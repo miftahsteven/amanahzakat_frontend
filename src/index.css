@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0B9D6D;
+  --color-primary-dark: #091D15;
+  --color-secondary: #A3DBC8;
+  --color-accent: #C8933B;
+  --color-[#0B9D6D]: #0B9D6D;
+  --color-[#091D15]: #091D15;
+  --color-[#A3DBC8]: #A3DBC8;
+  --color-[#C8933B]: #C8933B;
+  --color-[#F3F6F4]: #F3F6F4;
+  --color-[#14271F]: #14271F;
+  --color-[#8A9691]: #8A9691;
+  --color-[#D4DBD6]: #D4DBD6;
+  --color-[#EBEFEB]: #EBEFEB;
+  --color-[#E6F7EE]: #E6F7EE;
+  --color-[#F7F0E0]: #F7F0E0;
+}
+
+@layer base {
+  :root {
+    --brand-primary: #0B9D6D;
+    --brand-primary-dark: #091D15;
+    --brand-secondary: #A3DBC8;
+    --brand-accent: #C8933B;
+    --bg-main: #F3F6F4;
+    --surface-white: #FFFFFF;
+    --text-primary: #14271F;
+    --text-secondary: #8A9691;
+    --border-neutral: #D4DBD6;
+    --border-soft: #EBEFEB;
+    --success-soft: #E6F7EE;
+    --warning-soft: #F7F0E0;
+  }
+
+  body {
+    background-color: #F3F6F4;
+    color: #14271F;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4DBD6;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8A9691;
+}
+
+/* Glassmorphism Accents */
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #D4DBD6;
+}
+
+.dark .glass-card {
+  background: rgba(9, 29, 21, 0.95);
+  border-color: rgba(138, 150, 145, 0.4);
+}
