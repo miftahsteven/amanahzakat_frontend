@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 export const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Hours in ms
 
 // Session & Token Management
