@@ -18,18 +18,69 @@ import { PortalPublicPage } from './pages/PortalPublicPage';
 import { InboxPage } from './pages/InboxPage';
 import { GenericPage } from './pages/GenericPage';
 import { LoginPage } from './pages/LoginPage';
+import { UserManagementPage } from './pages/UserManagementPage';
+import { AclManagementPage, ALL_SYSTEM_MENUS } from './pages/AclManagementPage';
 import { Modal } from './components/ui/Modal';
 import { Button } from './components/ui/Button';
+import { authApi, isSessionValid, getStoredUser, removeStoredToken } from './lib/api';
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [currentUsername, setCurrentUsername] = useState<string>('admin');
+  const [allowedMenuIds, setAllowedMenuIds] = useState<string[]>(
+    ALL_SYSTEM_MENUS.map((m) => m.id) // Default all 21 menus for admin
+  );
   const [currentScreen, setCurrentScreen] = useState<string>('dashboard');
   const [selectedTrxId, setSelectedTrxId] = useState<string | null>(null);
   const [isQuickZisModalOpen, setIsQuickZisModalOpen] = useState<boolean>(false);
+  const [isCheckingSession, setIsCheckingSession] = useState<boolean>(true);
 
   // Quick ZIS Form State
   const [quickNominal, setQuickNominal] = useState<number>(1000000);
   const [quickJenis, setQuickJenis] = useState<string>('Zakat Maal');
+
+  // Check 24-Hour Session on Mount
+  React.useEffect(() => {
+    const checkSession = async () => {
+      if (isSessionValid()) {
+        const storedUser = getStoredUser();
+        if (storedUser) {
+          setIsLoggedIn(true);
+          setCurrentUsername(storedUser.username || 'admin');
+          if (storedUser.permissions && storedUser.permissions.length > 0) {
+            const mappedMenus = storedUser.permissions.map((p: string) => p.replace('menu.', ''));
+            setAllowedMenuIds(mappedMenus);
+          } else {
+            setAllowedMenuIds(ALL_SYSTEM_MENUS.map((m) => m.id));
+          }
+          setCurrentScreen('dashboard');
+          setIsCheckingSession(false);
+          return;
+        }
+
+        try {
+          const userRes = await authApi.me();
+          setIsLoggedIn(true);
+          setCurrentUsername(userRes.username);
+          if (userRes.permissions && userRes.permissions.length > 0) {
+            const mappedMenus = userRes.permissions.map((p: string) => p.replace('menu.', ''));
+            setAllowedMenuIds(mappedMenus);
+          } else {
+            setAllowedMenuIds(ALL_SYSTEM_MENUS.map((m) => m.id));
+          }
+          setCurrentScreen('dashboard');
+        } catch {
+          removeStoredToken();
+          setIsLoggedIn(false);
+        }
+      } else {
+        setIsLoggedIn(false);
+      }
+      setIsCheckingSession(false);
+    };
+
+    checkSession();
+  }, []);
 
   const handleQuickZisSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,18 +88,48 @@ export function App() {
     setIsQuickZisModalOpen(false);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (username: string, permissions?: string[]) => {
     setIsLoggedIn(true);
-    setCurrentScreen('dashboard');
+    setCurrentUsername(username);
+
+    let menusToSet = ALL_SYSTEM_MENUS.map((m) => m.id);
+    if (permissions && permissions.length > 0) {
+      menusToSet = permissions.map((p) => p.replace('menu.', ''));
+    }
+
+    setAllowedMenuIds(menusToSet);
+
+    // Redirect straight to dashboard
+    const initialScreen = menusToSet.includes('dashboard') ? 'dashboard' : menusToSet[0];
+    setCurrentScreen(initialScreen);
   };
 
   const handleLogout = () => {
+    authApi.logout();
     setIsLoggedIn(false);
     setCurrentScreen('login');
-    toast.info('Anda telah keluar dari sistem ERP AmanahZakat');
+    toast.info('Sesi login telah berakhir. Anda telah keluar dari sistem.');
   };
 
   const renderScreen = () => {
+    // ACL Guard: if currentScreen is not in allowedMenuIds (and not login), block or fallback
+    if (allowedMenuIds.length > 0 && !allowedMenuIds.includes(currentScreen) && currentScreen !== 'login') {
+      return (
+        <div className="p-12 text-center bg-white dark:bg-[#091D15] rounded-2xl border border-rose-200 dark:border-rose-900 space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-rose-100 dark:bg-rose-950 text-rose-600 font-bold mx-auto flex items-center justify-center text-2xl">
+            🚫
+          </div>
+          <h2 className="text-2xl font-black text-[#14271F] dark:text-white">Akses Ditolak (403 Forbidden)</h2>
+          <p className="text-xs text-[#8A9691] max-w-md mx-auto">
+            Peran akun Anda (<strong>{currentUsername}</strong>) tidak memiliki perizinan ACL untuk membuka modul <code>{currentScreen}</code>.
+          </p>
+          <Button onClick={() => setCurrentScreen('dashboard')} variant="primary" className="text-xs">
+            Kembali ke Dashboard
+          </Button>
+        </div>
+      );
+    }
+
     switch (currentScreen) {
       case 'dashboard':
         return (
@@ -106,12 +187,27 @@ export function App() {
         return <PortalPublicPage />;
       case 'inbox':
         return <InboxPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+      case 'user-management':
+        return <UserManagementPage />;
+      case 'acl-management':
+        return <AclManagementPage />;
       case 'login':
         return <LoginPage onLoginSuccess={handleLoginSuccess} />;
       default:
         return <GenericPage screenId={currentScreen} onNavigate={(screen) => setCurrentScreen(screen)} />;
     }
   };
+
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen bg-[#091D15] flex flex-col items-center justify-center text-white space-y-4 font-sans">
+        <div className="w-12 h-12 border-4 border-[#0B9D6D] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-extrabold text-[#A3DBC8] uppercase tracking-wider">
+          Memeriksa Sesi Autentikasi 24 Jam...
+        </p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn || currentScreen === 'login') {
     return (
@@ -129,6 +225,7 @@ export function App() {
         onNavigate={(screen) => setCurrentScreen(screen)}
         onOpenQuickZis={() => setIsQuickZisModalOpen(true)}
         onLogout={handleLogout}
+        allowedMenuIds={allowedMenuIds}
       >
         {renderScreen()}
       </AppLayout>

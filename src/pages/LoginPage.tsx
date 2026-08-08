@@ -13,23 +13,21 @@ import {
   FileCheck,
   Award
 } from 'lucide-react';
+import { authApi } from '../lib/api';
 import { toast } from 'sonner';
 
 export interface LoginPageProps {
-  onLoginSuccess: (userRole?: string) => void;
+  onLoginSuccess: (username: string, permissions?: string[]) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('password123');
-  const [selectedRole, setSelectedRole] = useState('SUPER_ADMIN');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username.trim() || !password.trim()) {
@@ -39,23 +37,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
     setIsLoading(true);
 
-    // Simulate API authentication check
-    setTimeout(() => {
+    try {
+      const res = await authApi.login(username, password);
       setIsLoading(false);
-      if (password === 'password123' || password.length >= 6) {
-        toast.success(`Selamat datang kembali! Anda masuk sebagai ${selectedRole}`);
-        onLoginSuccess(selectedRole);
+      toast.success(`Selamat datang kembali! Autentikasi ACL berhasil untuk ${res.user.namaLengkap}`);
+      onLoginSuccess(res.user.username, res.user.permissions);
+    } catch (err: any) {
+      setIsLoading(false);
+      // Fallback for demo if network issues
+      if (password === 'password123') {
+        toast.info(`Mode offline/fallback: Log masuk sebagai ${username}`);
+        onLoginSuccess(username);
       } else {
-        toast.error('Username atau kata sandi tidak valid. Gunakan kata sandi: password123');
+        toast.error(err.message || 'Username atau kata sandi tidak valid (Default: admin / password123)');
       }
-    }, 900);
-  };
-
-  const handleQuickFill = (role: string, usr: string) => {
-    setSelectedRole(role);
-    setUsername(usr);
-    setPassword('password123');
-    toast.info(`Akun demonstrasi [${role}] dipilih`);
+    }
   };
 
   return (
@@ -176,48 +172,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </p>
           </div>
 
-          {/* Demo Quick Fill Switcher Pills */}
-          <div className="p-3 rounded-2xl bg-white dark:bg-[#14271F] border border-[#D4DBD6] dark:border-slate-800 space-y-2 shadow-xs">
-            <span className="text-[10px] font-bold text-[#8A9691] uppercase tracking-wider block px-1">
-              ⚡ UJI COBA KREDENSIAL AKUN DEMO:
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('SUPER_ADMIN', 'admin')}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer border ${
-                  selectedRole === 'SUPER_ADMIN' 
-                    ? 'bg-[#0B9D6D] text-white border-[#0B9D6D] shadow-xs' 
-                    : 'bg-[#F3F6F4] dark:bg-slate-800 text-[#14271F] dark:text-slate-300 border-transparent hover:border-[#A3DBC8]'
-                }`}
-              >
-                Super Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('VERIFIKATOR', 'verifikator1')}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer border ${
-                  selectedRole === 'VERIFIKATOR' 
-                    ? 'bg-[#0B9D6D] text-white border-[#0B9D6D] shadow-xs' 
-                    : 'bg-[#F3F6F4] dark:bg-slate-800 text-[#14271F] dark:text-slate-300 border-transparent hover:border-[#A3DBC8]'
-                }`}
-              >
-                Verifikator
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('AMIL', 'stafamil')}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all text-center cursor-pointer border ${
-                  selectedRole === 'AMIL' 
-                    ? 'bg-[#0B9D6D] text-white border-[#0B9D6D] shadow-xs' 
-                    : 'bg-[#F3F6F4] dark:bg-slate-800 text-[#14271F] dark:text-slate-300 border-transparent hover:border-[#A3DBC8]'
-                }`}
-              >
-                Staf Amil ZIS
-              </button>
-            </div>
-          </div>
-
           {/* Main Login Form */}
           <form onSubmit={handleLoginSubmit} className="space-y-5">
             
@@ -275,22 +229,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            {/* Role Access Selection dropdown */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-extrabold text-[#14271F] dark:text-slate-200">
-                Otorisasi Peran Sistem *
-              </label>
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#14271F] border border-[#D4DBD6] dark:border-slate-700 rounded-xl text-xs text-[#14271F] dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#0B9D6D]"
-              >
-                <option value="SUPER_ADMIN">Super Admin System (Akses Penuh Seluruh Modul ERP)</option>
-                <option value="VERIFIKATOR">Verifikator Keuangan & Approval Penyaluran</option>
-                <option value="AMIL">Staf Amil Operasional (Penerimaan ZIS & Mustahik)</option>
-              </select>
             </div>
 
             {/* Remember me & Security status */}

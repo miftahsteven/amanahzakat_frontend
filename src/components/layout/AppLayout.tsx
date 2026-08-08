@@ -7,6 +7,7 @@ export interface AppLayoutProps {
   onNavigate: (screen: string) => void;
   onOpenQuickZis: () => void;
   onLogout?: () => void;
+  allowedMenuIds?: string[];
   children: React.ReactNode;
 }
 
@@ -15,12 +16,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onNavigate,
   onOpenQuickZis,
   onLogout,
+  allowedMenuIds,
   children,
 }) => {
   return (
     <div className="flex min-h-screen bg-[#F3F6F4] dark:bg-slate-950 text-[#14271F] dark:text-slate-200 font-sans transition-colors">
       {/* Sidebar */}
-      <Sidebar currentScreen={currentScreen} onNavigate={onNavigate} />
+      <Sidebar currentScreen={currentScreen} onNavigate={onNavigate} allowedMenuIds={allowedMenuIds} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
