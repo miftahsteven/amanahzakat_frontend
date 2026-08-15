@@ -1,85 +1,23 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
+import type { NavModul } from '../../types/acl';
 
 export interface SidebarProps {
   currentScreen: string;
   onNavigate: (screen: string) => void;
-  allowedMenuIds?: string[];
+  navigation?: NavModul[];
 }
 
-interface NavItem {
-  id: string;
-  code: string;
-  label: string;
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, allowedMenuIds }) => {
-  const allSections: NavSection[] = [
-    {
-      title: 'IKHTISAR',
-      items: [
-        { id: 'dashboard', code: 'DB', label: 'Dashboard' },
-        { id: 'laporan', code: 'LD', label: 'Laporan Distribusi' },
-        { id: 'peta', code: 'PT', label: 'Peta Sebaran' },
-        { id: 'dampak', code: 'DP', label: 'Dampak Publik' },
-      ],
-    },
-    {
-      title: 'OPERASIONAL ZIS',
-      items: [
-        { id: 'penerimaan', code: 'PN', label: 'Penerimaan ZIS' },
-        { id: 'penyaluran', code: 'PY', label: 'Penyaluran' },
-        { id: 'muzakki', code: 'MZ', label: 'Data Muzakki' },
-        { id: 'program', code: 'PR', label: 'Program & Anggaran' },
-        { id: 'mitra', code: 'MT', label: 'Dashboard Mitra' },
-        { id: 'portalUpz', code: 'PU', label: 'Portal UPZ Korporat' },
-        { id: 'upz', code: 'UP', label: 'Dashboard UPZ' },
-        { id: 'payroll', code: 'PL', label: 'Payroll UPZ' },
-        { id: 'mustahik', code: 'MS', label: 'Data Mustahik' },
-      ],
-    },
-    {
-      title: 'KEUANGAN & AKUNTANSI',
-      items: [
-        { id: 'jurnal', code: 'JR', label: 'Jurnal & G/L' },
-        { id: 'closing', code: 'CL', label: 'Closing Periode' },
-        { id: 'simba', code: 'SB', label: 'Export SIMBA' },
-      ],
-    },
-    {
-      title: 'PERALATAN',
-      items: [
-        { id: 'kalkulator', code: 'KL', label: 'Kalkulator ZIS' },
-        { id: 'portal', code: 'PO', label: 'Portal Publik' },
-      ],
-    },
-    {
-      title: 'PENGATURAN SISTEM',
-      items: [
-        { id: 'user-management', code: 'UM', label: 'Manajemen Pengguna' },
-        { id: 'acl-management', code: 'AM', label: 'ACL & Role Menu' },
-      ],
-    },
-  ];
-
-  // Filter items by allowedMenuIds if specified
-  const filteredSections = allSections
+export const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, navigation = [] }) => {
+  const filteredSections = navigation
     .map((section) => ({
-      ...section,
-      items: allowedMenuIds
-        ? section.items.filter((item) => allowedMenuIds.includes(item.id))
-        : section.items,
+      title: section.namaModul,
+      items: section.menus.filter((item) => item.tampilDiSidebar),
     }))
     .filter((section) => section.items.length > 0);
 
   return (
     <aside className="w-64 bg-[#091D15] text-[#8A9691] flex flex-col h-screen sticky top-0 shrink-0 select-none overflow-hidden font-sans border-r border-[#14271F]">
-      {/* Brand Header */}
       <div className="p-5 flex items-center gap-3 border-b border-[#14271F]">
         <div className="w-10 h-10 rounded-xl bg-[#0B9D6D] text-white flex items-center justify-center font-black text-xl shadow-md">
           A
@@ -92,20 +30,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, all
         </div>
       </div>
 
-      {/* Navigation Sections */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-6 text-xs scrollbar-thin">
-        {filteredSections.map((section, idx) => (
-          <div key={idx} className="space-y-1.5">
+        {filteredSections.map((section) => (
+          <div key={section.title} className="space-y-1.5">
             <h2 className="px-2 text-[10px] font-black text-[#8A9691] tracking-widest uppercase mb-2">
               {section.title}
             </h2>
             <div className="space-y-1">
               {section.items.map((item) => {
-                const isActive = currentScreen === item.id;
+                const isActive = currentScreen === item.kodeMenu;
                 return (
                   <button
-                    key={item.id}
-                    onClick={() => onNavigate(item.id)}
+                    key={item.kodeMenu}
+                    onClick={() => onNavigate(item.kodeMenu)}
                     className={cn(
                       'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold transition-all cursor-pointer text-left',
                       isActive
@@ -121,9 +58,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, all
                           : 'bg-[#14271F] text-[#8A9691]'
                       )}
                     >
-                      {item.code}
+                      {item.kodeTampil}
                     </span>
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate">{item.namaMenu}</span>
                   </button>
                 );
               })}
@@ -132,7 +69,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, all
         ))}
       </nav>
 
-      {/* Active Period Bottom Box */}
       <div className="p-4 bg-[#091D15] border-t border-[#14271F]">
         <div className="p-3.5 rounded-2xl bg-[#14271F] border border-[#21382E] text-xs space-y-1.5">
           <span className="text-[10px] font-bold text-[#8A9691] uppercase tracking-wider block">

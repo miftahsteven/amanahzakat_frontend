@@ -1,3 +1,5 @@
+import type { AuthUser, CatalogModul } from '../types/acl';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 export const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Hours in ms
 
@@ -91,14 +93,7 @@ export const authApi = {
     // Step 2: Auto-verify with dummy OTP '00000'
     const verifyRes = await apiFetch<{
       accessToken: string;
-      user: {
-        id: string;
-        username: string;
-        email: string;
-        namaLengkap: string;
-        roles: string[];
-        permissions: string[];
-      };
+      user: AuthUser;
     }>('/auth/verify-otp', {
       method: 'POST',
       body: JSON.stringify({
@@ -117,14 +112,7 @@ export const authApi = {
   },
 
   async me() {
-    return apiFetch<{
-      id: string;
-      username: string;
-      email: string;
-      namaLengkap: string;
-      roles: string[];
-      permissions: string[];
-    }>('/auth/me');
+    return apiFetch<AuthUser>('/auth/me');
   },
 
   logout() {
@@ -190,8 +178,111 @@ export const aclApi = {
     });
   },
 
+  async getModules(includeInactive = false) {
+    const query = includeInactive ? '?includeInactive=true' : '';
+    return apiFetch<CatalogModul[]>(`/acl/modules${query}`);
+  },
+
+  async createModul(data: { kodeModul: string; namaModul: string; urutan?: number }) {
+    return apiFetch<any>('/acl/modules', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateModul(
+    id: string,
+    data: { namaModul?: string; urutan?: number; isActive?: boolean }
+  ) {
+    return apiFetch<any>(`/acl/modules/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteModul(id: string) {
+    return apiFetch<any>(`/acl/modules/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async createMenu(data: {
+    modulId: string;
+    kodeMenu: string;
+    namaMenu: string;
+    kodeTampil: string;
+    urutan?: number;
+    tampilDiSidebar?: boolean;
+    tampilDiHeader?: boolean;
+    actions?: string[];
+  }) {
+    return apiFetch<any>('/acl/menus', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateMenu(
+    id: string,
+    data: {
+      namaMenu?: string;
+      kodeTampil?: string;
+      urutan?: number;
+      tampilDiSidebar?: boolean;
+      tampilDiHeader?: boolean;
+      isActive?: boolean;
+      modulId?: string;
+    }
+  ) {
+    return apiFetch<any>(`/acl/menus/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteMenu(id: string) {
+    return apiFetch<any>(`/acl/menus/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   async getPermissions() {
     return apiFetch<any[]>('/acl/permissions');
+  },
+
+  async createPermission(data: {
+    menuId: string;
+    aksi: string;
+    namaPermission: string;
+    kodePermission?: string;
+  }) {
+    return apiFetch<any>('/acl/permissions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updatePermission(
+    id: string,
+    data: { namaPermission?: string; aksi?: string; kodePermission?: string }
+  ) {
+    return apiFetch<any>(`/acl/permissions/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deletePermission(id: string) {
+    return apiFetch<any>(`/acl/permissions/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async assignPermissionRoles(permissionId: string, roleIds: string[]) {
+    return apiFetch<any>(`/acl/permissions/${permissionId}/assign-roles`, {
+      method: 'POST',
+      body: JSON.stringify({ roleIds }),
+    });
   },
 
   async assignPermissions(roleId: string, permissionIds: string[]) {

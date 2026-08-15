@@ -19,17 +19,20 @@ import { InboxPage } from './pages/InboxPage';
 import { GenericPage } from './pages/GenericPage';
 import { LoginPage } from './pages/LoginPage';
 import { UserManagementPage } from './pages/UserManagementPage';
-import { AclManagementPage, ALL_SYSTEM_MENUS } from './pages/AclManagementPage';
+import { AclManagementPage } from './pages/AclManagementPage';
+import { ModuleManagementPage } from './pages/ModuleManagementPage';
+import { PermissionManagementPage } from './pages/PermissionManagementPage';
 import { Modal } from './components/ui/Modal';
 import { Button } from './components/ui/Button';
 import { authApi, isSessionValid, getStoredUser, removeStoredToken } from './lib/api';
+import type { AuthUser, NavModul } from './types/acl';
+import { menuCodesFromUser } from './types/acl';
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [currentUsername, setCurrentUsername] = useState<string>('admin');
-  const [allowedMenuIds, setAllowedMenuIds] = useState<string[]>(
-    ALL_SYSTEM_MENUS.map((m) => m.id) // Default all 21 menus for admin
-  );
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [allowedMenuIds, setAllowedMenuIds] = useState<string[]>([]);
+  const [navigation, setNavigation] = useState<NavModul[]>([]);
   const [currentScreen, setCurrentScreen] = useState<string>('dashboard');
   const [selectedTrxId, setSelectedTrxId] = useState<string | null>(null);
   const [isQuickZisModalOpen, setIsQuickZisModalOpen] = useState<boolean>(false);
@@ -39,42 +42,37 @@ export function App() {
   const [quickNominal, setQuickNominal] = useState<number>(1000000);
   const [quickJenis, setQuickJenis] = useState<string>('Zakat Maal');
 
-  // Check 24-Hour Session on Mount
+  const applySession = (user: AuthUser) => {
+    const menus = menuCodesFromUser(user);
+    setCurrentUser(user);
+    setAllowedMenuIds(menus);
+    setNavigation(user.navigation || []);
+    const initialScreen = menus.includes('dashboard') ? 'dashboard' : menus[0] || 'dashboard';
+    setCurrentScreen(initialScreen);
+  };
+
   React.useEffect(() => {
     const checkSession = async () => {
-      if (isSessionValid()) {
-        const storedUser = getStoredUser();
-        if (storedUser) {
-          setIsLoggedIn(true);
-          setCurrentUsername(storedUser.username || 'admin');
-          if (storedUser.permissions && storedUser.permissions.length > 0) {
-            const mappedMenus = storedUser.permissions.map((p: string) => p.replace('menu.', ''));
-            setAllowedMenuIds(mappedMenus);
-          } else {
-            setAllowedMenuIds(ALL_SYSTEM_MENUS.map((m) => m.id));
-          }
-          setCurrentScreen('dashboard');
-          setIsCheckingSession(false);
-          return;
-        }
+      if (!isSessionValid()) {
+        setIsLoggedIn(false);
+        setIsCheckingSession(false);
+        return;
+      }
 
-        try {
-          const userRes = await authApi.me();
+      try {
+        const userRes = await authApi.me();
+        localStorage.setItem('amanahzakat_user', JSON.stringify(userRes));
+        setIsLoggedIn(true);
+        applySession(userRes);
+      } catch {
+        const storedUser = getStoredUser();
+        if (storedUser?.navigation || storedUser?.menus) {
           setIsLoggedIn(true);
-          setCurrentUsername(userRes.username);
-          if (userRes.permissions && userRes.permissions.length > 0) {
-            const mappedMenus = userRes.permissions.map((p: string) => p.replace('menu.', ''));
-            setAllowedMenuIds(mappedMenus);
-          } else {
-            setAllowedMenuIds(ALL_SYSTEM_MENUS.map((m) => m.id));
-          }
-          setCurrentScreen('dashboard');
-        } catch {
+          applySession(storedUser);
+        } else {
           removeStoredToken();
           setIsLoggedIn(false);
         }
-      } else {
-        setIsLoggedIn(false);
       }
       setIsCheckingSession(false);
     };
@@ -88,32 +86,24 @@ export function App() {
     setIsQuickZisModalOpen(false);
   };
 
-  const handleLoginSuccess = (username: string, permissions?: string[]) => {
+  const handleLoginSuccess = (user: AuthUser) => {
     setIsLoggedIn(true);
-    setCurrentUsername(username);
-
-    let menusToSet = ALL_SYSTEM_MENUS.map((m) => m.id);
-    if (permissions && permissions.length > 0) {
-      menusToSet = permissions.map((p) => p.replace('menu.', ''));
-    }
-
-    setAllowedMenuIds(menusToSet);
-
-    // Redirect straight to dashboard
-    const initialScreen = menusToSet.includes('dashboard') ? 'dashboard' : menusToSet[0];
-    setCurrentScreen(initialScreen);
+    applySession(user);
   };
 
   const handleLogout = () => {
     authApi.logout();
     setIsLoggedIn(false);
+    setCurrentUser(null);
+    setAllowedMenuIds([]);
+    setNavigation([]);
     setCurrentScreen('login');
     toast.info('Sesi login telah berakhir. Anda telah keluar dari sistem.');
   };
 
   const renderScreen = () => {
     // ACL Guard: if currentScreen is not in allowedMenuIds (and not login), block or fallback
-    if (allowedMenuIds.length > 0 && !allowedMenuIds.includes(currentScreen) && currentScreen !== 'login') {
+    if (currentScreen !== 'login' && !allowedMenuIds.includes(currentScreen)) {
       return (
         <div className="p-12 text-center bg-white dark:bg-[#091D15] rounded-2xl border border-rose-200 dark:border-rose-900 space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-rose-100 dark:bg-rose-950 text-rose-600 font-bold mx-auto flex items-center justify-center text-2xl">
@@ -121,9 +111,9 @@ export function App() {
           </div>
           <h2 className="text-2xl font-black text-[#14271F] dark:text-white">Akses Ditolak (403 Forbidden)</h2>
           <p className="text-xs text-[#8A9691] max-w-md mx-auto">
-            Peran akun Anda (<strong>{currentUsername}</strong>) tidak memiliki perizinan ACL untuk membuka modul <code>{currentScreen}</code>.
+            Peran akun Anda (<strong>{currentUser?.username}</strong>) tidak memiliki perizinan ACL untuk membuka modul <code>{currentScreen}</code>.
           </p>
-          <Button onClick={() => setCurrentScreen('dashboard')} variant="primary" className="text-xs">
+          <Button onClick={() => setCurrentScreen(allowedMenuIds[0] || 'dashboard')} variant="primary" className="text-xs">
             Kembali ke Dashboard
           </Button>
         </div>
@@ -189,6 +179,10 @@ export function App() {
         return <InboxPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'user-management':
         return <UserManagementPage />;
+      case 'module-management':
+        return <ModuleManagementPage />;
+      case 'permission-management':
+        return <PermissionManagementPage />;
       case 'acl-management':
         return <AclManagementPage />;
       case 'login':
@@ -225,7 +219,8 @@ export function App() {
         onNavigate={(screen) => setCurrentScreen(screen)}
         onOpenQuickZis={() => setIsQuickZisModalOpen(true)}
         onLogout={handleLogout}
-        allowedMenuIds={allowedMenuIds}
+        navigation={navigation}
+        currentUser={currentUser}
       >
         {renderScreen()}
       </AppLayout>

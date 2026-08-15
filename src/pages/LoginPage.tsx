@@ -15,9 +15,10 @@ import {
 } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { toast } from 'sonner';
+import type { AuthUser } from '../types/acl';
 
 export interface LoginPageProps {
-  onLoginSuccess: (username: string, permissions?: string[]) => void;
+  onLoginSuccess: (user: AuthUser) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
@@ -41,16 +42,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       const res = await authApi.login(username, password);
       setIsLoading(false);
       toast.success(`Selamat datang kembali! Autentikasi ACL berhasil untuk ${res.user.namaLengkap}`);
-      onLoginSuccess(res.user.username, res.user.permissions);
+      onLoginSuccess(res.user);
     } catch (err: any) {
       setIsLoading(false);
-      // Fallback for demo if network issues
-      if (password === 'password123') {
-        toast.info(`Mode offline/fallback: Log masuk sebagai ${username}`);
-        onLoginSuccess(username);
-      } else {
-        toast.error(err.message || 'Username atau kata sandi tidak valid (Default: admin / password123)');
-      }
+      toast.error(err.message || 'Username atau kata sandi tidak valid (Default: admin / password123)');
     }
   };
 
