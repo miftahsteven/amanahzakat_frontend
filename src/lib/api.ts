@@ -211,6 +211,7 @@ export const aclApi = {
     kodeMenu: string;
     namaMenu: string;
     kodeTampil: string;
+    icon?: string | null;
     urutan?: number;
     tampilDiSidebar?: boolean;
     tampilDiHeader?: boolean;
@@ -227,6 +228,7 @@ export const aclApi = {
     data: {
       namaMenu?: string;
       kodeTampil?: string;
+      icon?: string | null;
       urutan?: number;
       tampilDiSidebar?: boolean;
       tampilDiHeader?: boolean;

@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/Button';
 import { aclApi } from '../lib/api';
+import { MENU_ICON_OPTIONS, getMenuIcon } from '../lib/menuIcons';
 import type { CatalogMenu, CatalogModul } from '../types/acl';
 
 export const ModuleManagementPage: React.FC = () => {
@@ -31,6 +32,7 @@ export const ModuleManagementPage: React.FC = () => {
     kodeMenu: '',
     namaMenu: '',
     kodeTampil: '',
+    icon: '',
     urutan: 0,
     tampilDiSidebar: true,
     tampilDiHeader: false,
@@ -126,6 +128,7 @@ export const ModuleManagementPage: React.FC = () => {
       kodeMenu: '',
       namaMenu: '',
       kodeTampil: '',
+      icon: '',
       urutan: (selectedModul.menus?.length || 0) + 1,
       tampilDiSidebar: true,
       tampilDiHeader: false,
@@ -141,6 +144,7 @@ export const ModuleManagementPage: React.FC = () => {
       kodeMenu: menu.kodeMenu,
       namaMenu: menu.namaMenu,
       kodeTampil: menu.kodeTampil,
+      icon: menu.icon || '',
       urutan: menu.urutan,
       tampilDiSidebar: menu.tampilDiSidebar,
       tampilDiHeader: menu.tampilDiHeader,
@@ -156,6 +160,7 @@ export const ModuleManagementPage: React.FC = () => {
         await aclApi.updateMenu(editingMenu.id, {
           namaMenu: menuForm.namaMenu,
           kodeTampil: menuForm.kodeTampil,
+          icon: menuForm.icon || null,
           urutan: Number(menuForm.urutan),
           tampilDiSidebar: menuForm.tampilDiSidebar,
           tampilDiHeader: menuForm.tampilDiHeader,
@@ -172,6 +177,7 @@ export const ModuleManagementPage: React.FC = () => {
           kodeMenu: menuForm.kodeMenu,
           namaMenu: menuForm.namaMenu,
           kodeTampil: menuForm.kodeTampil,
+          icon: menuForm.icon || null,
           urutan: Number(menuForm.urutan),
           tampilDiSidebar: menuForm.tampilDiSidebar,
           tampilDiHeader: menuForm.tampilDiHeader,
@@ -313,44 +319,49 @@ export const ModuleManagementPage: React.FC = () => {
                     Belum ada menu di modul ini.
                   </div>
                 ) : (
-                  selectedModul.menus.map((menu) => (
-                    <div
-                      key={menu.id}
-                      className={`p-4 rounded-xl border border-[#D4DBD6] dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                        menu.isActive === false ? 'opacity-60' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-9 h-8 rounded-lg bg-[#091D15] text-[#A3DBC8] text-[11px] font-black flex items-center justify-center">
-                          {menu.kodeTampil}
-                        </span>
-                        <div>
-                          <div className="font-extrabold text-sm text-[#14271F] dark:text-white flex items-center gap-2">
-                            <MenuIcon className="w-3.5 h-3.5 text-[#0B9D6D]" />
-                            {menu.namaMenu}
-                          </div>
-                          <div className="text-[11px] font-mono text-[#8A9691] mt-0.5">
-                            {menu.kodeMenu} · urutan {menu.urutan}
-                            {menu.tampilDiSidebar ? ' · sidebar' : ''}
-                            {menu.tampilDiHeader ? ' · header' : ''}
-                          </div>
-                          <div className="text-[10px] text-[#8A9691] mt-1">
-                            Permission: {menu.permissions.map((p) => p.aksi).join(', ') || '-'}
+                  selectedModul.menus.map((menu) => {
+                    const ItemIcon = getMenuIcon(menu.icon);
+                    return (
+                      <div
+                        key={menu.id}
+                        className={`p-4 rounded-xl border border-[#D4DBD6] dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          menu.isActive === false ? 'opacity-60' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-9 h-8 rounded-lg bg-[#091D15] text-[#A3DBC8] text-[11px] font-black flex items-center justify-center">
+                            {ItemIcon ? <ItemIcon className="w-4 h-4" /> : menu.kodeTampil}
+                          </span>
+                          <div>
+                            <div className="font-extrabold text-sm text-[#14271F] dark:text-white flex items-center gap-2">
+                              <MenuIcon className="w-3.5 h-3.5 text-[#0B9D6D]" />
+                              {menu.namaMenu}
+                            </div>
+                            <div className="text-[11px] font-mono text-[#8A9691] mt-0.5">
+                              {menu.kodeMenu} · tampil {menu.kodeTampil}
+                              {menu.icon ? ` · icon ${menu.icon}` : ''}
+                              {' · '}urutan {menu.urutan}
+                              {menu.tampilDiSidebar ? ' · sidebar' : ''}
+                              {menu.tampilDiHeader ? ' · header' : ''}
+                            </div>
+                            <div className="text-[10px] text-[#8A9691] mt-1">
+                              Permission: {menu.permissions.map((p) => p.aksi).join(', ') || '-'}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Button onClick={() => openEditMenu(menu)} variant="outline" className="text-xs py-1.5">
+                            <Pencil className="w-3.5 h-3.5" />
+                            Edit
+                          </Button>
+                          <Button onClick={() => handleToggleMenu(menu)} variant="outline" className="text-xs py-1.5">
+                            {menu.isActive === false ? <Eye className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
+                            {menu.isActive === false ? 'Aktifkan' : 'Nonaktifkan'}
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button onClick={() => openEditMenu(menu)} variant="outline" className="text-xs py-1.5">
-                          <Pencil className="w-3.5 h-3.5" />
-                          Edit
-                        </Button>
-                        <Button onClick={() => handleToggleMenu(menu)} variant="outline" className="text-xs py-1.5">
-                          {menu.isActive === false ? <Eye className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
-                          {menu.isActive === false ? 'Aktifkan' : 'Nonaktifkan'}
-                        </Button>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -476,6 +487,74 @@ export const ModuleManagementPage: React.FC = () => {
                 className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
+          </div>
+          <div>
+            <label className="block font-extrabold mb-1">Icon Sidebar (opsional)</label>
+            <div className="p-3 rounded-xl border border-[#D4DBD6] dark:border-slate-700 bg-[#F8FAF9] dark:bg-slate-900/60 space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-9 rounded-lg bg-[#091D15] text-[#A3DBC8] flex items-center justify-center shrink-0">
+                  {(() => {
+                    const SelectedIcon = getMenuIcon(menuForm.icon);
+                    return SelectedIcon ? (
+                      <SelectedIcon className="w-4 h-4" />
+                    ) : (
+                      <span className="text-[10px] font-black">
+                        {menuForm.kodeTampil || '—'}
+                      </span>
+                    );
+                  })()}
+                </span>
+                <div className="text-[11px] text-[#8A9691]">
+                  {menuForm.icon
+                    ? `Terpilih: ${MENU_ICON_OPTIONS.find((o) => o.value === menuForm.icon)?.label || menuForm.icon}`
+                    : 'Belum ada icon — sidebar pakai Kode Tampil'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto pr-1">
+                <button
+                  type="button"
+                  onClick={() => setMenuForm({ ...menuForm, icon: '' })}
+                  className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border text-[10px] font-bold transition-all cursor-pointer ${
+                    !menuForm.icon
+                      ? 'border-[#0B9D6D] bg-[#E6F7EE] text-[#0B9D6D]'
+                      : 'border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#8A9691] hover:border-[#A3DBC8]'
+                  }`}
+                  title="Tanpa icon"
+                >
+                  <span className="w-7 h-6 rounded-md bg-[#091D15] text-[#A3DBC8] text-[9px] font-black flex items-center justify-center">
+                    {menuForm.kodeTampil || 'TXT'}
+                  </span>
+                  <span>Kosong</span>
+                </button>
+
+                {MENU_ICON_OPTIONS.map((option) => {
+                  const selected = menuForm.icon === option.value;
+                  const OptionIcon = option.Icon;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setMenuForm({ ...menuForm, icon: option.value })}
+                      className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border text-[10px] font-bold transition-all cursor-pointer ${
+                        selected
+                          ? 'border-[#0B9D6D] bg-[#E6F7EE] text-[#0B9D6D]'
+                          : 'border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#8A9691] hover:border-[#A3DBC8]'
+                      }`}
+                      title={`${option.label} (${option.value})`}
+                    >
+                      <span className="w-7 h-6 rounded-md bg-[#091D15] text-[#A3DBC8] flex items-center justify-center">
+                        <OptionIcon className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="truncate w-full text-center">{option.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <p className="text-[10px] text-[#8A9691] mt-1">
+              Jika kosong, sidebar menampilkan Kode Tampil (contoh: DB).
+            </p>
           </div>
           {!editingMenu && (
             <div>

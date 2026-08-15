@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { getMenuIcon } from '../../lib/menuIcons';
 import type { NavModul } from '../../types/acl';
 
 export interface SidebarProps {
@@ -104,6 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-1">
                 {section.items.map((item) => {
                   const isActive = currentScreen === item.kodeMenu;
+                  const MenuIcon = getMenuIcon(item.icon);
                   return (
                     <button
                       key={item.kodeMenu}
@@ -126,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             : 'bg-[#14271F] text-[#8A9691]'
                         )}
                       >
-                        {item.kodeTampil}
+                        {MenuIcon ? <MenuIcon className="w-3.5 h-3.5" /> : item.kodeTampil}
                       </span>
                       {visuallyExpanded && <span className="truncate">{item.namaMenu}</span>}
                     </button>

@@ -2,6 +2,7 @@ export interface NavMenu {
   kodeMenu: string;
   namaMenu: string;
   kodeTampil: string;
+  icon?: string | null;
   urutan: number;
   tampilDiSidebar: boolean;
   tampilDiHeader: boolean;
@@ -40,6 +41,7 @@ export interface CatalogMenu {
   kodeMenu: string;
   namaMenu: string;
   kodeTampil: string;
+  icon?: string | null;
   urutan: number;
   tampilDiSidebar: boolean;
   tampilDiHeader: boolean;
