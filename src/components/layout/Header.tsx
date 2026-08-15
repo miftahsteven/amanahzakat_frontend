@@ -1,7 +1,8 @@
 import React from 'react';
-import { Bell, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Bell, Monitor, Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
 import type { AuthUser, NavModul } from '../../types/acl';
 import { findMenuLabel } from '../../types/acl';
+import { useTheme } from '../../hooks/useTheme';
 
 export interface HeaderProps {
   currentScreen: string;
@@ -30,11 +31,15 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
   sidebarCollapsed = false,
 }) => {
+  const { preference, cycle } = useTheme();
   const screenLabel = findMenuLabel(navigation, currentScreen);
   const canOpenInbox = currentUser?.menus?.includes('inbox') ?? navigation.some((modul) =>
     modul.menus.some((menu) => menu.kodeMenu === 'inbox')
   );
   const roleLabel = currentUser?.roles?.[0]?.replace(/_/g, ' ') || 'Pengguna';
+  const themeLabel =
+    preference === 'system' ? 'Ikuti sistem' : preference === 'light' ? 'Mode terang' : 'Mode gelap';
+  const ThemeIcon = preference === 'system' ? Monitor : preference === 'light' ? Sun : Moon;
 
   return (
     <header className="h-16 bg-white dark:bg-[#091D15] border-b border-[#EBEFEB] dark:border-slate-800 px-8 flex items-center justify-between sticky top-0 z-30 font-sans">
@@ -69,6 +74,15 @@ export const Header: React.FC<HeaderProps> = ({
             className="w-full pl-8 pr-4 py-1.5 text-xs bg-[#F3F6F4] dark:bg-slate-800 border border-[#D4DBD6] dark:border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-[#0B9D6D] text-[#14271F] dark:text-slate-200"
           />
         </div>
+
+        <button
+          type="button"
+          onClick={cycle}
+          title={`${themeLabel} — klik untuk ganti (Sistem → Terang → Gelap)`}
+          className="p-2 rounded-full hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#14271F] dark:text-slate-300 transition-colors cursor-pointer border border-transparent hover:border-[#D4DBD6] dark:hover:border-slate-700"
+        >
+          <ThemeIcon className="w-4 h-4 text-[#8A9691]" />
+        </button>
 
         {canOpenInbox && (
           <button
