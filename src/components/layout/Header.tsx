@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import type { AuthUser, NavModul } from '../../types/acl';
 import { findMenuLabel } from '../../types/acl';
 
@@ -10,6 +10,8 @@ export interface HeaderProps {
   onLogout?: () => void;
   navigation?: NavModul[];
   currentUser?: AuthUser | null;
+  onToggleSidebar?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
 function initialsFromName(nama?: string): string {
@@ -22,10 +24,11 @@ function initialsFromName(nama?: string): string {
 export const Header: React.FC<HeaderProps> = ({
   currentScreen,
   onNavigate,
-  onOpenQuickZis,
   onLogout,
   navigation = [],
   currentUser,
+  onToggleSidebar,
+  sidebarCollapsed = false,
 }) => {
   const screenLabel = findMenuLabel(navigation, currentScreen);
   const canOpenInbox = currentUser?.menus?.includes('inbox') ?? navigation.some((modul) =>
@@ -35,10 +38,26 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="h-16 bg-white dark:bg-[#091D15] border-b border-[#EBEFEB] dark:border-slate-800 px-8 flex items-center justify-between sticky top-0 z-30 font-sans">
-      <div className="flex items-center gap-2 text-xs font-medium text-[#8A9691]">
-        <span>AmanahZakat ERP</span>
-        <span>/</span>
-        <span className="font-extrabold text-[#14271F] dark:text-white">{screenLabel}</span>
+      <div className="flex items-center gap-3 text-xs font-medium text-[#8A9691]">
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            title={sidebarCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
+            className="p-2 rounded-xl border border-[#D4DBD6] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#14271F] dark:text-slate-200 transition-colors cursor-pointer"
+          >
+            {sidebarCollapsed ? (
+              <PanelLeftOpen className="w-4 h-4" />
+            ) : (
+              <PanelLeftClose className="w-4 h-4" />
+            )}
+          </button>
+        )}
+        <div className="flex items-center gap-2">
+          <span>AmanahZakat ERP</span>
+          <span>/</span>
+          <span className="font-extrabold text-[#14271F] dark:text-white">{screenLabel}</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
