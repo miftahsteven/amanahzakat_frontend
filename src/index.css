@@ -4,52 +4,59 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #0B9D6D;
-  --color-primary-dark: #091D15;
-  --color-secondary: #A3DBC8;
-  --color-accent: #C8933B;
-  --color-[#0B9D6D]: #0B9D6D;
-  --color-[#091D15]: #091D15;
-  --color-[#A3DBC8]: #A3DBC8;
-  --color-[#C8933B]: #C8933B;
-  --color-[#F3F6F4]: #F3F6F4;
-  --color-[#14271F]: #14271F;
-  --color-[#8A9691]: #8A9691;
-  --color-[#D4DBD6]: #D4DBD6;
-  --color-[#EBEFEB]: #EBEFEB;
-  --color-[#E6F7EE]: #E6F7EE;
-  --color-[#F7F0E0]: #F7F0E0;
+  --color-primary: #0F9D6E;
+  --color-primary-dark: #0D1714;
+  --color-secondary: #A5E4CB;
+  --color-accent: #C8933A;
+  --color-[#0F9D6E]: #0F9D6E;
+  --color-[#0B7C56]: #0B7C56;
+  --color-[#0D1714]: #0D1714;
+  --color-[#04241A]: #04241A;
+  --color-[#A5E4CB]: #A5E4CB;
+  --color-[#C8933A]: #C8933A;
+  --color-[#F4F6F4]: #F4F6F4;
+  --color-[#16211D]: #16211D;
+  --color-[#5F766C]: #5F766C;
+  --color-[#7D938A]: #7D938A;
+  --color-[#A4B8AF]: #A4B8AF;
+  --color-[#E3E8E4]: #E3E8E4;
+  --color-[#DDE3DF]: #DDE3DF;
+  --color-[#E6F6EF]: #E6F6EF;
+  --color-[#FDF5EA]: #FDF5EA;
 }
 
 @layer base {
   :root {
-    --brand-primary: #0B9D6D;
-    --brand-primary-dark: #091D15;
-    --brand-secondary: #A3DBC8;
-    --brand-accent: #C8933B;
-    --bg-main: #F3F6F4;
+    --brand-primary: #0F9D6E;
+    --brand-primary-dark: #0D1714;
+    --brand-secondary: #A5E4CB;
+    --brand-accent: #C8933A;
+    --bg-main: #F4F6F4;
     --surface-white: #FFFFFF;
-    --text-primary: #14271F;
-    --text-secondary: #8A9691;
-    --border-neutral: #D4DBD6;
-    --border-soft: #EBEFEB;
-    --success-soft: #E6F7EE;
-    --warning-soft: #F7F0E0;
+    --text-primary: #16211D;
+    --text-secondary: #7D938A;
+    --border-neutral: #DDE3DF;
+    --border-soft: #E3E8E4;
+    --success-soft: #E6F6EF;
+    --warning-soft: #FDF5EA;
   }
 
-  body {
-    background-color: #F3F6F4;
-    color: #14271F;
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #F4F6F4;
+    color: #16211D;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   .dark body {
-    background-color: #091D15;
-    color: #EBEFEB;
+    background-color: #0D1714;
+    color: #E7EFE9;
   }
 }
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -62,12 +69,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D4DBD6;
+  background: #DDE3DF;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8A9691;
+  background: #7D938A;
 }
 
 /* Glassmorphism Accents */
@@ -75,7 +82,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #D4DBD6;
+  border: 1px solid #DDE3DF;
 }
 
 .dark .glass-card {

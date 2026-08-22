@@ -32,22 +32,31 @@ export function getStatusBadgeClass(status: string): string {
     case 'Terbit':
     case 'Patuh':
     case 'Berjalan':
-      return 'bg-[#E6F7EE] text-[#0B9D6D] border-[#A3DBC8]';
+    case 'Selesai':
+    case 'Sukses':
+    case 'Aktif':
+      return 'bg-[#E6F6EF] text-[#0B7C56] border-[#BFE4D4]';
     case 'Menunggu Verifikasi':
     case 'Sedang Diproses':
+    case 'Sedang diproses':
     case 'Siap Bayar':
     case 'Perlu Survei':
     case 'Survei Lapangan':
     case 'Disetujui Verifikator':
     case 'Terbuka':
     case 'Draft':
+    case 'Draf':
     case 'Perlu Audit':
-      return 'bg-[#F7F0E0] text-[#C8933B] border-[#F7F0E0]';
+    case 'Menunggu':
+      return 'bg-[#FDF5EA] text-[#9C6C1A] border-[#F0DFBE]';
     case 'Ditolak':
     case 'Indikasi Ganda':
     case 'Tertunda':
-      return 'bg-rose-50 text-rose-700 border-rose-200';
+    case 'Batal':
+    case 'Nonaktif':
+      return 'bg-[#FBEeed] text-[#B83D32] border-[#F2D1CE]';
     default:
-      return 'bg-[#EBEFEB] text-[#8A9691] border-[#D4DBD6]';
+      return 'bg-[#F1F4F1] text-[#7D938A] border-[#E3E8E4]';
   }
 }
+

@@ -42,72 +42,70 @@ export const Header: React.FC<HeaderProps> = ({
   const ThemeIcon = preference === 'system' ? Monitor : preference === 'light' ? Sun : Moon;
 
   return (
-    <header className="h-16 bg-white dark:bg-[#091D15] border-b border-[#EBEFEB] dark:border-slate-800 px-8 flex items-center justify-between sticky top-0 z-30 font-sans">
-      <div className="flex items-center gap-3 text-xs font-medium text-[#8A9691]">
+    <header className="min-h-[60px] h-[60px] bg-white/95 backdrop-blur-md border-b border-[#E3E8E4] px-7 flex items-center justify-between sticky top-0 z-30 font-sans">
+      <div className="flex items-center gap-3 text-xs font-medium text-[#6B7A74]">
         {onToggleSidebar && (
           <button
             type="button"
             onClick={onToggleSidebar}
             title={sidebarCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
-            className="p-2 rounded-xl border border-[#D4DBD6] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#14271F] dark:text-slate-200 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-[#DDE3DF] hover:bg-[#F1F4F1] text-[#16211D] transition-colors cursor-pointer"
           >
             {sidebarCollapsed ? (
-              <PanelLeftOpen className="w-4 h-4" />
+              <PanelLeftOpen className="w-4 h-4 text-[#7D938A]" />
             ) : (
-              <PanelLeftClose className="w-4 h-4" />
+              <PanelLeftClose className="w-4 h-4 text-[#7D938A]" />
             )}
           </button>
         )}
         <div className="flex items-center gap-2">
-          <span>AmanahZakat ERP</span>
-          <span>/</span>
-          <span className="font-extrabold text-[#14271F] dark:text-white">{screenLabel}</span>
+          <span>Dashboard ERP</span>
+          <span className="text-[#C2CCC6]">/</span>
+          <span className="font-semibold text-[#16211D]">{screenLabel}</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <div className="relative w-64">
-          <span className="w-2 h-2 rounded-full bg-[#0B9D6D] absolute left-3 top-1/2 -translate-y-1/2"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#0F9D6E] absolute left-3 top-1/2 -translate-y-1/2"></span>
           <input
             type="text"
-            placeholder="Cari data..."
-            className="w-full pl-8 pr-4 py-1.5 text-xs bg-[#F3F6F4] dark:bg-slate-800 border border-[#D4DBD6] dark:border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-[#0B9D6D] text-[#14271F] dark:text-slate-200"
+            placeholder="Cari data…"
+            className="w-full pl-7 pr-3 py-1.5 text-xs bg-[#F1F4F1] border border-[#E3E8E4] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0F9D6E] text-[#16211D] placeholder:text-[#9FB3AA]"
           />
         </div>
 
         <button
           type="button"
           onClick={cycle}
-          title={`${themeLabel} — klik untuk ganti (Sistem → Terang → Gelap)`}
-          className="p-2 rounded-full hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#14271F] dark:text-slate-300 transition-colors cursor-pointer border border-transparent hover:border-[#D4DBD6] dark:hover:border-slate-700"
+          title={`${themeLabel} — klik untuk ganti`}
+          className="p-1.5 rounded-lg hover:bg-[#F1F4F1] text-[#7D938A] transition-colors cursor-pointer border border-transparent hover:border-[#E3E8E4]"
         >
-          <ThemeIcon className="w-4 h-4 text-[#8A9691]" />
+          <ThemeIcon className="w-4 h-4" />
         </button>
 
         {canOpenInbox && (
           <button
             onClick={() => onNavigate('inbox')}
-            className="relative p-2 rounded-full hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#14271F] dark:text-slate-300 transition-colors cursor-pointer"
+            className="relative p-1.5 rounded-lg hover:bg-[#F1F4F1] text-[#7D938A] transition-colors cursor-pointer border border-transparent hover:border-[#E3E8E4]"
           >
-            <Bell className="w-4 h-4 text-[#8A9691]" />
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center border-2 border-white dark:border-slate-900">
-              6
-            </span>
+            <Bell className="w-4 h-4" />
+            <span className="absolute 0.5 top-0.5 right-0.5 w-2 h-2 rounded-full bg-rose-500"></span>
           </button>
         )}
 
-        <div className="flex items-center gap-3 bg-[#F3F6F4] dark:bg-slate-800/80 p-1.5 pr-3 rounded-full border border-[#D4DBD6] dark:border-slate-700">
-          <div className="w-8 h-8 rounded-full bg-[#091D15] text-[#A3DBC8] font-bold text-xs flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-2.5 bg-[#F1F4F1] border border-[#E3E8E4] p-1 pr-2.5 rounded-full">
+          <div className="w-7 h-7 rounded-full bg-[#0D1714] text-[#A5E4CB] font-extrabold text-[11px] flex items-center justify-center shrink-0">
             {initialsFromName(currentUser?.namaLengkap)}
           </div>
           <div className="text-left text-xs">
-            <span className="font-extrabold text-[#14271F] dark:text-white block leading-tight">
+            <span className="font-bold text-[#16211D] block leading-tight">
               {currentUser?.namaLengkap || currentUser?.username || 'Pengguna'}
             </span>
-            <span className="text-[10px] text-[#8A9691] font-medium block">{roleLabel}</span>
+            <span className="text-[10px] text-[#7D938A] font-medium block leading-tight">{roleLabel}</span>
           </div>
-          <span className="px-2 py-0.5 rounded-full bg-[#E6F7EE] text-[#0B9D6D] text-[10px] font-black border border-[#A3DBC8] ml-1">
-            {currentUser?.roles?.[0] || 'USER'}
+          <span className="px-2 py-0.5 rounded-full bg-[#E6F6EF] text-[#0B7C56] text-[10px] font-bold ml-1">
+            {currentUser?.roles?.[0] || 'Approver'}
           </span>
           <button
             onClick={() => {
@@ -117,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onNavigate('login');
               }
             }}
-            className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 px-2 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800"
+            className="text-xs font-semibold text-[#4D5C56] hover:text-rose-600 px-2 py-0.5 rounded-md hover:bg-rose-50 transition-colors cursor-pointer border border-[#DDE3DF] bg-white ml-1"
           >
             Keluar
           </button>
@@ -126,3 +124,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+

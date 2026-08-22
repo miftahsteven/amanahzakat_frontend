@@ -12,17 +12,18 @@ export function getStoredTheme(): ThemePreference {
   } catch {
     // ignore
   }
-  return 'system';
+  return 'light';
 }
 
 export function getSystemTheme(): ResolvedTheme {
   if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'light';
 }
 
 export function resolveTheme(preference: ThemePreference): ResolvedTheme {
-  return preference === 'system' ? getSystemTheme() : preference;
+  return preference === 'dark' ? 'dark' : 'light';
 }
+
 
 export function applyTheme(preference: ThemePreference): ResolvedTheme {
   const resolved = resolveTheme(preference);

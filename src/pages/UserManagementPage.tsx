@@ -80,14 +80,14 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
 
   return (
     <div className="space-y-2" ref={containerRef}>
-      <label className="block font-extrabold text-[#14271F] dark:text-slate-300">
+      <label className="block font-extrabold text-[#16211D] dark:text-slate-300">
         Penetapan Role ACL Pengguna *
       </label>
 
       {/* Selected Role Badges */}
-      <div className="flex flex-wrap gap-1.5 min-h-[42px] p-2 border border-[#D4DBD6] dark:border-slate-700 bg-[#F8FAF9] dark:bg-slate-900 rounded-xl items-center">
+      <div className="flex flex-wrap gap-1.5 min-h-[42px] p-2 border border-[#DDE3DF] dark:border-slate-700 bg-[#F8FAF9] dark:bg-slate-900 rounded-xl items-center">
         {selectedRoleCodes.length === 0 ? (
-          <span className="text-xs text-[#8A9691] italic px-1">
+          <span className="text-xs text-[#7D938A] italic px-1">
             Belum ada role dipilih. Klik cari di bawah untuk memilih role...
           </span>
         ) : (
@@ -96,7 +96,7 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
             return (
               <span
                 key={code}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#E6F7EE] dark:bg-[#0B9D6D]/30 text-[#0B9D6D] dark:text-[#A3DBC8] border border-[#0B9D6D]/30 shadow-xs"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#E6F6EF] dark:bg-[#0F9D6E]/30 text-[#0F9D6E] dark:text-[#A5E4CB] border border-[#0F9D6E]/30 shadow-xs"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
                 {roleObj ? roleObj.name : code}
@@ -117,7 +117,7 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
       {/* Search Input & Select Box */}
       <div className="relative">
         <div className="relative flex items-center">
-          <Search className="w-4 h-4 text-[#8A9691] absolute left-3 pointer-events-none" />
+          <Search className="w-4 h-4 text-[#7D938A] absolute left-3 pointer-events-none" />
           <input
             type="text"
             value={search}
@@ -127,14 +127,14 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
             }}
             onFocus={() => setIsOpen(true)}
             placeholder="Cari role (ketik nama/kode role, misal: Super Admin, Verifikator, Amil)..."
-            className="w-full pl-9 pr-24 py-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-[#0B9D6D] outline-none transition-all"
+            className="w-full pl-9 pr-24 py-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-[#0F9D6E] outline-none transition-all"
           />
           <div className="absolute right-2 flex items-center gap-1">
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="text-[#8A9691] hover:text-slate-600 text-xs px-1.5 py-0.5 rounded font-bold"
+                className="text-[#7D938A] hover:text-slate-600 text-xs px-1.5 py-0.5 rounded font-bold"
               >
                 Reset
               </button>
@@ -142,7 +142,7 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className="text-[#0B9D6D] hover:bg-[#E6F7EE] dark:hover:bg-[#0B9D6D]/20 px-2 py-1 rounded-lg text-xs font-extrabold cursor-pointer"
+              className="text-[#0F9D6E] hover:bg-[#E6F6EF] dark:hover:bg-[#0F9D6E]/20 px-2 py-1 rounded-lg text-xs font-extrabold cursor-pointer"
             >
               {isOpen ? 'Tutup ▲' : 'Pilih ▼'}
             </button>
@@ -151,20 +151,20 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
 
         {/* Dropdown Options List */}
         {isOpen && (
-          <div className="absolute z-50 left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white dark:bg-slate-800 border border-[#D4DBD6] dark:border-slate-700 rounded-xl shadow-2xl p-2 space-y-1">
-            <div className="flex items-center justify-between px-2 py-1.5 border-b border-[#EBEFEB] dark:border-slate-700 text-[11px] text-[#8A9691] font-medium">
+          <div className="absolute z-50 left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-white dark:bg-slate-800 border border-[#DDE3DF] dark:border-slate-700 rounded-xl shadow-2xl p-2 space-y-1">
+            <div className="flex items-center justify-between px-2 py-1.5 border-b border-[#E3E8E4] dark:border-slate-700 text-[11px] text-[#7D938A] font-medium">
               <span>Menampilkan {filteredRoles.length} dari {availableRoles.length} role tersedia</span>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="text-xs font-bold text-[#0B9D6D] hover:underline cursor-pointer"
+                className="text-xs font-bold text-[#0F9D6E] hover:underline cursor-pointer"
               >
                 Selesai
               </button>
             </div>
 
             {filteredRoles.length === 0 ? (
-              <div className="p-4 text-center text-xs text-[#8A9691]">
+              <div className="p-4 text-center text-xs text-[#7D938A]">
                 Role &quot;{search}&quot; tidak ditemukan.
               </div>
             ) : (
@@ -176,7 +176,7 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
                     onClick={() => toggleRole(role.code)}
                     className={`flex items-start gap-3 p-2.5 rounded-xl cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-[#E6F7EE] dark:bg-[#0B9D6D]/20 border border-[#0B9D6D]'
+                        ? 'bg-[#E6F6EF] dark:bg-[#0F9D6E]/20 border border-[#0F9D6E]'
                         : 'hover:bg-[#F3F6F4] dark:hover:bg-slate-700 border border-transparent'
                     }`}
                   >
@@ -184,18 +184,18 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => {}}
-                      className="mt-0.5 w-4 h-4 text-[#0B9D6D] accent-[#0B9D6D] rounded"
+                      className="mt-0.5 w-4 h-4 text-[#0F9D6E] accent-[#0F9D6E] rounded"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-xs text-[#14271F] dark:text-white">
+                        <span className="font-extrabold text-xs text-[#16211D] dark:text-white">
                           {role.name}
                         </span>
-                        <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-700 text-[#0B9D6D] dark:text-[#A3DBC8] px-1.5 py-0.5 rounded-md font-bold">
+                        <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-700 text-[#0F9D6E] dark:text-[#A5E4CB] px-1.5 py-0.5 rounded-md font-bold">
                           {role.code}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#8A9691] truncate mt-0.5">
+                      <p className="text-[11px] text-[#7D938A] truncate mt-0.5">
                         {role.desc}
                       </p>
                     </div>
@@ -455,16 +455,16 @@ export const UserManagementPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Page Banner Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#091D15] p-6 rounded-2xl border border-[#EBEFEB] dark:border-slate-800 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white  p-6 rounded-2xl border border-[#E3E8E4] dark:border-slate-800 shadow-xs">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F7EE] dark:bg-[#0B9D6D]/20 text-[#0B9D6D] text-xs font-bold border border-[#A3DBC8] mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F6EF] dark:bg-[#0F9D6E]/20 text-[#0F9D6E] text-xs font-bold border border-[#A5E4CB] mb-2">
             <Users className="w-3.5 h-3.5" />
             <span>Modul Pengaturan Access Control List (ACL)</span>
           </div>
-          <h1 className="text-2xl font-black text-[#14271F] dark:text-white tracking-tight">
+          <h1 className="text-2xl font-black text-[#16211D] dark:text-white tracking-tight">
             Manajemen Pengguna System
           </h1>
-          <p className="text-xs text-[#8A9691] font-medium mt-1">
+          <p className="text-xs text-[#7D938A] font-medium mt-1">
             Kelola data akun pengguna, NIP amil, perizinan role, dan status keaktifan petugas ERP.
           </p>
         </div>
@@ -481,47 +481,47 @@ export const UserManagementPage: React.FC = () => {
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#091D15] border border-[#EBEFEB] dark:border-slate-800 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#0B9D6D]/15 text-[#0B9D6D] flex items-center justify-center font-bold">
+        <div className="p-5 rounded-2xl bg-white  border border-[#E3E8E4] dark:border-slate-800 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#0F9D6E]/15 text-[#0F9D6E] flex items-center justify-center font-bold">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-[#8A9691] uppercase block">TOTAL PENGGUNA</span>
-            <span className="text-2xl font-black text-[#14271F] dark:text-white">{users.length} User</span>
+            <span className="text-xs font-bold text-[#7D938A] uppercase block">TOTAL PENGGUNA</span>
+            <span className="text-2xl font-black text-[#16211D] dark:text-white">{users.length} User</span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#091D15] border border-[#EBEFEB] dark:border-slate-800 shadow-xs flex items-center gap-4">
+        <div className="p-5 rounded-2xl bg-white  border border-[#E3E8E4] dark:border-slate-800 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center font-bold">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-[#8A9691] uppercase block">AKUN AKTIF</span>
-            <span className="text-2xl font-black text-[#14271F] dark:text-white">
+            <span className="text-xs font-bold text-[#7D938A] uppercase block">AKUN AKTIF</span>
+            <span className="text-2xl font-black text-[#16211D] dark:text-white">
               {users.filter((u) => u.isActive).length} User
             </span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#091D15] border border-[#EBEFEB] dark:border-slate-800 shadow-xs flex items-center gap-4">
+        <div className="p-5 rounded-2xl bg-white  border border-[#E3E8E4] dark:border-slate-800 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-[#C8933B]/15 text-[#C8933B] flex items-center justify-center font-bold">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-[#8A9691] uppercase block">SUPER ADMIN</span>
-            <span className="text-2xl font-black text-[#14271F] dark:text-white">
+            <span className="text-xs font-bold text-[#7D938A] uppercase block">SUPER ADMIN</span>
+            <span className="text-2xl font-black text-[#16211D] dark:text-white">
               {users.filter((u) => u.roles.includes('SUPER_ADMIN')).length} User
             </span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#091D15] border border-[#EBEFEB] dark:border-slate-800 shadow-xs flex items-center gap-4">
+        <div className="p-5 rounded-2xl bg-white  border border-[#E3E8E4] dark:border-slate-800 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-slate-500/15 text-slate-600 flex items-center justify-center font-bold">
             <Key className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-[#8A9691] uppercase block">AKUN NONAKTIF</span>
-            <span className="text-2xl font-black text-[#14271F] dark:text-white">
+            <span className="text-xs font-bold text-[#7D938A] uppercase block">AKUN NONAKTIF</span>
+            <span className="text-2xl font-black text-[#16211D] dark:text-white">
               {users.filter((u) => !u.isActive).length} User
             </span>
           </div>
@@ -529,22 +529,22 @@ export const UserManagementPage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-[#091D15] border border-[#EBEFEB] dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="p-4 rounded-2xl bg-white  border border-[#E3E8E4] dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between">
         {/* Search Input */}
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-[#8A9691] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#7D938A] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama, username, email, NIP..."
-            className="w-full pl-10 pr-4 py-2 bg-[#F3F6F4] dark:bg-slate-800 border border-[#D4DBD6] dark:border-slate-700 rounded-xl text-xs text-[#14271F] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0B9D6D]"
+            className="w-full pl-10 pr-4 py-2 bg-[#F3F6F4] dark:bg-slate-800 border border-[#DDE3DF] dark:border-slate-700 rounded-xl text-xs text-[#16211D] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0F9D6E]"
           />
         </div>
 
         {/* Dropdown Filters */}
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#8A9691]">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#7D938A]">
             <Filter className="w-4 h-4" />
             <span>Filter:</span>
           </div>
@@ -552,7 +552,7 @@ export const UserManagementPage: React.FC = () => {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F3F6F4] dark:bg-slate-800 border border-[#D4DBD6] dark:border-slate-700 rounded-xl text-xs font-bold text-[#14271F] dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0B9D6D]"
+            className="px-3 py-2 bg-[#F3F6F4] dark:bg-slate-800 border border-[#DDE3DF] dark:border-slate-700 rounded-xl text-xs font-bold text-[#16211D] dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F9D6E]"
           >
             <option value="ALL">Semua Role</option>
             <option value="SUPER_ADMIN">Super Admin</option>
@@ -563,7 +563,7 @@ export const UserManagementPage: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-[#F3F6F4] dark:bg-slate-800 border border-[#D4DBD6] dark:border-slate-700 rounded-xl text-xs font-bold text-[#14271F] dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0B9D6D]"
+            className="px-3 py-2 bg-[#F3F6F4] dark:bg-slate-800 border border-[#DDE3DF] dark:border-slate-700 rounded-xl text-xs font-bold text-[#16211D] dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F9D6E]"
           >
             <option value="ALL">Semua Status</option>
             <option value="ACTIVE">Aktif Saja</option>
@@ -573,10 +573,10 @@ export const UserManagementPage: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white dark:bg-[#091D15] rounded-2xl border border-[#EBEFEB] dark:border-slate-800 overflow-hidden shadow-xs">
+      <div className="bg-white  rounded-2xl border border-[#E3E8E4] dark:border-slate-800 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F3F6F4] dark:bg-slate-800/80 text-[#8A9691] uppercase font-black tracking-wider border-b border-[#EBEFEB] dark:border-slate-800">
+            <thead className="bg-[#F3F6F4] dark:bg-slate-800/80 text-[#7D938A] uppercase font-black tracking-wider border-b border-[#E3E8E4] dark:border-slate-800">
               <tr>
                 <th className="p-4">Informasi Pengguna</th>
                 <th className="p-4">NIP & Kontak</th>
@@ -586,10 +586,10 @@ export const UserManagementPage: React.FC = () => {
                 <th className="p-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EBEFEB] dark:divide-slate-800">
+            <tbody className="divide-y divide-[#E3E8E4] dark:divide-slate-800">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-[#8A9691]">
+                  <td colSpan={6} className="p-8 text-center text-[#7D938A]">
                     Tidak ada pengguna yang cocok dengan kriteria pencarian.
                   </td>
                 </tr>
@@ -598,14 +598,14 @@ export const UserManagementPage: React.FC = () => {
                   <tr key={user.id} className="hover:bg-[#F3F6F4]/50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#091D15] text-[#A3DBC8] font-bold text-xs flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-[#0D1714] text-[#A5E4CB] font-bold text-xs flex items-center justify-center shrink-0">
                           {user.namaLengkap.substring(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <span className="font-extrabold text-[#14271F] dark:text-white block text-sm">
+                          <span className="font-extrabold text-[#16211D] dark:text-white block text-sm">
                             {user.namaLengkap}
                           </span>
-                          <span className="text-[11px] font-mono text-[#0B9D6D] block">
+                          <span className="text-[11px] font-mono text-[#0F9D6E] block">
                             @{user.username}
                           </span>
                         </div>
@@ -613,13 +613,13 @@ export const UserManagementPage: React.FC = () => {
                     </td>
 
                     <td className="p-4 space-y-1">
-                      <div className="font-mono text-[11px] text-[#14271F] dark:text-slate-300 font-bold">
+                      <div className="font-mono text-[11px] text-[#16211D] dark:text-slate-300 font-bold">
                         {user.nip}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-[#8A9691]">
-                        <Mail className="w-3 h-3 text-[#0B9D6D]" /> {user.email}
+                      <div className="flex items-center gap-2 text-[11px] text-[#7D938A]">
+                        <Mail className="w-3 h-3 text-[#0F9D6E]" /> {user.email}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-[#8A9691]">
+                      <div className="flex items-center gap-2 text-[11px] text-[#7D938A]">
                         <Phone className="w-3 h-3 text-[#C8933B]" /> {user.nomorHp}
                       </div>
                     </td>
@@ -634,7 +634,7 @@ export const UserManagementPage: React.FC = () => {
                                 ? 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-950 dark:text-purple-300'
                                 : r === 'VERIFIKATOR'
                                 ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
-                                : 'bg-[#E6F7EE] text-[#0B9D6D] border-[#A3DBC8]'
+                                : 'bg-[#E6F6EF] text-[#0F9D6E] border-[#A5E4CB]'
                             }`}
                           >
                             {r}
@@ -648,7 +648,7 @@ export const UserManagementPage: React.FC = () => {
                         onClick={() => handleToggleActive(user)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black border cursor-pointer transition-all ${
                           user.isActive
-                            ? 'bg-[#E6F7EE] text-[#0B9D6D] border-[#A3DBC8] hover:bg-emerald-200'
+                            ? 'bg-[#E6F6EF] text-[#0F9D6E] border-[#A5E4CB] hover:bg-emerald-200'
                             : 'bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-950 dark:text-rose-300'
                         }`}
                       >
@@ -666,7 +666,7 @@ export const UserManagementPage: React.FC = () => {
                       </button>
                     </td>
 
-                    <td className="p-4 font-mono text-[#8A9691] text-[11px]">
+                    <td className="p-4 font-mono text-[#7D938A] text-[11px]">
                       {user.createdAt}
                     </td>
 
@@ -674,10 +674,10 @@ export const UserManagementPage: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleOpenEditModal(user)}
-                          className="p-1.5 rounded-lg border border-[#D4DBD6] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#14271F] dark:text-slate-300 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg border border-[#DDE3DF] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#16211D] dark:text-slate-300 transition-colors cursor-pointer"
                           title="Edit Pengguna"
                         >
-                          <Edit3 className="w-3.5 h-3.5 text-[#0B9D6D]" />
+                          <Edit3 className="w-3.5 h-3.5 text-[#0F9D6E]" />
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user)}
@@ -707,7 +707,7 @@ export const UserManagementPage: React.FC = () => {
         <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Nama Lengkap Petugas *
               </label>
               <input
@@ -716,12 +716,12 @@ export const UserManagementPage: React.FC = () => {
                 value={formData.namaLengkap}
                 onChange={(e) => setFormData({ ...formData, namaLengkap: e.target.value })}
                 placeholder="Contoh: Muhammad Ridwan, S.E."
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
 
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Username Akun *
               </label>
               <input
@@ -730,14 +730,14 @@ export const UserManagementPage: React.FC = () => {
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })}
                 placeholder="Contoh: mridwan"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Alamat Email *
               </label>
               <input
@@ -746,12 +746,12 @@ export const UserManagementPage: React.FC = () => {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="email@amanahzakat.or.id"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
 
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Kata Sandi *
               </label>
               <input
@@ -760,14 +760,14 @@ export const UserManagementPage: React.FC = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="Minimal 6 karakter"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 NIP Amil
               </label>
               <input
@@ -775,12 +775,12 @@ export const UserManagementPage: React.FC = () => {
                 value={formData.nip}
                 onChange={(e) => setFormData({ ...formData, nip: e.target.value })}
                 placeholder="AML-2026-XXX"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
             </div>
 
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Nomor WhatsApp / HP
               </label>
               <input
@@ -788,14 +788,14 @@ export const UserManagementPage: React.FC = () => {
                 value={formData.nomorHp}
                 onChange={(e) => setFormData({ ...formData, nomorHp: e.target.value })}
                 placeholder="081234567890"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
           </div>
 
           {/* Role Selection */}
           {/* Searchable Role Select Box */}
-          <div className="pt-2 border-t border-[#EBEFEB] dark:border-slate-800">
+          <div className="pt-2 border-t border-[#E3E8E4] dark:border-slate-800">
             <RoleSearchSelect
               selectedRoleCodes={formData.roles}
               onChange={(roles) => setFormData({ ...formData, roles })}
@@ -803,7 +803,7 @@ export const UserManagementPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#EBEFEB] dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E3E8E4] dark:border-slate-800">
             <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
               Batal
             </Button>
@@ -825,7 +825,7 @@ export const UserManagementPage: React.FC = () => {
         <form onSubmit={handleUpdateUser} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Nama Lengkap Petugas *
               </label>
               <input
@@ -833,12 +833,12 @@ export const UserManagementPage: React.FC = () => {
                 required
                 value={formData.namaLengkap}
                 onChange={(e) => setFormData({ ...formData, namaLengkap: e.target.value })}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
 
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Username Akun *
               </label>
               <input
@@ -846,14 +846,14 @@ export const UserManagementPage: React.FC = () => {
                 required
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Alamat Email *
               </label>
               <input
@@ -861,25 +861,25 @@ export const UserManagementPage: React.FC = () => {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
 
             <div>
-              <label className="block font-extrabold text-[#14271F] dark:text-slate-300 mb-1">
+              <label className="block font-extrabold text-[#16211D] dark:text-slate-300 mb-1">
                 Nomor WhatsApp / HP
               </label>
               <input
                 type="text"
                 value={formData.nomorHp}
                 onChange={(e) => setFormData({ ...formData, nomorHp: e.target.value })}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
           </div>
 
           {/* Searchable Role Select Box */}
-          <div className="pt-2 border-t border-[#EBEFEB] dark:border-slate-800">
+          <div className="pt-2 border-t border-[#E3E8E4] dark:border-slate-800">
             <RoleSearchSelect
               selectedRoleCodes={formData.roles}
               onChange={(roles) => setFormData({ ...formData, roles })}
@@ -887,15 +887,15 @@ export const UserManagementPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-[#EBEFEB] dark:border-slate-800">
+          <div className="flex items-center justify-between pt-4 border-t border-[#E3E8E4] dark:border-slate-800">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.isActive}
                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="w-4 h-4 text-[#0B9D6D] accent-[#0B9D6D]"
+                className="w-4 h-4 text-[#0F9D6E] accent-[#0F9D6E]"
               />
-              <span className="font-extrabold text-xs text-[#14271F] dark:text-slate-200">
+              <span className="font-extrabold text-xs text-[#16211D] dark:text-slate-200">
                 Status Akun Aktif
               </span>
             </label>

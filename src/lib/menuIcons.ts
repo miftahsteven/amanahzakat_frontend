@@ -22,6 +22,12 @@ import {
   Layers,
   KeyRound,
   ShieldCheck,
+  Sliders,
+  Image,
+  Newspaper,
+  Quote,
+  HelpCircle,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -49,6 +55,12 @@ export const MENU_ICON_OPTIONS: { value: string; label: string; Icon: LucideIcon
   { value: 'Layers', label: 'Modul', Icon: Layers },
   { value: 'KeyRound', label: 'Permission', Icon: KeyRound },
   { value: 'ShieldCheck', label: 'ACL', Icon: ShieldCheck },
+  { value: 'Sliders', label: 'Slider / Controls', Icon: Sliders },
+  { value: 'Image', label: 'Gambar', Icon: Image },
+  { value: 'Newspaper', label: 'Berita', Icon: Newspaper },
+  { value: 'Quote', label: 'Testimoni', Icon: Quote },
+  { value: 'HelpCircle', label: 'Bantuan / FAQ', Icon: HelpCircle },
+  { value: 'Sparkles', label: 'Fitur', Icon: Sparkles },
 ];
 
 const iconMap = Object.fromEntries(
@@ -59,3 +71,4 @@ export function getMenuIcon(iconName?: string | null): LucideIcon | null {
   if (!iconName) return null;
   return iconMap[iconName] || null;
 }
+

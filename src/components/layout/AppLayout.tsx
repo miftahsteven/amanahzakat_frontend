@@ -45,8 +45,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F3F6F4] dark:bg-slate-950 text-[#14271F] dark:text-slate-200 font-sans transition-colors">
+    <div className="flex min-h-screen bg-[#F4F6F4] text-[#16211D] font-sans">
       <Sidebar
+
         currentScreen={currentScreen}
         onNavigate={onNavigate}
         navigation={navigation}

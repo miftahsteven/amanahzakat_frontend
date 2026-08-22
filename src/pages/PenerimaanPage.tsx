@@ -91,7 +91,7 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
       cell: ({ row }: any) => (
         <span
           onClick={() => onSelectTrx(row.original.id)}
-          className="font-mono font-bold text-[#0B9D6D] hover:underline cursor-pointer"
+          className="font-mono font-bold text-[#0F9D6E] hover:underline cursor-pointer"
         >
           {row.getValue('noKwitansi')}
         </span>
@@ -106,8 +106,8 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
       header: 'Muzakki / Donatur',
       cell: ({ row }: any) => (
         <div>
-          <div className="font-bold text-[#14271F] dark:text-slate-200">{row.getValue('muzakkiNama')}</div>
-          <div className="text-[10px] text-[#8A9691]">{row.original.muzakkiTipe}</div>
+          <div className="font-bold text-[#16211D] dark:text-slate-200">{row.getValue('muzakkiNama')}</div>
+          <div className="text-[10px] text-[#7D938A]">{row.original.muzakkiTipe}</div>
         </div>
       ),
     },
@@ -119,7 +119,7 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
     {
       accessorKey: 'nominal',
       header: 'Nominal',
-      cell: ({ row }: any) => <span className="font-extrabold text-[#0B9D6D]">{formatRP(row.getValue('nominal'))}</span>,
+      cell: ({ row }: any) => <span className="font-extrabold text-[#0F9D6E]">{formatRP(row.getValue('nominal'))}</span>,
     },
     {
       accessorKey: 'kanal',
@@ -137,7 +137,7 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
         <div className="flex items-center gap-1.5">
           {row.original.status === 'Menunggu Verifikasi' && (
             <Button variant="secondary" size="sm" onClick={() => handleVerifikasi(row.original.id)}>
-              <CheckCircle className="w-3.5 h-3.5 text-[#0B9D6D]" />
+              <CheckCircle className="w-3.5 h-3.5 text-[#0F9D6E]" />
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={() => setSelectedBszData(row.original)} title="Cetak BSZ">
@@ -156,10 +156,10 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#14271F] dark:text-slate-100 flex items-center gap-2">
-            <ArrowDownLeft className="w-6 h-6 text-[#0B9D6D]" /> Transaksi Penerimaan ZIS
+          <h1 className="text-2xl font-extrabold text-[#16211D] dark:text-slate-100 flex items-center gap-2">
+            <ArrowDownLeft className="w-6 h-6 text-[#0F9D6E]" /> Transaksi Penerimaan ZIS
           </h1>
-          <p className="text-xs text-[#8A9691]">Pencatatan setoran masuk Zakat, Infak, Shodaqoh, dan Bukti Setor Zakat (BSZ)</p>
+          <p className="text-xs text-[#7D938A]">Pencatatan setoran masuk Zakat, Infak, Shodaqoh, dan Bukti Setor Zakat (BSZ)</p>
         </div>
         <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
           Catat Penerimaan Baru
@@ -174,8 +174,8 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
             onClick={() => setFilterJenis(tab)}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               filterJenis === tab
-                ? 'bg-[#0B9D6D] text-white font-bold shadow-xs'
-                : 'bg-white dark:bg-slate-900 text-[#14271F] dark:text-slate-400 hover:bg-[#F3F6F4] border border-[#D4DBD6] dark:border-slate-800'
+                ? 'bg-[#0F9D6E] text-white font-bold shadow-xs'
+                : 'bg-white dark:bg-slate-900 text-[#16211D] dark:text-slate-400 hover:bg-[#F3F6F4] border border-[#DDE3DF] dark:border-slate-800'
             }`}
           >
             {tab}
@@ -196,10 +196,10 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-[#14271F] dark:text-slate-300 mb-1">Pilih Muzakki / Donatur *</label>
+            <label className="block font-bold text-[#16211D] dark:text-slate-300 mb-1">Pilih Muzakki / Donatur *</label>
             <select
               {...register('muzakkiId')}
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#14271F] dark:text-slate-200 focus:ring-2 focus:ring-[#0B9D6D]"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E]"
             >
               <option value="">-- Pilih Muzakki Terdaftar --</option>
               {INITIAL_MUZAKKI.map((m) => (
@@ -213,10 +213,10 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block font-bold text-[#14271F] dark:text-slate-300 mb-1">Jenis ZIS *</label>
+              <label className="block font-bold text-[#16211D] dark:text-slate-300 mb-1">Jenis ZIS *</label>
               <select
                 {...register('jenisZis')}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#14271F] dark:text-slate-200 focus:ring-2 focus:ring-[#0B9D6D]"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E]"
               >
                 <option value="Zakat Maal">Zakat Maal</option>
                 <option value="Zakat Profesi">Zakat Profesi</option>
@@ -230,10 +230,10 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
             </div>
 
             <div>
-              <label className="block font-bold text-[#14271F] dark:text-slate-300 mb-1">Kanal Pembayaran *</label>
+              <label className="block font-bold text-[#16211D] dark:text-slate-300 mb-1">Kanal Pembayaran *</label>
               <select
                 {...register('kanal')}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#14271F] dark:text-slate-200 focus:ring-2 focus:ring-[#0B9D6D]"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E]"
               >
                 <option value="Transfer Bank BSI">Transfer Bank BSI</option>
                 <option value="QRIS">QRIS</option>
@@ -245,27 +245,27 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
           </div>
 
           <div>
-            <label className="block font-bold text-[#14271F] dark:text-slate-300 mb-1">Nominal (Rp) *</label>
+            <label className="block font-bold text-[#16211D] dark:text-slate-300 mb-1">Nominal (Rp) *</label>
             <input
               type="number"
               {...register('nominal', { valueAsNumber: true })}
               placeholder="Contoh: 1500000"
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#14271F] dark:text-slate-200 focus:ring-2 focus:ring-[#0B9D6D]"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E]"
             />
             {errors.nominal && <p className="text-rose-500 text-[11px] mt-1">{errors.nominal.message}</p>}
           </div>
 
           <div>
-            <label className="block font-bold text-[#14271F] dark:text-slate-300 mb-1">Catatan / Keterangan Akad</label>
+            <label className="block font-bold text-[#16211D] dark:text-slate-300 mb-1">Catatan / Keterangan Akad</label>
             <textarea
               {...register('catatan')}
               rows={2}
               placeholder="Contoh: Zakat penghasilan bulan Agustus 2026..."
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#14271F] dark:text-slate-200 focus:ring-2 focus:ring-[#0B9D6D]"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E]"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EBEFEB] dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E3E8E4] dark:border-slate-800">
             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
               Batal
             </Button>

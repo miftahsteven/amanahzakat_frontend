@@ -22,11 +22,23 @@ import { UserManagementPage } from './pages/UserManagementPage';
 import { AclManagementPage } from './pages/AclManagementPage';
 import { ModuleManagementPage } from './pages/ModuleManagementPage';
 import { PermissionManagementPage } from './pages/PermissionManagementPage';
+import { HeroSliderPage } from './pages/cms/HeroSliderPage';
+import { CampaignsManagementPage } from './pages/cms/CampaignsManagementPage';
+import { DistributionsManagementPage } from './pages/cms/DistributionsManagementPage';
+import { TestimonialsManagementPage } from './pages/cms/TestimonialsManagementPage';
+import { FaqManagementPage } from './pages/cms/FaqManagementPage';
+import { ImpactManagementPage } from './pages/cms/ImpactManagementPage';
+import { AssistanceManagementPage } from './pages/cms/AssistanceManagementPage';
+import { WebSettingsPage } from './pages/cms/WebSettingsPage';
+import { ApprovalPage } from './pages/ApprovalPage';
 import { Modal } from './components/ui/Modal';
+
+
 import { Button } from './components/ui/Button';
 import { authApi, isSessionValid, getStoredUser, removeStoredToken } from './lib/api';
 import type { AuthUser, NavModul } from './types/acl';
 import { menuCodesFromUser } from './types/acl';
+
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -105,12 +117,12 @@ export function App() {
     // ACL Guard: if currentScreen is not in allowedMenuIds (and not login), block or fallback
     if (currentScreen !== 'login' && !allowedMenuIds.includes(currentScreen)) {
       return (
-        <div className="p-12 text-center bg-white dark:bg-[#091D15] rounded-2xl border border-rose-200 dark:border-rose-900 space-y-4">
+        <div className="p-12 text-center bg-white  rounded-2xl border border-rose-200 dark:border-rose-900 space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-rose-100 dark:bg-rose-950 text-rose-600 font-bold mx-auto flex items-center justify-center text-2xl">
             🚫
           </div>
-          <h2 className="text-2xl font-black text-[#14271F] dark:text-white">Akses Ditolak (403 Forbidden)</h2>
-          <p className="text-xs text-[#8A9691] max-w-md mx-auto">
+          <h2 className="text-2xl font-black text-[#16211D] dark:text-white">Akses Ditolak (403 Forbidden)</h2>
+          <p className="text-xs text-[#7D938A] max-w-md mx-auto">
             Peran akun Anda (<strong>{currentUser?.username}</strong>) tidak memiliki perizinan ACL untuk membuka modul <code>{currentScreen}</code>.
           </p>
           <Button onClick={() => setCurrentScreen(allowedMenuIds[0] || 'dashboard')} variant="primary" className="text-xs">
@@ -177,6 +189,22 @@ export function App() {
         return <PortalPublicPage />;
       case 'inbox':
         return <InboxPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+      case 'cms-hero':
+        return <HeroSliderPage />;
+      case 'cms-campaigns':
+        return <CampaignsManagementPage />;
+      case 'cms-distributions':
+        return <DistributionsManagementPage />;
+      case 'cms-testimonials':
+        return <TestimonialsManagementPage />;
+      case 'cms-faqs':
+        return <FaqManagementPage />;
+      case 'cms-impact':
+        return <ImpactManagementPage />;
+      case 'cms-assistance':
+        return <AssistanceManagementPage />;
+      case 'cms-settings':
+        return <WebSettingsPage />;
       case 'user-management':
         return <UserManagementPage />;
       case 'module-management':
@@ -185,18 +213,22 @@ export function App() {
         return <PermissionManagementPage />;
       case 'acl-management':
         return <AclManagementPage />;
+      case 'approval':
+        return <ApprovalPage />;
       case 'login':
         return <LoginPage onLoginSuccess={handleLoginSuccess} />;
       default:
         return <GenericPage screenId={currentScreen} onNavigate={(screen) => setCurrentScreen(screen)} />;
+
     }
   };
 
+
   if (isCheckingSession) {
     return (
-      <div className="min-h-screen bg-[#091D15] flex flex-col items-center justify-center text-white space-y-4 font-sans">
-        <div className="w-12 h-12 border-4 border-[#0B9D6D] border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-extrabold text-[#A3DBC8] uppercase tracking-wider">
+      <div className="min-h-screen bg-[#0D1714] flex flex-col items-center justify-center text-white space-y-4 font-sans">
+        <div className="w-12 h-12 border-4 border-[#0F9D6E] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-extrabold text-[#A5E4CB] uppercase tracking-wider">
           Memeriksa Sesi Autentikasi 24 Jam...
         </p>
       </div>

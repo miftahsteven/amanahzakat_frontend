@@ -209,7 +209,7 @@ export const ModuleManagementPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-12 text-center text-xs font-bold text-[#8A9691]">
+      <div className="p-12 text-center text-xs font-bold text-[#7D938A]">
         Memuat katalog modul & menu...
       </div>
     );
@@ -217,16 +217,16 @@ export const ModuleManagementPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#091D15] p-6 rounded-2xl border border-[#EBEFEB] dark:border-slate-800 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white  p-6 rounded-2xl border border-[#E3E8E4] dark:border-slate-800 shadow-xs">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F7EE] dark:bg-[#0B9D6D]/20 text-[#0B9D6D] text-xs font-bold border border-[#A3DBC8] mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F6EF] dark:bg-[#0F9D6E]/20 text-[#0F9D6E] text-xs font-bold border border-[#A5E4CB] mb-2">
             <Layers className="w-3.5 h-3.5" />
             <span>Master Modul & Menu Sidebar</span>
           </div>
-          <h1 className="text-2xl font-black text-[#14271F] dark:text-white tracking-tight">
+          <h1 className="text-2xl font-black text-[#16211D] dark:text-white tracking-tight">
             Manajemen Modul & Menu
           </h1>
-          <p className="text-xs text-[#8A9691] font-medium mt-1">
+          <p className="text-xs text-[#7D938A] font-medium mt-1">
             Tambah, ubah, atau nonaktifkan modul/menu yang tampil di sidebar. Data tersimpan di database.
           </p>
         </div>
@@ -245,8 +245,8 @@ export const ModuleManagementPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-4 bg-white dark:bg-[#091D15] rounded-2xl border border-[#EBEFEB] dark:border-slate-800 shadow-xs">
-            <h3 className="text-xs font-extrabold text-[#8A9691] uppercase tracking-wider mb-3 px-1">
+          <div className="p-4 bg-white  rounded-2xl border border-[#E3E8E4] dark:border-slate-800 shadow-xs">
+            <h3 className="text-xs font-extrabold text-[#7D938A] uppercase tracking-wider mb-3 px-1">
               Daftar Modul ({modules.length})
             </h3>
             <div className="space-y-2">
@@ -258,15 +258,15 @@ export const ModuleManagementPage: React.FC = () => {
                     onClick={() => setSelectedModulId(modul.id)}
                     className={`p-4 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#E6F7EE] dark:bg-[#0B9D6D]/20 border-[#0B9D6D]'
-                        : 'bg-white dark:bg-slate-800 border-[#D4DBD6] dark:border-slate-700'
+                        ? 'bg-[#E6F6EF] dark:bg-[#0F9D6E]/20 border-[#0F9D6E]'
+                        : 'bg-white dark:bg-slate-800 border-[#DDE3DF] dark:border-slate-700'
                     } ${modul.isActive === false ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <div className="font-black text-sm text-[#14271F] dark:text-white">{modul.namaModul}</div>
-                        <div className="font-mono text-[11px] text-[#0B9D6D] font-bold mt-0.5">{modul.kodeModul}</div>
-                        <div className="text-[11px] text-[#8A9691] mt-1">
+                        <div className="font-black text-sm text-[#16211D] dark:text-white">{modul.namaModul}</div>
+                        <div className="font-mono text-[11px] text-[#0F9D6E] font-bold mt-0.5">{modul.kodeModul}</div>
+                        <div className="text-[11px] text-[#7D938A] mt-1">
                           {modul.menus.length} menu · urutan {modul.urutan}
                         </div>
                       </div>
@@ -274,7 +274,7 @@ export const ModuleManagementPage: React.FC = () => {
                         className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${
                           modul.isActive === false
                             ? 'bg-rose-100 text-rose-600'
-                            : 'bg-[#091D15] text-[#A3DBC8]'
+                            : 'bg-[#0D1714] text-[#A5E4CB]'
                         }`}
                       >
                         {modul.isActive === false ? 'Nonaktif' : 'Aktif'}
@@ -289,11 +289,11 @@ export const ModuleManagementPage: React.FC = () => {
 
         <div className="lg:col-span-8">
           {selectedModul ? (
-            <div className="p-6 bg-white dark:bg-[#091D15] rounded-2xl border border-[#EBEFEB] dark:border-slate-800 shadow-xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EBEFEB] dark:border-slate-800">
+            <div className="p-6 bg-white  rounded-2xl border border-[#E3E8E4] dark:border-slate-800 shadow-xs space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E3E8E4] dark:border-slate-800">
                 <div>
-                  <h2 className="text-xl font-black text-[#14271F] dark:text-white">{selectedModul.namaModul}</h2>
-                  <p className="text-xs text-[#8A9691] mt-1">
+                  <h2 className="text-xl font-black text-[#16211D] dark:text-white">{selectedModul.namaModul}</h2>
+                  <p className="text-xs text-[#7D938A] mt-1">
                     Kelola menu di dalam modul ini. Menu baru otomatis mendapat permission <code>read</code>.
                   </p>
                 </div>
@@ -315,7 +315,7 @@ export const ModuleManagementPage: React.FC = () => {
 
               <div className="space-y-3">
                 {selectedModul.menus.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-[#8A9691] border border-dashed border-[#D4DBD6] rounded-xl">
+                  <div className="p-8 text-center text-xs text-[#7D938A] border border-dashed border-[#DDE3DF] rounded-xl">
                     Belum ada menu di modul ini.
                   </div>
                 ) : (
@@ -324,27 +324,27 @@ export const ModuleManagementPage: React.FC = () => {
                     return (
                       <div
                         key={menu.id}
-                        className={`p-4 rounded-xl border border-[#D4DBD6] dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        className={`p-4 rounded-xl border border-[#DDE3DF] dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                           menu.isActive === false ? 'opacity-60' : ''
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <span className="w-9 h-8 rounded-lg bg-[#091D15] text-[#A3DBC8] text-[11px] font-black flex items-center justify-center">
+                          <span className="w-9 h-8 rounded-lg bg-[#0D1714] text-[#A5E4CB] text-[11px] font-black flex items-center justify-center">
                             {ItemIcon ? <ItemIcon className="w-4 h-4" /> : menu.kodeTampil}
                           </span>
                           <div>
-                            <div className="font-extrabold text-sm text-[#14271F] dark:text-white flex items-center gap-2">
-                              <MenuIcon className="w-3.5 h-3.5 text-[#0B9D6D]" />
+                            <div className="font-extrabold text-sm text-[#16211D] dark:text-white flex items-center gap-2">
+                              <MenuIcon className="w-3.5 h-3.5 text-[#0F9D6E]" />
                               {menu.namaMenu}
                             </div>
-                            <div className="text-[11px] font-mono text-[#8A9691] mt-0.5">
+                            <div className="text-[11px] font-mono text-[#7D938A] mt-0.5">
                               {menu.kodeMenu} · tampil {menu.kodeTampil}
                               {menu.icon ? ` · icon ${menu.icon}` : ''}
                               {' · '}urutan {menu.urutan}
                               {menu.tampilDiSidebar ? ' · sidebar' : ''}
                               {menu.tampilDiHeader ? ' · header' : ''}
                             </div>
-                            <div className="text-[10px] text-[#8A9691] mt-1">
+                            <div className="text-[10px] text-[#7D938A] mt-1">
                               Permission: {menu.permissions.map((p) => p.aksi).join(', ') || '-'}
                             </div>
                           </div>
@@ -366,7 +366,7 @@ export const ModuleManagementPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="p-12 text-center text-xs text-[#8A9691] bg-white rounded-2xl border">
+            <div className="p-12 text-center text-xs text-[#7D938A] bg-white rounded-2xl border">
               Belum ada modul. Tambahkan modul terlebih dahulu.
             </div>
           )}
@@ -389,7 +389,7 @@ export const ModuleManagementPage: React.FC = () => {
               value={modulForm.kodeModul}
               onChange={(e) => setModulForm({ ...modulForm, kodeModul: e.target.value })}
               placeholder="Contoh: OPERASIONAL_ZIS"
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono uppercase disabled:opacity-60"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono uppercase disabled:opacity-60"
             />
           </div>
           <div>
@@ -399,7 +399,7 @@ export const ModuleManagementPage: React.FC = () => {
               value={modulForm.namaModul}
               onChange={(e) => setModulForm({ ...modulForm, namaModul: e.target.value })}
               placeholder="Contoh: OPERASIONAL ZIS"
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
             />
           </div>
           <div>
@@ -408,7 +408,7 @@ export const ModuleManagementPage: React.FC = () => {
               type="number"
               value={modulForm.urutan}
               onChange={(e) => setModulForm({ ...modulForm, urutan: Number(e.target.value) })}
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
             />
           </div>
           <div className="flex justify-end gap-3 pt-3 border-t">
@@ -436,7 +436,7 @@ export const ModuleManagementPage: React.FC = () => {
               required
               value={menuForm.modulId}
               onChange={(e) => setMenuForm({ ...menuForm, modulId: e.target.value })}
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
             >
               {modules.map((modul) => (
                 <option key={modul.id} value={modul.id}>
@@ -453,7 +453,7 @@ export const ModuleManagementPage: React.FC = () => {
               value={menuForm.kodeMenu}
               onChange={(e) => setMenuForm({ ...menuForm, kodeMenu: e.target.value })}
               placeholder="Contoh: penerimaan"
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono disabled:opacity-60"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono disabled:opacity-60"
             />
           </div>
           <div>
@@ -463,7 +463,7 @@ export const ModuleManagementPage: React.FC = () => {
               value={menuForm.namaMenu}
               onChange={(e) => setMenuForm({ ...menuForm, namaMenu: e.target.value })}
               placeholder="Contoh: Penerimaan ZIS"
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -475,7 +475,7 @@ export const ModuleManagementPage: React.FC = () => {
                 value={menuForm.kodeTampil}
                 onChange={(e) => setMenuForm({ ...menuForm, kodeTampil: e.target.value })}
                 placeholder="PN"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono uppercase"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono uppercase"
               />
             </div>
             <div>
@@ -484,15 +484,15 @@ export const ModuleManagementPage: React.FC = () => {
                 type="number"
                 value={menuForm.urutan}
                 onChange={(e) => setMenuForm({ ...menuForm, urutan: Number(e.target.value) })}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
               />
             </div>
           </div>
           <div>
             <label className="block font-extrabold mb-1">Icon Sidebar (opsional)</label>
-            <div className="p-3 rounded-xl border border-[#D4DBD6] dark:border-slate-700 bg-[#F8FAF9] dark:bg-slate-900/60 space-y-3">
+            <div className="p-3 rounded-xl border border-[#DDE3DF] dark:border-slate-700 bg-[#F8FAF9] dark:bg-slate-900/60 space-y-3">
               <div className="flex items-center gap-3">
-                <span className="w-10 h-9 rounded-lg bg-[#091D15] text-[#A3DBC8] flex items-center justify-center shrink-0">
+                <span className="w-10 h-9 rounded-lg bg-[#0D1714] text-[#A5E4CB] flex items-center justify-center shrink-0">
                   {(() => {
                     const SelectedIcon = getMenuIcon(menuForm.icon);
                     return SelectedIcon ? (
@@ -504,7 +504,7 @@ export const ModuleManagementPage: React.FC = () => {
                     );
                   })()}
                 </span>
-                <div className="text-[11px] text-[#8A9691]">
+                <div className="text-[11px] text-[#7D938A]">
                   {menuForm.icon
                     ? `Terpilih: ${MENU_ICON_OPTIONS.find((o) => o.value === menuForm.icon)?.label || menuForm.icon}`
                     : 'Belum ada icon — sidebar pakai Kode Tampil'}
@@ -517,12 +517,12 @@ export const ModuleManagementPage: React.FC = () => {
                   onClick={() => setMenuForm({ ...menuForm, icon: '' })}
                   className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border text-[10px] font-bold transition-all cursor-pointer ${
                     !menuForm.icon
-                      ? 'border-[#0B9D6D] bg-[#E6F7EE] text-[#0B9D6D]'
-                      : 'border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#8A9691] hover:border-[#A3DBC8]'
+                      ? 'border-[#0F9D6E] bg-[#E6F6EF] text-[#0F9D6E]'
+                      : 'border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#7D938A] hover:border-[#A5E4CB]'
                   }`}
                   title="Tanpa icon"
                 >
-                  <span className="w-7 h-6 rounded-md bg-[#091D15] text-[#A3DBC8] text-[9px] font-black flex items-center justify-center">
+                  <span className="w-7 h-6 rounded-md bg-[#0D1714] text-[#A5E4CB] text-[9px] font-black flex items-center justify-center">
                     {menuForm.kodeTampil || 'TXT'}
                   </span>
                   <span>Kosong</span>
@@ -538,12 +538,12 @@ export const ModuleManagementPage: React.FC = () => {
                       onClick={() => setMenuForm({ ...menuForm, icon: option.value })}
                       className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border text-[10px] font-bold transition-all cursor-pointer ${
                         selected
-                          ? 'border-[#0B9D6D] bg-[#E6F7EE] text-[#0B9D6D]'
-                          : 'border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#8A9691] hover:border-[#A3DBC8]'
+                          ? 'border-[#0F9D6E] bg-[#E6F6EF] text-[#0F9D6E]'
+                          : 'border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#7D938A] hover:border-[#A5E4CB]'
                       }`}
                       title={`${option.label} (${option.value})`}
                     >
-                      <span className="w-7 h-6 rounded-md bg-[#091D15] text-[#A3DBC8] flex items-center justify-center">
+                      <span className="w-7 h-6 rounded-md bg-[#0D1714] text-[#A5E4CB] flex items-center justify-center">
                         <OptionIcon className="w-3.5 h-3.5" />
                       </span>
                       <span className="truncate w-full text-center">{option.label}</span>
@@ -552,7 +552,7 @@ export const ModuleManagementPage: React.FC = () => {
                 })}
               </div>
             </div>
-            <p className="text-[10px] text-[#8A9691] mt-1">
+            <p className="text-[10px] text-[#7D938A] mt-1">
               Jika kosong, sidebar menampilkan Kode Tampil (contoh: DB).
             </p>
           </div>
@@ -563,7 +563,7 @@ export const ModuleManagementPage: React.FC = () => {
                 value={menuForm.actions}
                 onChange={(e) => setMenuForm({ ...menuForm, actions: e.target.value })}
                 placeholder="read, create, update, manage"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
             </div>
           )}

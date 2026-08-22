@@ -235,7 +235,7 @@ export const PermissionManagementPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-12 text-center text-xs font-bold text-[#8A9691]">
+      <div className="p-12 text-center text-xs font-bold text-[#7D938A]">
         Memuat katalog permission...
       </div>
     );
@@ -243,16 +243,16 @@ export const PermissionManagementPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#091D15] p-6 rounded-2xl border border-[#EBEFEB] dark:border-slate-800 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white  p-6 rounded-2xl border border-[#E3E8E4] dark:border-slate-800 shadow-xs">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F7EE] dark:bg-[#0B9D6D]/20 text-[#0B9D6D] text-xs font-bold border border-[#A3DBC8] mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F6EF] dark:bg-[#0F9D6E]/20 text-[#0F9D6E] text-xs font-bold border border-[#A5E4CB] mb-2">
             <KeyRound className="w-3.5 h-3.5" />
             <span>Master Permission CRUD + Assign Role</span>
           </div>
-          <h1 className="text-2xl font-black text-[#14271F] dark:text-white tracking-tight">
+          <h1 className="text-2xl font-black text-[#16211D] dark:text-white tracking-tight">
             Manajemen Permission
           </h1>
-          <p className="text-xs text-[#8A9691] font-medium mt-1">
+          <p className="text-xs text-[#7D938A] font-medium mt-1">
             Kelola aksi per menu (`read`, `create`, `manage`, dll.) dan tentukan role mana yang memilikinya.
           </p>
         </div>
@@ -268,20 +268,20 @@ export const PermissionManagementPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#091D15] p-4 rounded-2xl border border-[#EBEFEB] dark:border-slate-800 flex flex-col md:flex-row gap-3">
+      <div className="bg-white  p-4 rounded-2xl border border-[#E3E8E4] dark:border-slate-800 flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8A9691]" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#7D938A]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari kode, nama, aksi, atau menu..."
-            className="w-full pl-9 pr-3 py-2.5 text-xs border border-[#D4DBD6] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
+            className="w-full pl-9 pr-3 py-2.5 text-xs border border-[#DDE3DF] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
           />
         </div>
         <select
           value={filterModulId}
           onChange={(e) => setFilterModulId(e.target.value)}
-          className="md:w-64 p-2.5 text-xs border border-[#D4DBD6] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
+          className="md:w-64 p-2.5 text-xs border border-[#DDE3DF] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
         >
           <option value="all">Semua Modul</option>
           {modules.map((modul) => (
@@ -292,10 +292,10 @@ export const PermissionManagementPage: React.FC = () => {
         </select>
       </div>
 
-      <div className="bg-white dark:bg-[#091D15] rounded-2xl border border-[#EBEFEB] dark:border-slate-800 overflow-hidden">
+      <div className="bg-white  rounded-2xl border border-[#E3E8E4] dark:border-slate-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
-            <thead className="bg-[#F3F6F4] dark:bg-slate-900 text-[#8A9691] uppercase tracking-wider">
+            <thead className="bg-[#F3F6F4] dark:bg-slate-900 text-[#7D938A] uppercase tracking-wider">
               <tr>
                 <th className="text-left font-extrabold px-4 py-3">Permission</th>
                 <th className="text-left font-extrabold px-4 py-3">Menu / Modul</th>
@@ -307,39 +307,39 @@ export const PermissionManagementPage: React.FC = () => {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-[#8A9691]">
+                  <td colSpan={5} className="px-4 py-10 text-center text-[#7D938A]">
                     Tidak ada permission yang cocok.
                   </td>
                 </tr>
               ) : (
                 filtered.map((row) => (
-                  <tr key={row.id} className="border-t border-[#EBEFEB] dark:border-slate-800">
+                  <tr key={row.id} className="border-t border-[#E3E8E4] dark:border-slate-800">
                     <td className="px-4 py-3">
-                      <div className="font-mono font-bold text-[#0B9D6D]">{row.kodePermission}</div>
-                      <div className="text-[#14271F] dark:text-white font-semibold mt-0.5">
+                      <div className="font-mono font-bold text-[#0F9D6E]">{row.kodePermission}</div>
+                      <div className="text-[#16211D] dark:text-white font-semibold mt-0.5">
                         {row.namaPermission}
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-bold text-[#14271F] dark:text-white">
+                      <div className="font-bold text-[#16211D] dark:text-white">
                         {row.menu?.namaMenu || '-'}
                       </div>
-                      <div className="text-[#8A9691]">{row.menu?.modul?.namaModul || '-'}</div>
+                      <div className="text-[#7D938A]">{row.menu?.modul?.namaModul || '-'}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="px-2 py-1 rounded-lg bg-[#E6F7EE] text-[#0B9D6D] font-black uppercase">
+                      <span className="px-2 py-1 rounded-lg bg-[#E6F6EF] text-[#0F9D6E] font-black uppercase">
                         {row.aksi}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
                         {(row.rolePermissions || []).length === 0 ? (
-                          <span className="text-[#8A9691] italic">Belum di-assign</span>
+                          <span className="text-[#7D938A] italic">Belum di-assign</span>
                         ) : (
                           (row.rolePermissions || []).map((rp) => (
                             <span
                               key={rp.role.id}
-                              className="px-2 py-0.5 rounded-md bg-[#091D15] text-[#A3DBC8] text-[10px] font-bold"
+                              className="px-2 py-0.5 rounded-md bg-[#0D1714] text-[#A5E4CB] text-[10px] font-bold"
                             >
                               {rp.role.kodeRole}
                             </span>
@@ -369,7 +369,7 @@ export const PermissionManagementPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-        <div className="px-4 py-3 border-t border-[#EBEFEB] dark:border-slate-800 text-[11px] text-[#8A9691]">
+        <div className="px-4 py-3 border-t border-[#E3E8E4] dark:border-slate-800 text-[11px] text-[#7D938A]">
           Menampilkan {filtered.length} dari {permissions.length} permission
         </div>
       </div>
@@ -392,7 +392,7 @@ export const PermissionManagementPage: React.FC = () => {
                 setNamaManual(false);
                 handleMenuOrAksiChange({ menuId: e.target.value });
               }}
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 disabled:opacity-60"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 disabled:opacity-60"
             >
               {allMenus.map((menu) => (
                 <option key={menu.id} value={menu.id}>
@@ -411,7 +411,7 @@ export const PermissionManagementPage: React.FC = () => {
                   setNamaManual(false);
                   handleMenuOrAksiChange({ aksi: e.target.value });
                 }}
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 font-mono"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 font-mono"
               >
                 {PERMISSION_ACTIONS.map((action) => (
                   <option key={action.value} value={action.value}>
@@ -430,7 +430,7 @@ export const PermissionManagementPage: React.FC = () => {
                 value={form.kodePermission}
                 readOnly
                 placeholder="otomatis: menu.aksi"
-                className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 rounded-xl bg-[#F3F6F4] dark:bg-slate-900 font-mono text-[#8A9691]"
+                className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 rounded-xl bg-[#F3F6F4] dark:bg-slate-900 font-mono text-[#7D938A]"
               />
             </div>
           </div>
@@ -444,9 +444,9 @@ export const PermissionManagementPage: React.FC = () => {
                 setForm({ ...form, namaPermission: e.target.value });
               }}
               placeholder="Otomatis dari Menu + Aksi"
-              className="w-full p-2.5 border border-[#D4DBD6] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800"
             />
-            <p className="text-[10px] text-[#8A9691] mt-1">
+            <p className="text-[10px] text-[#7D938A] mt-1">
               Terisi otomatis dari Menu + Aksi. Boleh diubah manual jika perlu.
             </p>
           </div>
@@ -469,7 +469,7 @@ export const PermissionManagementPage: React.FC = () => {
         maxWidth="md"
       >
         <div className="space-y-4 text-xs">
-          <p className="text-[#8A9691]">
+          <p className="text-[#7D938A]">
             Centang role yang boleh memiliki permission ini. Perubahan langsung menimpa daftar role untuk
             permission terpilih.
           </p>
@@ -481,19 +481,19 @@ export const PermissionManagementPage: React.FC = () => {
                   key={role.id}
                   className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer ${
                     checked
-                      ? 'border-[#0B9D6D] bg-[#E6F7EE] dark:bg-[#0B9D6D]/20'
-                      : 'border-[#D4DBD6] dark:border-slate-700'
+                      ? 'border-[#0F9D6E] bg-[#E6F6EF] dark:bg-[#0F9D6E]/20'
+                      : 'border-[#DDE3DF] dark:border-slate-700'
                   }`}
                 >
                   <div>
-                    <div className="font-black text-[#14271F] dark:text-white">{role.namaRole}</div>
-                    <div className="font-mono text-[#0B9D6D]">{role.kodeRole}</div>
+                    <div className="font-black text-[#16211D] dark:text-white">{role.namaRole}</div>
+                    <div className="font-mono text-[#0F9D6E]">{role.kodeRole}</div>
                   </div>
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleRole(role.id)}
-                    className="accent-[#0B9D6D]"
+                    className="accent-[#0F9D6E]"
                   />
                 </label>
               );

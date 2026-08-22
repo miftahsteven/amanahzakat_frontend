@@ -50,7 +50,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-[#091D15] font-sans selection:bg-[#0B9D6D] selection:text-white relative overflow-hidden">
+    <div className="min-h-screen w-full flex bg-[#091D15] font-sans selection:bg-[#0F9D6E] selection:text-white relative overflow-hidden">
       
       {/* LEFT SIDE: Brand Showcase with Real Zakat Office Background */}
       <div className="hidden lg:flex lg:w-7/12 relative flex-col justify-between p-12 overflow-hidden">
@@ -60,21 +60,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           style={{ backgroundImage: `url('/assets/zakat-office-bg.png')` }}
         />
         {/* Dark Emerald & Mint Glass Overlay for maximum legibility & brand alignment */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#091D15]/95 via-[#091D15]/80 to-[#0B9D6D]/45 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#091D15]/95 via-[#091D15]/80 to-[#0F9D6E]/45 backdrop-blur-[2px]" />
 
         {/* Decorative Light Glow Accent */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#0B9D6D]/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#0F9D6E]/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-[#C8933B]/20 rounded-full blur-3xl pointer-events-none" />
 
         {/* Top Header Logo */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-[#0B9D6D] text-white flex items-center justify-center font-black text-2xl shadow-xl border border-white/20">
+            <div className="w-12 h-12 rounded-2xl bg-[#0F9D6E] text-white flex items-center justify-center font-black text-2xl shadow-xl border border-white/20">
               A
             </div>
             <div>
               <span className="text-2xl font-black text-white tracking-tight block">AmanahZakat</span>
-              <span className="text-xs font-bold text-[#A3DBC8] uppercase tracking-widest block">
+              <span className="text-xs font-bold text-[#A5E4CB] uppercase tracking-widest block">
                 Sistem ERP Lembaga Amil ZIS Indonesia
               </span>
             </div>
@@ -88,7 +88,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
         {/* Center Main Value Proposition */}
         <div className="relative z-10 my-auto max-w-xl space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C8933B]/20 border border-[#C8933B]/40 text-[#F7F0E0] text-xs font-bold backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C8933B]/20 border border-[#C8933B]/40 text-[#FDF5EA] text-xs font-bold backdrop-blur-sm">
             <Sparkles className="w-4 h-4 text-[#C8933B]" />
             <span>Digitalisasi Penyelenggaraan Zakat, Infak & Sedekah</span>
           </div>
@@ -97,36 +97,36 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             Kelola ZIS Lebih Transparan, Akuntabel & Sesuai Syariah
           </h1>
 
-          <p className="text-base text-[#D4DBD6] leading-relaxed font-normal">
+          <p className="text-base text-[#DDE3DF] leading-relaxed font-normal">
             Platform ERP Terpadu untuk Pelayanan Muzakki, Pendataan Mustahik 8 Asnaf, Akuntansi PSAK 109, serta Integrasi Ekspor SIMBA BAZNAS Nasional.
           </p>
 
           {/* Key Feature Badges Grid */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-white flex items-start gap-3 hover:bg-white/15 transition-all">
-              <div className="p-2 rounded-xl bg-[#0B9D6D]/40 text-[#A3DBC8] shrink-0">
+              <div className="p-2 rounded-xl bg-[#0F9D6E]/40 text-[#A5E4CB] shrink-0">
                 <FileCheck className="w-5 h-5" />
               </div>
               <div>
                 <h4 className="font-extrabold text-sm text-white">Standar PSAK 109</h4>
-                <p className="text-xs text-[#A3DBC8]">Pencatatan Jurnal & Laporan Keuangan ZIS Otomatis</p>
+                <p className="text-xs text-[#A5E4CB]">Pencatatan Jurnal & Laporan Keuangan ZIS Otomatis</p>
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-white flex items-start gap-3 hover:bg-white/15 transition-all">
-              <div className="p-2 rounded-xl bg-[#C8933B]/40 text-[#F7F0E0] shrink-0">
+              <div className="p-2 rounded-xl bg-[#C8933B]/40 text-[#FDF5EA] shrink-0">
                 <Award className="w-5 h-5" />
               </div>
               <div>
                 <h4 className="font-extrabold text-sm text-white">Integrasi SIMBA BAZNAS</h4>
-                <p className="text-xs text-[#D4DBD6]">Format Pelaporan Resmi Badan Amil Zakat Nasional</p>
+                <p className="text-xs text-[#DDE3DF]">Format Pelaporan Resmi Badan Amil Zakat Nasional</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Footer Info inside Office Backdrop */}
-        <div className="relative z-10 flex items-center justify-between border-t border-white/15 pt-6 text-xs text-[#A3DBC8]">
+        <div className="relative z-10 flex items-center justify-between border-t border-white/15 pt-6 text-xs text-[#A5E4CB]">
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-[#C8933B]" />
             <span>Kantor Pelayanan ZIS Kantor Pusat & Cabang Indonesia</span>
@@ -136,33 +136,33 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       </div>
 
       {/* RIGHT SIDE: Modern Clean Login Form */}
-      <div className="w-full lg:w-5/12 flex items-center justify-center p-6 md:p-12 bg-[#F3F6F4] dark:bg-[#091D15] relative">
+      <div className="w-full lg:w-5/12 flex items-center justify-center p-6 md:p-12 bg-[#F3F6F4]  relative">
         {/* Soft Background Accent Lines */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#0B9D6D]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#0F9D6E]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="w-full max-w-md space-y-8 relative z-10">
           
           {/* Mobile Logo View (Hidden on LG) */}
           <div className="lg:hidden flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#0B9D6D] text-white flex items-center justify-center font-black text-xl shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-[#0F9D6E] text-white flex items-center justify-center font-black text-xl shadow-md">
               A
             </div>
             <div>
-              <span className="text-xl font-black text-[#14271F] dark:text-white block">AmanahZakat</span>
-              <span className="text-[10px] font-bold text-[#0B9D6D] uppercase tracking-wider block">Lembaga Amil Zakat</span>
+              <span className="text-xl font-black text-[#16211D] dark:text-white block">AmanahZakat</span>
+              <span className="text-[10px] font-bold text-[#0F9D6E] uppercase tracking-wider block">Lembaga Amil Zakat</span>
             </div>
           </div>
 
           {/* Header Title */}
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#E6F7EE] dark:bg-[#0B9D6D]/20 text-[#0B9D6D] dark:text-[#A3DBC8] text-xs font-bold border border-[#A3DBC8]/50">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#E6F6EF] dark:bg-[#0F9D6E]/20 text-[#0F9D6E] dark:text-[#A5E4CB] text-xs font-bold border border-[#A5E4CB]/50">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Portal Masuk Petugas Amil & Pengelola</span>
             </div>
-            <h2 className="text-3xl font-black text-[#14271F] dark:text-white tracking-tight">
+            <h2 className="text-3xl font-black text-[#16211D] dark:text-white tracking-tight">
               Selamat Datang
             </h2>
-            <p className="text-xs text-[#8A9691] font-medium leading-relaxed">
+            <p className="text-xs text-[#7D938A] font-medium leading-relaxed">
               Silakan masukkan kredensial akun amil Anda untuk mengelola transaksi penerimaan, penyaluran, dan laporan keuangan ZIS.
             </p>
           </div>
@@ -172,11 +172,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             
             {/* Input Username / NIP */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-extrabold text-[#14271F] dark:text-slate-200">
+              <label className="block text-xs font-extrabold text-[#16211D] dark:text-slate-200">
                 Nama Pengguna / NIP Amil *
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8A9691]">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#7D938A]">
                   <User className="w-4 h-4" />
                 </div>
                 <input
@@ -185,7 +185,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Contoh: admin atau AML-2026-001"
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#14271F] border border-[#D4DBD6] dark:border-slate-700 rounded-xl text-xs text-[#14271F] dark:text-white placeholder-[#8A9691] focus:outline-none focus:ring-2 focus:ring-[#0B9D6D] focus:border-transparent transition-all font-medium"
+                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#16211D] border border-[#DDE3DF] dark:border-slate-700 rounded-xl text-xs text-[#16211D] dark:text-white placeholder-[#7D938A] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:border-transparent transition-all font-medium"
                 />
               </div>
             </div>
@@ -193,19 +193,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             {/* Input Password */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-extrabold text-[#14271F] dark:text-slate-200">
+                <label className="block text-xs font-extrabold text-[#16211D] dark:text-slate-200">
                   Kata Sandi *
                 </label>
                 <button
                   type="button"
                   onClick={() => toast.info('Sistem reset OTP dikirim ke email penanggung jawab amil.')}
-                  className="text-[11px] font-bold text-[#0B9D6D] hover:underline cursor-pointer"
+                  className="text-[11px] font-bold text-[#0F9D6E] hover:underline cursor-pointer"
                 >
                   Lupa Kata Sandi?
                 </button>
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8A9691]">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#7D938A]">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -214,12 +214,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-11 py-3 bg-white dark:bg-[#14271F] border border-[#D4DBD6] dark:border-slate-700 rounded-xl text-xs text-[#14271F] dark:text-white placeholder-[#8A9691] focus:outline-none focus:ring-2 focus:ring-[#0B9D6D] focus:border-transparent transition-all font-medium"
+                  className="w-full pl-10 pr-11 py-3 bg-white dark:bg-[#16211D] border border-[#DDE3DF] dark:border-slate-700 rounded-xl text-xs text-[#16211D] dark:text-white placeholder-[#7D938A] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:border-transparent transition-all font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#8A9691] hover:text-[#14271F] dark:hover:text-white transition-colors cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#7D938A] hover:text-[#16211D] dark:hover:text-white transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -233,14 +233,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-[#D4DBD6] text-[#0B9D6D] focus:ring-[#0B9D6D] accent-[#0B9D6D]"
+                  className="w-4 h-4 rounded border-[#DDE3DF] text-[#0F9D6E] focus:ring-[#0F9D6E] accent-[#0F9D6E]"
                 />
-                <span className="text-xs font-medium text-[#14271F] dark:text-slate-300">
+                <span className="text-xs font-medium text-[#16211D] dark:text-slate-300">
                   Ingat saya di perangkat ini
                 </span>
               </label>
 
-              <div className="flex items-center gap-1 text-[11px] font-bold text-[#0B9D6D]">
+              <div className="flex items-center gap-1 text-[11px] font-bold text-[#0F9D6E]">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>SSL 256-bit</span>
               </div>
@@ -250,7 +250,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#0B9D6D] to-[#091D15] hover:from-[#091D15] hover:to-[#0B9D6D] text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+              className="w-full py-3.5 px-4 rounded-xl bg-[#0F9D6E] hover:bg-[#0B7C56] text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
             >
               {isLoading ? (
                 <>
@@ -264,20 +264,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </>
               )}
             </button>
+
           </form>
 
           {/* Footer Security Badges */}
-          <div className="pt-6 border-t border-[#D4DBD6] dark:border-slate-800 text-center space-y-2">
-            <div className="flex items-center justify-center gap-4 text-[11px] font-extrabold text-[#8A9691]">
+          <div className="pt-6 border-t border-[#DDE3DF] dark:border-slate-800 text-center space-y-2">
+            <div className="flex items-center justify-center gap-4 text-[11px] font-extrabold text-[#7D938A]">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#0B9D6D]" /> BAZNAS Compliant
+                <ShieldCheck className="w-3.5 h-3.5 text-[#0F9D6E]" /> BAZNAS Compliant
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <KeyRound className="w-3.5 h-3.5 text-[#C8933B]" /> Standard Audit Syariah
               </span>
             </div>
-            <p className="text-[10px] text-[#8A9691]">
+            <p className="text-[10px] text-[#7D938A]">
               AmanahZakat ERP • Terdaftar & Diawasi Kementerian Agama RI & BAZNAS
             </p>
           </div>

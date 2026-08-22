@@ -43,78 +43,78 @@ export const BszPdfModal: React.FC<BszPdfModalProps> = ({ isOpen, onClose, data 
     >
       <div className="space-y-6">
         {/* Document Preview Box */}
-        <div className="p-6 bg-white border border-[#D4DBD6] rounded-2xl shadow-xs text-[#14271F] space-y-5 font-sans relative">
+        <div className="p-6 bg-white border border-[#DDE3DF] rounded-2xl shadow-xs text-[#16211D] space-y-5 font-sans relative">
           {/* Header Lembaga */}
-          <div className="flex items-center justify-between border-b pb-4 border-[#EBEFEB]">
+          <div className="flex items-center justify-between border-b pb-4 border-[#E3E8E4]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#0B9D6D] text-white flex items-center justify-center font-extrabold text-xl shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-[#0F9D6E] text-white flex items-center justify-center font-extrabold text-xl shadow-sm">
                 A
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-[#091D15] tracking-wide uppercase">Amanah Zakat</h2>
-                <p className="text-[11px] text-[#8A9691] font-medium">Lembaga Amil Zakat Nasional (LAZNAS) Izin Kemenag RI</p>
+                <h2 className="text-base font-extrabold text-[#0D1714] tracking-wide uppercase">Amanah Zakat</h2>
+                <p className="text-[11px] text-[#7D938A] font-medium">Lembaga Amil Zakat Nasional (LAZNAS) Izin Kemenag RI</p>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-[#E6F7EE] text-[#0B9D6D] border border-[#A3DBC8]">
+              <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-[#E6F6EF] text-[#0F9D6E] border border-[#A5E4CB]">
                 Resmi & Sah
               </span>
-              <p className="text-xs font-mono font-bold text-[#14271F] mt-1">{data.noKwitansi}</p>
+              <p className="text-xs font-mono font-bold text-[#16211D] mt-1">{data.noKwitansi}</p>
             </div>
           </div>
 
           {/* Title */}
           <div className="text-center py-2">
-            <h3 className="text-sm font-bold tracking-wider text-[#14271F] uppercase">TANDA TERIMA BUKTI SETOR ZAKAT (BSZ)</h3>
-            <p className="text-[11px] text-[#8A9691]">Dasar Pengurang Penghasilan Kena Pajak sesuai UU No. 23 Tahun 2011</p>
+            <h3 className="text-sm font-bold tracking-wider text-[#16211D] uppercase">TANDA TERIMA BUKTI SETOR ZAKAT (BSZ)</h3>
+            <p className="text-[11px] text-[#7D938A]">Dasar Pengurang Penghasilan Kena Pajak sesuai UU No. 23 Tahun 2011</p>
           </div>
 
           {/* Table Details */}
-          <div className="bg-[#F3F6F4] rounded-xl p-4 border border-[#D4DBD6] space-y-2.5 text-xs">
+          <div className="bg-[#F3F6F4] rounded-xl p-4 border border-[#DDE3DF] space-y-2.5 text-xs">
             <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#8A9691] font-medium">Tanggal Transaksi</span>
-              <span className="col-span-2 font-bold text-[#14271F]">{data.tanggal}</span>
+              <span className="text-[#7D938A] font-medium">Tanggal Transaksi</span>
+              <span className="col-span-2 font-bold text-[#16211D]">{data.tanggal}</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#8A9691] font-medium">Nama Muzakki</span>
-              <span className="col-span-2 font-bold text-[#14271F]">{data.muzakkiNama} ({data.muzakkiTipe})</span>
+              <span className="text-[#7D938A] font-medium">Nama Muzakki</span>
+              <span className="col-span-2 font-bold text-[#16211D]">{data.muzakkiNama} ({data.muzakkiTipe})</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#8A9691] font-medium">Jenis Akad ZIS</span>
-              <span className="col-span-2 font-bold text-[#0B9D6D]">{data.jenisZis}</span>
+              <span className="text-[#7D938A] font-medium">Jenis Akad ZIS</span>
+              <span className="col-span-2 font-bold text-[#0F9D6E]">{data.jenisZis}</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#8A9691] font-medium">Jumlah Setoran</span>
-              <span className="col-span-2 font-extrabold text-base text-[#14271F]">{formatRP(data.nominal)}</span>
+              <span className="text-[#7D938A] font-medium">Jumlah Setoran</span>
+              <span className="col-span-2 font-extrabold text-base text-[#16211D]">{formatRP(data.nominal)}</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#8A9691] font-medium">Kanal Pembayaran</span>
-              <span className="col-span-2 font-medium text-[#14271F]">{data.kanal}</span>
+              <span className="text-[#7D938A] font-medium">Kanal Pembayaran</span>
+              <span className="col-span-2 font-medium text-[#16211D]">{data.kanal}</span>
             </div>
             {data.catatan && (
               <div className="grid grid-cols-3 gap-2">
-                <span className="text-[#8A9691] font-medium">Keterangan</span>
-                <span className="col-span-2 italic text-[#14271F]">{data.catatan}</span>
+                <span className="text-[#7D938A] font-medium">Keterangan</span>
+                <span className="col-span-2 italic text-[#16211D]">{data.catatan}</span>
               </div>
             )}
           </div>
 
           {/* QR Verification & Sign Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#EBEFEB] text-xs">
+          <div className="flex items-center justify-between pt-4 border-t border-[#E3E8E4] text-xs">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#F3F6F4] rounded-xl border border-[#D4DBD6]">
-                <QrCode className="w-10 h-10 text-[#091D15]" />
+              <div className="p-2 bg-[#F3F6F4] rounded-xl border border-[#DDE3DF]">
+                <QrCode className="w-10 h-10 text-[#0D1714]" />
               </div>
               <div className="space-y-0.5">
-                <p className="font-bold text-[11px] text-[#14271F] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#0B9D6D]" /> Tanda Tangan Digital Sah
+                <p className="font-bold text-[11px] text-[#16211D] flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#0F9D6E]" /> Tanda Tangan Digital Sah
                 </p>
-                <p className="text-[10px] text-[#8A9691]">Scan QR untuk verifikasi keaslian via Sistem SIMBA</p>
+                <p className="text-[10px] text-[#7D938A]">Scan QR untuk verifikasi keaslian via Sistem SIMBA</p>
               </div>
             </div>
             <div className="text-center font-medium">
-              <p className="text-[10px] text-[#8A9691]">Bandung, {data.tanggal}</p>
-              <p className="font-bold text-[#14271F] mt-6">Divisi Amil Kasir Utama</p>
+              <p className="text-[10px] text-[#7D938A]">Bandung, {data.tanggal}</p>
+              <p className="font-bold text-[#16211D] mt-6">Divisi Amil Kasir Utama</p>
             </div>
           </div>
         </div>

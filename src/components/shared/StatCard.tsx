@@ -23,19 +23,19 @@ export const StatCard: React.FC<StatCardProps> = ({
   accentColor = 'emerald',
 }) => {
   const bgIcons = {
-    emerald: 'bg-[#E6F7EE] text-[#0B9D6D]',
-    blue: 'bg-[#E6F7EE] text-[#0B9D6D]',
-    amber: 'bg-[#F7F0E0] text-[#C8933B]',
-    purple: 'bg-[#F3F6F4] text-[#14271F]',
+    emerald: 'bg-[#E6F6EF] text-[#0F9D6E]',
+    blue: 'bg-[#E6F6EF] text-[#0F9D6E]',
+    amber: 'bg-[#FDF5EA] text-[#C8933B]',
+    purple: 'bg-[#F3F6F4] text-[#16211D]',
   };
 
   return (
     <Card className="relative p-5 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="space-y-1.5">
-          <p className="text-xs font-bold text-[#8A9691] dark:text-slate-400 uppercase tracking-wider">{title}</p>
-          <h2 className="text-2xl font-extrabold text-[#14271F] dark:text-slate-100 tracking-tight">{value}</h2>
-          {subtitle && <p className="text-xs text-[#8A9691] dark:text-slate-400 font-medium">{subtitle}</p>}
+          <p className="text-xs font-bold text-[#7D938A] dark:text-slate-400 uppercase tracking-wider">{title}</p>
+          <h2 className="text-2xl font-extrabold text-[#16211D] dark:text-slate-100 tracking-tight">{value}</h2>
+          {subtitle && <p className="text-xs text-[#7D938A] dark:text-slate-400 font-medium">{subtitle}</p>}
         </div>
         <div className={cn('p-3 rounded-xl shrink-0 font-bold', bgIcons[accentColor])}>
           {icon}
@@ -43,10 +43,10 @@ export const StatCard: React.FC<StatCardProps> = ({
       </div>
       {trend && (
         <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold">
-          <span className={trend.isPositive ? 'text-[#0B9D6D]' : 'text-rose-600'}>
+          <span className={trend.isPositive ? 'text-[#0F9D6E]' : 'text-rose-600'}>
             {trend.isPositive ? '↑' : '↓'} {trend.value}
           </span>
-          <span className="text-[#8A9691] font-normal">vs bulan lalu</span>
+          <span className="text-[#7D938A] font-normal">vs bulan lalu</span>
         </div>
       )}
     </Card>

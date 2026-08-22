@@ -46,15 +46,15 @@ export function DataTable<TData, TValue>({
   return (
     <Card className="shadow-xs">
       {/* Table Action Bar */}
-      <div className="p-4 border-b border-[#D4DBD6] dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#F3F6F4]/60 dark:bg-slate-900/40">
+      <div className="p-4 border-b border-[#DDE3DF] dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#F3F6F4]/60 dark:bg-slate-900/40">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8A9691]" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#7D938A]" />
           <input
             type="text"
             value={globalFilter ?? ''}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full pl-9 pr-4 py-2 text-xs border border-[#D4DBD6] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0B9D6D] text-[#14271F] dark:text-slate-200 font-medium"
+            className="w-full pl-9 pr-4 py-2 text-xs border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] text-[#16211D] dark:text-slate-200 font-medium"
           />
         </div>
         {actionButton && <div className="w-full sm:w-auto flex justify-end">{actionButton}</div>}
@@ -62,19 +62,19 @@ export function DataTable<TData, TValue>({
 
       {/* Responsive Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-[#14271F] dark:text-slate-300">
-          <thead className="bg-[#F3F6F4] dark:bg-slate-800/70 text-[#14271F] dark:text-slate-400 font-extrabold border-b border-[#D4DBD6] dark:border-slate-800">
+        <table className="w-full text-left text-xs text-[#16211D] dark:text-slate-300">
+          <thead className="bg-[#F3F6F4] dark:bg-slate-800/70 text-[#16211D] dark:text-slate-400 font-extrabold border-b border-[#DDE3DF] dark:border-slate-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 py-3.5 font-bold whitespace-nowrap uppercase tracking-wider text-[11px]">
                     {header.isPlaceholder ? null : (
                       <div
-                        className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1 hover:text-[#0B9D6D]' : ''}
+                        className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-1 hover:text-[#0F9D6E]' : ''}
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getCanSort() && <ArrowUpDown className="w-3 h-3 text-[#8A9691] shrink-0" />}
+                        {header.column.getCanSort() && <ArrowUpDown className="w-3 h-3 text-[#7D938A] shrink-0" />}
                       </div>
                     )}
                   </th>
@@ -82,12 +82,12 @@ export function DataTable<TData, TValue>({
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-[#EBEFEB] dark:divide-slate-800/60">
+          <tbody className="divide-y divide-[#E3E8E4] dark:divide-slate-800/60">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-[#E6F7EE]/40 dark:hover:bg-slate-800/50 transition-colors"
+                  className="hover:bg-[#E6F6EF]/40 dark:hover:bg-slate-800/50 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3.5 whitespace-nowrap">
@@ -98,7 +98,7 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="h-32 text-center text-[#8A9691] font-medium">
+                <td colSpan={columns.length} className="h-32 text-center text-[#7D938A] font-medium">
                   Tidak ada data yang ditemukan.
                 </td>
               </tr>
@@ -108,27 +108,27 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-4 border-t border-[#D4DBD6] dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8A9691] dark:text-slate-400">
+      <div className="p-4 border-t border-[#DDE3DF] dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7D938A] dark:text-slate-400">
         <div>
           Menampilkan{' '}
-          <span className="font-bold text-[#14271F] dark:text-slate-200">
+          <span className="font-bold text-[#16211D] dark:text-slate-200">
             {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
           </span>{' '}
           -{' '}
-          <span className="font-bold text-[#14271F] dark:text-slate-200">
+          <span className="font-bold text-[#16211D] dark:text-slate-200">
             {Math.min(
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length
             )}
           </span>{' '}
-          dari <span className="font-bold text-[#14271F] dark:text-slate-200">{table.getFilteredRowModel().rows.length}</span> total data
+          dari <span className="font-bold text-[#16211D] dark:text-slate-200">{table.getFilteredRowModel().rows.length}</span> total data
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="p-1.5 rounded-lg border border-[#D4DBD6] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="p-1.5 rounded-lg border border-[#DDE3DF] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -138,7 +138,7 @@ export function DataTable<TData, TValue>({
           <button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="p-1.5 rounded-lg border border-[#D4DBD6] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="p-1.5 rounded-lg border border-[#DDE3DF] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

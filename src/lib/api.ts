@@ -294,3 +294,150 @@ export const aclApi = {
     });
   },
 };
+
+// 4. CMS API Module (Content Management System)
+export const cmsApi = {
+  // Hero Sliders
+  async getHeroSliders() {
+    return apiFetch<any[]>('/cms/hero-sliders');
+  },
+  async createHeroSlider(data: any) {
+    return apiFetch<any>('/cms/hero-sliders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async updateHeroSlider(id: number, data: any) {
+    return apiFetch<any>(`/cms/hero-sliders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  async deleteHeroSlider(id: number) {
+    return apiFetch<any>(`/cms/hero-sliders/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Campaigns
+  async getCampaigns() {
+    return apiFetch<any[]>('/cms/campaigns');
+  },
+  async createCampaign(data: any) {
+    return apiFetch<any>('/cms/campaigns', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async updateCampaign(id: number, data: any) {
+    return apiFetch<any>(`/cms/campaigns/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  async deleteCampaign(id: number) {
+    return apiFetch<any>(`/cms/campaigns/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Distributions
+  async getDistributions() {
+    return apiFetch<any[]>('/cms/distributions');
+  },
+  async createDistribution(data: any) {
+    return apiFetch<any>('/cms/distributions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async updateDistribution(id: number, data: any) {
+    return apiFetch<any>(`/cms/distributions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  async deleteDistribution(id: number) {
+    return apiFetch<any>(`/cms/distributions/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Testimonials
+  async getTestimonials() {
+    return apiFetch<any[]>('/cms/testimonials');
+  },
+  async createTestimonial(data: any) {
+    return apiFetch<any>('/cms/testimonials', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async updateTestimonial(id: string, data: any) {
+    return apiFetch<any>(`/cms/testimonials/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  async deleteTestimonial(id: string) {
+    return apiFetch<any>(`/cms/testimonials/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // FAQs
+  async getFaqs() {
+    return apiFetch<any[]>('/cms/faqs');
+  },
+  async createFaq(data: any) {
+    return apiFetch<any>('/cms/faqs', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async updateFaq(id: string, data: any) {
+    return apiFetch<any>(`/cms/faqs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  async deleteFaq(id: string) {
+    return apiFetch<any>(`/cms/faqs/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Impact
+  async getImpact() {
+    return apiFetch<any>('/cms/impact');
+  },
+  async updateImpact(data: any) {
+    return apiFetch<any>('/cms/impact', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Assistance
+  async getAssistanceSubmissions() {
+    return apiFetch<any[]>('/cms/assistance');
+  },
+  async updateAssistanceStatus(id: string, data: { status: string; surveiNotes?: string }) {
+    return apiFetch<any>(`/cms/assistance/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Web Settings
+  async getWebSettings() {
+    return apiFetch<any>('/cms/settings');
+  },
+  async updateWebSettings(data: any) {
+    return apiFetch<any>('/cms/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
