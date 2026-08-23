@@ -25,7 +25,6 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import {
-  INITIAL_PROGRAM,
   INITIAL_MITRA,
   INITIAL_UPZ,
   INITIAL_KAMPANYE,
@@ -41,32 +40,6 @@ export interface GenericPageProps {
 }
 
 export const GenericPage: React.FC<GenericPageProps> = ({ screenId, onNavigate }) => {
-  // Render Program Page
-  if (screenId === 'program') {
-    const cols: ColumnDef<any, any>[] = [
-      { accessorKey: 'nama', header: 'Nama Program', cell: ({ row }: any) => <span className="font-bold text-[#16211D]">{row.getValue('nama')}</span> },
-      { accessorKey: 'pilar', header: 'Pilar ZIS', cell: ({ row }: any) => <Badge variant="emerald">{row.getValue('pilar')}</Badge> },
-      { accessorKey: 'paguAnggaran', header: 'Pagu Anggaran', cell: ({ row }: any) => <span className="font-semibold">{formatRP(row.getValue('paguAnggaran'))}</span> },
-      { accessorKey: 'terpakai', header: 'Realisasi Terpakai', cell: ({ row }: any) => <span className="font-bold text-[#0F9D6E]">{formatRP(row.getValue('terpakai'))}</span> },
-      { accessorKey: 'realisasiPenerima', header: 'Target vs Realisasi', cell: ({ row }: any) => <span>{row.original.realisasiPenerima} / {row.original.targetPenerima} Mustahik</span> },
-      { accessorKey: 'status', header: 'Status', cell: ({ row }: any) => <Badge statusText={row.getValue('status')} /> },
-    ];
-    return (
-      <div className="space-y-6 font-sans">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-[25px] font-extrabold text-[#16211D] flex items-center gap-2">
-              <FolderKanban className="w-6 h-6 text-[#0F9D6E]" /> Program 5 Pilar ZIS
-            </h1>
-            <p className="text-[13px] text-[#7D938A] mt-0.5">Pendidikan, Kesehatan, Ekonomi, Dakwah, dan Kemanusiaan</p>
-          </div>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => toast.success('Program ZIS Baru Ditambahkan')}>Buat Program Baru</Button>
-        </div>
-        <DataTable columns={cols} data={INITIAL_PROGRAM} searchPlaceholder="Cari program pilar..." />
-      </div>
-    );
-  }
-
   // Render Mitra Page
   if (screenId === 'mitra') {
     const cols: ColumnDef<any, any>[] = [

@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { cmsApi } from '../../lib/api';
+import { webPublicPageUrl } from '../../lib/media-url';
 
 export interface DistributionItem {
   id: number;
@@ -299,7 +300,7 @@ export const DistributionsManagementPage: React.FC = () => {
 
                 <div className="pt-3 border-t border-slate-100  flex items-center justify-between gap-2">
                   <a
-                    href={`http://localhost:3001/kabar-penyaluran/${item.slug}`}
+                    href={webPublicPageUrl(`/kabar-penyaluran/${item.slug}`)}
                     target="_blank"
                     rel="noreferrer"
                     className="text-[11px] font-bold text-[#0F9D6E] hover:underline flex items-center gap-1"

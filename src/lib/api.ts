@@ -535,3 +535,92 @@ export const muzakkiApi = {
   },
 };
 
+export const penyaluranApi = {
+  async list(asnaf?: string) {
+    const query = asnaf && asnaf !== 'Semua' ? `?asnaf=${encodeURIComponent(asnaf)}` : '';
+    return apiFetch<any[]>(`/penyaluran${query}`);
+  },
+  async listMustahik() {
+    return apiFetch<any[]>('/penyaluran/mustahik');
+  },
+  async listProgram() {
+    return apiFetch<any[]>('/penyaluran/program');
+  },
+  async create(data: {
+    mustahikId: string;
+    programId: string;
+    asnaf: string;
+    nominal: number;
+    metodePembayaran: string;
+    keterangan: string;
+  }) {
+    return apiFetch<any>('/penyaluran', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async disburse(id: string) {
+    return apiFetch<any>(`/penyaluran/${id}/disburse`, {
+      method: 'PATCH',
+    });
+  },
+};
+
+export const mustahikApi = {
+  async list(asnaf?: string) {
+    const query = asnaf && asnaf !== 'Semua' ? `?asnaf=${encodeURIComponent(asnaf)}` : '';
+    return apiFetch<any[]>(`/mustahik${query}`);
+  },
+  async create(data: {
+    nik: string;
+    nama: string;
+    kategoriAsnaf: string;
+    hp: string;
+    alamat: string;
+    pekerjaan: string;
+    jumlahTanggungan: number;
+    penghasilanBulanan: number;
+    rekeningBank: string;
+  }) {
+    return apiFetch<any>('/mustahik', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
+export const programApi = {
+  async list() {
+    return apiFetch<any[]>('/program');
+  },
+  async create(data: {
+    nama: string;
+    pilar: string;
+    paguAnggaran: number;
+    targetPenerima: number;
+    penanggungJawab: string;
+    status?: string;
+  }) {
+    return apiFetch<any>('/program', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async update(
+    id: string,
+    data: Partial<{
+      nama: string;
+      pilar: string;
+      paguAnggaran: number;
+      targetPenerima: number;
+      penanggungJawab: string;
+      status: string;
+    }>,
+  ) {
+    return apiFetch<any>(`/program/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+};
+

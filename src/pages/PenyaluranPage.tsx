@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { TransaksiPenyaluran, Asnaf } from '../types/zis';
-import { INITIAL_PENYALURAN, INITIAL_MUSTAHIK, INITIAL_PROGRAM } from '../mock/mockData';
+import { TransaksiPenyaluran, Asnaf, Mustahik } from '../types/zis';
+import { ProgramZis } from '../types/system';
 import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Plus, ArrowUpRight } from 'lucide-react';
+import { Plus, ArrowUpRight, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { penyaluranApi } from '../lib/api';
 
 export interface PenyaluranPageProps {
   onNavigate: (screen: string) => void;
@@ -29,10 +30,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onNavigate, onSelectSalur }) => {
-  const [dataList, setDataList] = useState<TransaksiPenyaluran[]>(INITIAL_PENYALURAN);
+export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur }) => {
+  const [dataList, setDataList] = useState<TransaksiPenyaluran[]>([]);
+  const [mustahikList, setMustahikList] = useState<Mustahik[]>([]);
+  const [programList, setProgramList] = useState<ProgramZis[]>([]);
   const [filterAsnaf, setFilterAsnaf] = useState<string>('Semua');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -48,46 +53,54 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onNavigate, onSe
     },
   });
 
-  const filteredData = dataList.filter((item) => {
-    if (filterAsnaf === 'Semua') return true;
-    return item.asnaf === filterAsnaf;
-  });
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [rows, mustahik, programs] = await Promise.all([
+        penyaluranApi.list(filterAsnaf),
+        penyaluranApi.listMustahik(),
+        penyaluranApi.listProgram(),
+      ]);
+      setDataList(rows);
+      setMustahikList(mustahik);
+      setProgramList(programs);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal memuat data penyaluran');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filterAsnaf]);
 
-  const onSubmit = (values: FormValues) => {
-    const selectedMustahik = INITIAL_MUSTAHIK.find((m) => m.id === values.mustahikId);
-    const selectedProgram = INITIAL_PROGRAM.find((p) => p.id === values.programId);
-    const potonganAmil = Math.round(values.nominal * 0.075);
-    const danaMustahik = values.nominal - potonganAmil;
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-    const newSalur: TransaksiPenyaluran = {
-      id: String(dataList.length + 1),
-      noPenyaluran: `SLR/2026/08/${String(dataList.length + 1).padStart(3, '0')}`,
-      tanggal: new Date().toISOString().split('T')[0],
-      mustahikId: values.mustahikId,
-      mustahikNama: selectedMustahik ? selectedMustahik.nama : 'Mustahik Terdaftar',
-      asnaf: values.asnaf as Asnaf,
-      programId: values.programId,
-      programNama: selectedProgram ? selectedProgram.nama : 'Program Bantuan',
-      nominal: values.nominal,
-      status: 'Siap Bayar',
-      metodePembayaran: values.metodePembayaran,
-      rekeningTujuan: selectedMustahik ? selectedMustahik.rekeningBank : 'BSI 7123456789',
-      keterangan: values.keterangan,
-      potonganAmil,
-      danaMustahik,
-    };
-
-    setDataList([newSalur, ...dataList]);
-    toast.success(`Pengajuan Penyaluran ${newSalur.noPenyaluran} berhasil dibuat & masuk antrean pembayaran!`);
-    reset();
-    setIsCreateModalOpen(false);
+  const onSubmit = async (values: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      const created = await penyaluranApi.create(values);
+      setDataList((prev) => [created, ...prev]);
+      toast.success(`Pengajuan Penyaluran ${created.noPenyaluran} berhasil dibuat & masuk antrean pembayaran!`);
+      reset();
+      setIsCreateModalOpen(false);
+      penyaluranApi.listMustahik().then(setMustahikList);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menyimpan pengajuan penyaluran');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSalurkan = (id: string) => {
-    setDataList(
-      dataList.map((item) => (item.id === id ? { ...item, status: 'Sudah Tersalurkan' } : item))
-    );
-    toast.success('Penyaluran dana ZIS ke Mustahik telah berhasil dikirim!');
+  const handleSalurkan = async (id: string) => {
+    try {
+      const updated = await penyaluranApi.disburse(id);
+      setDataList((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      toast.success('Penyaluran dana ZIS ke Mustahik telah berhasil dikirim!');
+      penyaluranApi.listMustahik().then(setMustahikList);
+      penyaluranApi.listProgram().then(setProgramList);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mencairkan penyaluran');
+    }
   };
 
   const columns: ColumnDef<TransaksiPenyaluran, any>[] = [
@@ -156,24 +169,31 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onNavigate, onSe
 
   return (
     <div className="space-y-6">
-      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <ArrowUpRight className="w-6 h-6 text-blue-600" /> Penyaluran ZIS 8 Asnaf
           </h1>
-          <p className="text-xs text-slate-500">Distribusi dana zakat, infak, dan sedekah tepat sasaran sesuai syariah</p>
+          <p className="text-xs text-slate-500">
+            Distribusi dana zakat, infak, dan sedekah tepat sasaran sesuai syariah
+            {!isLoading && ` — Total: ${dataList.length} transaksi`}
+          </p>
         </div>
-        <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-          Buat Penyaluran Baru
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
+            Refresh
+          </Button>
+          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
+            Buat Penyaluran Baru
+          </Button>
+        </div>
       </div>
 
-      {/* Tabs Filter 8 Asnaf */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-semibold">
         {['Semua', 'Fakir', 'Miskin', 'Amil', 'Mualaf', 'Riqab', 'Gharim', 'Fisabilillah', 'Ibnus Sabil'].map((tab) => (
           <button
             key={tab}
+            type="button"
             onClick={() => setFilterAsnaf(tab)}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               filterAsnaf === tab
@@ -186,10 +206,12 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onNavigate, onSe
         ))}
       </div>
 
-      {/* DataTable */}
-      <DataTable columns={columns} data={filteredData} searchPlaceholder="Cari no penyaluran, program, atau mustahik..." />
+      {isLoading ? (
+        <div className="py-16 text-center text-sm text-slate-500">Memuat data penyaluran...</div>
+      ) : (
+        <DataTable columns={columns} data={dataList} searchPlaceholder="Cari no penyaluran, program, atau mustahik..." />
+      )}
 
-      {/* Create Penyaluran Modal (RHF + Zod) */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -205,7 +227,7 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onNavigate, onSe
               className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e]"
             >
               <option value="">-- Pilih Mustahik Terverifikasi --</option>
-              {INITIAL_MUSTAHIK.map((m) => (
+              {mustahikList.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.nama} ({m.kategoriAsnaf}) - NIK: {m.nik}
                 </option>
@@ -239,7 +261,7 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onNavigate, onSe
                 className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e]"
               >
                 <option value="">-- Pilih Program --</option>
-                {INITIAL_PROGRAM.map((p) => (
+                {programList.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nama} ({p.pilar})
                   </option>
@@ -287,8 +309,8 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onNavigate, onSe
             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
               Batal
             </Button>
-            <Button type="submit" variant="primary">
-              Ajukan Penyaluran
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Menyimpan...' : 'Ajukan Penyaluran'}
             </Button>
           </div>
         </form>

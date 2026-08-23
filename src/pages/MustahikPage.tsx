@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Mustahik, Asnaf } from '../types/zis';
-import { INITIAL_MUSTAHIK } from '../mock/mockData';
 import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { HeartHandshake, Plus, ShieldCheck } from 'lucide-react';
+import { HeartHandshake, Plus, ShieldCheck, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { mustahikApi } from '../lib/api';
 
 export interface MustahikPageProps {
   onNavigate: (screen: string) => void;
@@ -32,9 +32,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelectMustahik }) => {
-  const [dataList, setDataList] = useState<Mustahik[]>(INITIAL_MUSTAHIK);
+export const MustahikPage: React.FC<MustahikPageProps> = ({ onSelectMustahik }) => {
+  const [dataList, setDataList] = useState<Mustahik[]>([]);
+  const [filterAsnaf, setFilterAsnaf] = useState<string>('Semua');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -50,34 +53,37 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelect
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    // Check NIK duplicate
-    const exists = dataList.some((m) => m.nik === values.nik);
-    if (exists) {
-      toast.error('NIK sudah terdaftar di database Mustahik! Indikasi penerima ganda.');
-      return;
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const rows = await mustahikApi.list(filterAsnaf);
+      setDataList(rows);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal memuat data mustahik');
+    } finally {
+      setIsLoading(false);
     }
+  }, [filterAsnaf]);
 
-    const newMustahik: Mustahik = {
-      id: String(dataList.length + 1),
-      nik: values.nik,
-      nama: values.nama,
-      kategoriAsnaf: values.kategoriAsnaf as Asnaf,
-      hp: values.hp,
-      alamat: values.alamat,
-      pekerjaan: values.pekerjaan,
-      jumlahTanggungan: values.jumlahTanggungan,
-      penghasilanBulanan: values.penghasilanBulanan,
-      rekeningBank: values.rekeningBank,
-      statusSurvei: 'Terverifikasi',
-      skorKelayakan: 88,
-      totalBantuanDiterima: 0,
-    };
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-    setDataList([newMustahik, ...dataList]);
-    toast.success(`Mustahik ${newMustahik.nama} (NIK ${newMustahik.nik}) berhasil diverifikasi & terdaftar!`);
-    reset();
-    setIsCreateModalOpen(false);
+  const onSubmit = async (values: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      const created = await mustahikApi.create(values);
+      setDataList((prev) => [created, ...prev]);
+      toast.success(
+        `Mustahik ${created.nama} berhasil terdaftar — Skor kelayakan: ${created.skorKelayakan}/100`,
+      );
+      reset();
+      setIsCreateModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mendaftarkan mustahik');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const columns: ColumnDef<Mustahik, any>[] = [
@@ -99,7 +105,9 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelect
       cell: ({ row }: any) => (
         <div>
           <div className="font-bold text-slate-800 dark:text-slate-200">{row.getValue('nama')}</div>
-          <div className="text-[10px] text-slate-400">{row.original.pekerjaan} ({row.original.jumlahTanggungan} tanggungan)</div>
+          <div className="text-[10px] text-slate-400">
+            {row.original.pekerjaan} ({row.original.jumlahTanggungan} tanggungan)
+          </div>
         </div>
       ),
     },
@@ -111,7 +119,11 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelect
     {
       accessorKey: 'penghasilanBulanan',
       header: 'Penghasilan / Bln',
-      cell: ({ row }: any) => <span className="font-semibold text-slate-700 dark:text-slate-300">{formatRP(row.getValue('penghasilanBulanan'))}</span>,
+      cell: ({ row }: any) => (
+        <span className="font-semibold text-slate-700 dark:text-slate-300">
+          {formatRP(row.getValue('penghasilanBulanan'))}
+        </span>
+      ),
     },
     {
       accessorKey: 'skorKelayakan',
@@ -126,7 +138,9 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelect
     {
       accessorKey: 'totalBantuanDiterima',
       header: 'Total Bantuan',
-      cell: ({ row }: any) => <span className="font-extrabold text-blue-600">{formatRP(row.getValue('totalBantuanDiterima'))}</span>,
+      cell: ({ row }: any) => (
+        <span className="font-extrabold text-blue-600">{formatRP(row.getValue('totalBantuanDiterima'))}</span>
+      ),
     },
     {
       accessorKey: 'statusSurvei',
@@ -137,23 +151,49 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelect
 
   return (
     <div className="space-y-6">
-      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <HeartHandshake className="w-6 h-6 text-blue-600" /> Database Mustahik (Penerima Manfaat)
           </h1>
-          <p className="text-xs text-slate-500">Database penerima zakat terverifikasi NIK KTP & survei kelayakan lapangan</p>
+          <p className="text-xs text-slate-500">
+            Database penerima zakat terverifikasi NIK KTP & survei kelayakan lapangan
+            {!isLoading && ` — Total: ${dataList.length} mustahik`}
+          </p>
         </div>
-        <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-          Tambah Mustahik Baru
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
+            Refresh
+          </Button>
+          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
+            Tambah Mustahik Baru
+          </Button>
+        </div>
       </div>
 
-      {/* DataTable */}
-      <DataTable columns={columns} data={dataList} searchPlaceholder="Cari NIK, nama mustahik, pekerjaan, atau asnaf..." />
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-semibold">
+        {['Semua', 'Fakir', 'Miskin', 'Amil', 'Mualaf', 'Riqab', 'Gharim', 'Fisabilillah', 'Ibnus Sabil'].map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setFilterAsnaf(tab)}
+            className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
+              filterAsnaf === tab
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
 
-      {/* Create Mustahik Modal */}
+      <DataTable
+        columns={columns}
+        data={dataList}
+        searchPlaceholder="Cari NIK, nama mustahik, pekerjaan, atau asnaf..."
+      />
+
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -181,14 +221,13 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelect
                 {...register('kategoriAsnaf')}
                 className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e]"
               >
-                <option value="Fakir">Fakir</option>
-                <option value="Miskin">Miskin</option>
-                <option value="Amil">Amil</option>
-                <option value="Mualaf">Mualaf</option>
-                <option value="Riqab">Riqab</option>
-                <option value="Gharim">Gharim</option>
-                <option value="Fisabilillah">Fisabilillah</option>
-                <option value="Ibnus Sabil">Ibnus Sabil</option>
+                {(['Fakir', 'Miskin', 'Amil', 'Mualaf', 'Riqab', 'Gharim', 'Fisabilillah', 'Ibnus Sabil'] as Asnaf[]).map(
+                  (a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ),
+                )}
               </select>
             </div>
           </div>
@@ -276,8 +315,8 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onNavigate, onSelect
             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
               Batal
             </Button>
-            <Button type="submit" variant="primary">
-              Simpan Mustahik
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Mustahik'}
             </Button>
           </div>
         </form>
