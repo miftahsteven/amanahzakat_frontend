@@ -487,3 +487,32 @@ export const cmsApi = {
   },
 };
 
+export const penerimaanApi = {
+  async list(jenisZis?: string) {
+    const query = jenisZis && jenisZis !== 'Semua' ? `?jenisZis=${encodeURIComponent(jenisZis)}` : '';
+    return apiFetch<any[]>(`/penerimaan${query}`);
+  },
+  async listMuzakki() {
+    return apiFetch<any[]>('/penerimaan/muzakki');
+  },
+  async create(data: {
+    muzakkiId: string;
+    jenisZis: string;
+    nominal: number;
+    kanal: string;
+    rekeningTujuan?: string;
+    catatan?: string;
+    programNama?: string;
+  }) {
+    return apiFetch<any>('/penerimaan', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async verify(id: string) {
+    return apiFetch<any>(`/penerimaan/${id}/verify`, {
+      method: 'PATCH',
+    });
+  },
+};
+

@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { TransaksiPenerimaan, JenisZis } from '../types/zis';
-import { INITIAL_PENERIMAAN, INITIAL_MUZAKKI } from '../mock/mockData';
+import { TransaksiPenerimaan, JenisZis, Muzakki } from '../types/zis';
 import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { BszPdfModal } from '../components/shared/BszPdfModal';
-import { Plus, Printer, CheckCircle, FileText, ArrowDownLeft } from 'lucide-react';
+import { Plus, Printer, CheckCircle, FileText, ArrowDownLeft, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { penerimaanApi } from '../lib/api';
 
 export interface PenerimaanPageProps {
   onNavigate: (screen: string) => void;
@@ -29,11 +29,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSelectTrx }) => {
-  const [dataList, setDataList] = useState<TransaksiPenerimaan[]>(INITIAL_PENERIMAAN);
+export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onSelectTrx }) => {
+  const [dataList, setDataList] = useState<TransaksiPenerimaan[]>([]);
+  const [muzakkiList, setMuzakkiList] = useState<Muzakki[]>([]);
   const [filterJenis, setFilterJenis] = useState<string>('Semua');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedBszData, setSelectedBszData] = useState<TransaksiPenerimaan | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -49,39 +52,55 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
     },
   });
 
-  const filteredData = dataList.filter((item) => {
-    if (filterJenis === 'Semua') return true;
-    return item.jenisZis === filterJenis;
-  });
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [rows, muzakki] = await Promise.all([
+        penerimaanApi.list(filterJenis),
+        penerimaanApi.listMuzakki(),
+      ]);
+      setDataList(rows);
+      setMuzakkiList(muzakki);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal memuat data penerimaan ZIS');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filterJenis]);
 
-  const onSubmit = (values: FormValues) => {
-    const selectedMuzakki = INITIAL_MUZAKKI.find((m) => m.id === values.muzakkiId);
-    const newTrx: TransaksiPenerimaan = {
-      id: String(dataList.length + 1),
-      noKwitansi: `KWT/2026/08/${String(dataList.length + 1).padStart(3, '0')}`,
-      tanggal: new Date().toISOString().split('T')[0],
-      muzakkiId: values.muzakkiId,
-      muzakkiNama: selectedMuzakki ? selectedMuzakki.nama : 'Muzakki umum',
-      muzakkiTipe: selectedMuzakki ? selectedMuzakki.tipe : 'Perorangan',
-      jenisZis: values.jenisZis as JenisZis,
-      nominal: values.nominal,
-      kanal: values.kanal,
-      rekeningTujuan: 'BSI 7001234567 (Zakat Maal)',
-      status: 'Terverifikasi',
-      catatan: values.catatan,
-    };
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-    setDataList([newTrx, ...dataList]);
-    toast.success(`Transaksi Penerimaan ZIS ${newTrx.noKwitansi} berhasil dicatat & diverifikasi!`);
-    reset();
-    setIsCreateModalOpen(false);
+  const onSubmit = async (values: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      const created = await penerimaanApi.create({
+        muzakkiId: values.muzakkiId,
+        jenisZis: values.jenisZis,
+        nominal: values.nominal,
+        kanal: values.kanal,
+        catatan: values.catatan,
+      });
+      setDataList((prev) => [created, ...prev]);
+      toast.success(`Transaksi Penerimaan ZIS ${created.noKwitansi} berhasil dicatat!`);
+      reset();
+      setIsCreateModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menyimpan penerimaan ZIS');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleVerifikasi = (id: string) => {
-    setDataList(
-      dataList.map((item) => (item.id === id ? { ...item, status: 'Terverifikasi' } : item))
-    );
-    toast.success('Penerimaan ZIS berhasil diverifikasi bank!');
+  const handleVerifikasi = async (id: string) => {
+    try {
+      const updated = await penerimaanApi.verify(id);
+      setDataList((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      toast.success('Penerimaan ZIS berhasil diverifikasi bank!');
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal verifikasi penerimaan');
+    }
   };
 
   const columns: ColumnDef<TransaksiPenerimaan, any>[] = [
@@ -153,7 +172,6 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
 
   return (
     <div className="space-y-6">
-      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-[#16211D] dark:text-slate-100 flex items-center gap-2">
@@ -161,12 +179,16 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
           </h1>
           <p className="text-xs text-[#7D938A]">Pencatatan setoran masuk Zakat, Infak, Shodaqoh, dan Bukti Setor Zakat (BSZ)</p>
         </div>
-        <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-          Catat Penerimaan Baru
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
+            Muat Ulang
+          </Button>
+          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
+            Catat Penerimaan Baru
+          </Button>
+        </div>
       </div>
 
-      {/* Tabs Filter */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-semibold">
         {['Semua', 'Zakat Maal', 'Zakat Profesi', 'Zakat Fitrah', 'Infak', 'Shodaqoh'].map((tab) => (
           <button
@@ -183,10 +205,12 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
         ))}
       </div>
 
-      {/* DataTable */}
-      <DataTable columns={columns} data={filteredData} searchPlaceholder="Cari kwitansi atau nama muzakki..." />
+      {isLoading ? (
+        <div className="py-16 text-center text-sm text-[#7D938A]">Memuat data penerimaan dari server...</div>
+      ) : (
+        <DataTable columns={columns} data={dataList} searchPlaceholder="Cari kwitansi atau nama muzakki..." />
+      )}
 
-      {/* Create Transaction Modal Form (RHF + Zod) */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -202,7 +226,7 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
               className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E]"
             >
               <option value="">-- Pilih Muzakki Terdaftar --</option>
-              {INITIAL_MUZAKKI.map((m) => (
+              {muzakkiList.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.nama} ({m.tipe}) - {m.nomor}
                 </option>
@@ -269,14 +293,13 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onNavigate, onSe
             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
               Batal
             </Button>
-            <Button type="submit" variant="primary">
-              Simpan Penerimaan
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Penerimaan'}
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* BSZ Generator Modal */}
       <BszPdfModal isOpen={!!selectedBszData} onClose={() => setSelectedBszData(null)} data={selectedBszData} />
     </div>
   );
