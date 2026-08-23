@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { cmsApi } from '../../lib/api';
+import { resolveMediaUrl, webPublicPageUrl } from '../../lib/media-url';
 
 export interface CampaignItem {
   id: number;
@@ -370,16 +371,14 @@ export const CampaignsManagementPage: React.FC = () => {
                 <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={camp.imageUrl}
+                    src={resolveMediaUrl(camp.imageUrl)}
                     alt={camp.nama}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       if (!target.dataset.triedFallback) {
                         target.dataset.triedFallback = '1';
-                        target.src = 'http://localhost:3001' + (camp.imageUrl.startsWith('/') ? camp.imageUrl : '/' + camp.imageUrl);
-                      } else {
-                        target.src = '/images/campaigns/sumur-sumba.jpg';
+                        target.src = resolveMediaUrl('/images/campaigns/sumur-sumba.jpg');
                       }
                     }}
                   />
@@ -470,7 +469,7 @@ export const CampaignsManagementPage: React.FC = () => {
                   {/* Footer Action Buttons */}
                   <div className="pt-2 border-t border-[#E3E8E4] flex items-center justify-between gap-2">
                     <a
-                      href={`http://localhost:3001/kampanye/${camp.slug}`}
+                      href={webPublicPageUrl(`/kampanye/${camp.slug}`)}
                       target="_blank"
                       rel="noreferrer"
                       className="text-[11px] font-bold text-[#0F9D6E] hover:text-[#0B7C56] flex items-center gap-1 hover:underline"
@@ -527,16 +526,14 @@ export const CampaignsManagementPage: React.FC = () => {
               <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 shadow-xs group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={previewUrl}
+                  src={resolveMediaUrl(previewUrl)}
                   alt="Preview Kampanye"
                   className="w-full h-44 object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.dataset.triedFallback) {
                       target.dataset.triedFallback = '1';
-                      target.src = 'http://localhost:3001' + (previewUrl.startsWith('/') ? previewUrl : '/' + previewUrl);
-                    } else {
-                      target.src = '/images/campaigns/sumur-sumba.jpg';
+                      target.src = resolveMediaUrl('/images/campaigns/sumur-sumba.jpg');
                     }
                   }}
                 />

@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { cmsApi } from '../../lib/api';
+import { resolveMediaUrl } from '../../lib/media-url';
 
 export interface HeroSliderItem {
   id: number;
@@ -394,16 +395,14 @@ export const HeroSliderPage: React.FC = () => {
                         <div className="w-28 h-16 rounded-xl overflow-hidden border border-[#DDE3DF] bg-slate-100 relative group shadow-xs">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={slider.imageUrl}
+                            src={resolveMediaUrl(slider.imageUrl)}
                             alt={slider.title}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               if (!target.dataset.triedFallback) {
                                 target.dataset.triedFallback = '1';
-                                target.src = 'http://localhost:3001' + (slider.imageUrl.startsWith('/') ? slider.imageUrl : '/' + slider.imageUrl);
-                              } else {
-                                target.src = '/images/hero_slide_green_zakat.jpg';
+                                target.src = resolveMediaUrl('/images/hero_slide_green_zakat.jpg');
                               }
                             }}
                           />
@@ -543,16 +542,14 @@ export const HeroSliderPage: React.FC = () => {
               <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 shadow-xs group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={previewUrl}
+                  src={resolveMediaUrl(previewUrl)}
                   alt="Preview Banner"
                   className="w-full h-44 object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.dataset.triedFallback) {
                       target.dataset.triedFallback = '1';
-                      target.src = 'http://localhost:3001' + (previewUrl.startsWith('/') ? previewUrl : '/' + previewUrl);
-                    } else {
-                      target.src = '/images/hero_slide_green_zakat.jpg';
+                      target.src = resolveMediaUrl('/images/hero_slide_green_zakat.jpg');
                     }
                   }}
                 />
