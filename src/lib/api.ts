@@ -516,3 +516,22 @@ export const penerimaanApi = {
   },
 };
 
+export const muzakkiApi = {
+  async list() {
+    return apiFetch<any[]>('/muzakki');
+  },
+  async create(data: {
+    nama: string;
+    tipe: string;
+    nikAtauNpwp: string;
+    hp: string;
+    email: string;
+    alamat: string;
+  }) {
+    return apiFetch<any>('/muzakki', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+};
+

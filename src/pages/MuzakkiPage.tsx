@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Muzakki } from '../types/zis';
-import { INITIAL_MUZAKKI } from '../mock/mockData';
 import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Users, Plus, FileSpreadsheet, Mail, Phone } from 'lucide-react';
+import { Users, Plus, FileSpreadsheet, Mail, Phone, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { muzakkiApi } from '../lib/api';
 
 export interface MuzakkiPageProps {
   onNavigate: (screen: string) => void;
@@ -30,8 +30,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMuzakki }) => {
-  const [dataList, setDataList] = useState<Muzakki[]>(INITIAL_MUZAKKI);
+  const [dataList, setDataList] = useState<Muzakki[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -45,25 +47,35 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    const newMuzakki: Muzakki = {
-      id: String(dataList.length + 1),
-      nomor: `MZK-2026-${String(dataList.length + 1).padStart(5, '0')}`,
-      nama: values.nama,
-      tipe: values.tipe,
-      nikAtauNpwp: values.nikAtauNpwp,
-      hp: values.hp,
-      email: values.email,
-      alamat: values.alamat,
-      totalSetoran: 0,
-      transaksiCount: 0,
-      tanggalBergabung: new Date().toISOString().split('T')[0],
-    };
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const rows = await muzakkiApi.list();
+      setDataList(rows);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal memuat data muzakki');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    setDataList([newMuzakki, ...dataList]);
-    toast.success(`Muzakki ${newMuzakki.nama} berhasil terdaftar dengan nomor ${newMuzakki.nomor}!`);
-    reset();
-    setIsCreateModalOpen(false);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const onSubmit = async (values: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      const created = await muzakkiApi.create(values);
+      setDataList((prev) => [created, ...prev]);
+      toast.success(`Muzakki ${created.nama} berhasil terdaftar dengan nomor ${created.nomor}!`);
+      reset();
+      setIsCreateModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mendaftarkan muzakki');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const columns: ColumnDef<Muzakki, any>[] = [
@@ -117,7 +129,7 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
     {
       id: 'actions',
       header: 'Aksi',
-      cell: ({ row }: any) => (
+      cell: () => (
         <div className="flex items-center gap-1.5">
           <Button variant="outline" size="sm" onClick={() => onNavigate('rekap')} title="Surat SPT">
             <FileSpreadsheet className="w-3.5 h-3.5" /> Surat SPT
@@ -129,15 +141,20 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
 
   return (
     <div className="space-y-6">
-      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Users className="w-6 h-6 text-[#0f9d6e]" /> Master Data Muzakki (Donatur)
           </h1>
-          <p className="text-xs text-slate-500">Database Wajib Zakat perorangan, korporat CSR, dan UPZ terdaftar</p>
+          <p className="text-xs text-slate-500">
+            Database Wajib Zakat perorangan, korporat CSR, dan UPZ terdaftar
+            {!isLoading && ` — Total: ${dataList.length} muzakki`}
+          </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
+            Refresh
+          </Button>
           <Button variant="secondary" icon={<FileSpreadsheet className="w-4 h-4" />} onClick={() => onNavigate('rekap')}>
             Rekap Tahunan SPT
           </Button>
@@ -147,10 +164,12 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
         </div>
       </div>
 
-      {/* DataTable */}
-      <DataTable columns={columns} data={dataList} searchPlaceholder="Cari ID, nama, NPWP, atau kontak..." />
+      {isLoading ? (
+        <div className="py-16 text-center text-sm text-slate-500">Memuat data muzakki...</div>
+      ) : (
+        <DataTable columns={columns} data={dataList} searchPlaceholder="Cari ID, nama, NPWP, atau kontak..." />
+      )}
 
-      {/* Create Muzakki Modal */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -234,8 +253,8 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
               Batal
             </Button>
-            <Button type="submit" variant="primary">
-              Daftarkan Muzakki
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Menyimpan...' : 'Daftarkan Muzakki'}
             </Button>
           </div>
         </form>
