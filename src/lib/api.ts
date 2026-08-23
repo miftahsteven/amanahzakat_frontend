@@ -297,10 +297,33 @@ export const aclApi = {
 
 // 4. CMS API Module (Content Management System)
 export const cmsApi = {
-  // Hero Sliders
+  // Hero Sliders & Upload
+  async uploadSlider(file: File) {
+    const token = getStoredToken();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(`${API_BASE_URL}/cms/upload-slider`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Gagal mengunggah gambar slider');
+    }
+    return data.data; // { url: "/uploads/slider/...", filename: "...", size: number }
+  },
   async getHeroSliders() {
     return apiFetch<any[]>('/cms/hero-sliders');
   },
+
   async createHeroSlider(data: any) {
     return apiFetch<any>('/cms/hero-sliders', {
       method: 'POST',
@@ -319,10 +342,33 @@ export const cmsApi = {
     });
   },
 
-  // Campaigns
+  // Campaigns & Upload
+  async uploadCampaign(file: File) {
+    const token = getStoredToken();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(`${API_BASE_URL}/cms/upload-campaign`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Gagal mengunggah gambar kampanye');
+    }
+    return data.data; // { url: "/uploads/campaigns/...", filename: "...", size: number }
+  },
   async getCampaigns() {
     return apiFetch<any[]>('/cms/campaigns');
   },
+
   async createCampaign(data: any) {
     return apiFetch<any>('/cms/campaigns', {
       method: 'POST',
