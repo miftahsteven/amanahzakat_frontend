@@ -624,3 +624,41 @@ export const programApi = {
   },
 };
 
+export const mitraApi = {
+  async list(statusLpj?: string) {
+    const query = statusLpj && statusLpj !== 'Semua' ? `?statusLpj=${encodeURIComponent(statusLpj)}` : '';
+    return apiFetch<any[]>(`/mitra${query}`);
+  },
+  async create(data: {
+    nama: string;
+    bentukLembaga: string;
+    masaKerjasama: string;
+    picKontak: string;
+    hpPic: string;
+    totalPenyaluran?: number;
+    statusLaporanLpj?: string;
+  }) {
+    return apiFetch<any>('/mitra', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async update(
+    id: string,
+    data: Partial<{
+      nama: string;
+      bentukLembaga: string;
+      masaKerjasama: string;
+      picKontak: string;
+      hpPic: string;
+      totalPenyaluran: number;
+      statusLaporanLpj: string;
+    }>,
+  ) {
+    return apiFetch<any>(`/mitra/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+};
+

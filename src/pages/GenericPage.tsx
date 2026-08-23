@@ -25,7 +25,6 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import {
-  INITIAL_MITRA,
   INITIAL_UPZ,
   INITIAL_KAMPANYE,
   INITIAL_AMIL,
@@ -40,31 +39,6 @@ export interface GenericPageProps {
 }
 
 export const GenericPage: React.FC<GenericPageProps> = ({ screenId, onNavigate }) => {
-  // Render Mitra Page
-  if (screenId === 'mitra') {
-    const cols: ColumnDef<any, any>[] = [
-      { accessorKey: 'nama', header: 'Nama Lembaga Mitra', cell: ({ row }: any) => <span className="font-bold text-[#16211D]">{row.getValue('nama')}</span> },
-      { accessorKey: 'bentukLembaga', header: 'Bentuk Lembaga', cell: ({ row }: any) => <Badge variant="blue">{row.getValue('bentukLembaga')}</Badge> },
-      { accessorKey: 'noMou', header: 'No. MoU', cell: ({ row }: any) => <span className="font-mono">{row.getValue('noMou')}</span> },
-      { accessorKey: 'totalPenyaluran', header: 'Dana Dikelola', cell: ({ row }: any) => <span className="font-bold text-[#0F9D6E]">{formatRP(row.getValue('totalPenyaluran'))}</span> },
-      { accessorKey: 'statusLaporanLpj', header: 'Status LPJ', cell: ({ row }: any) => <Badge statusText={row.getValue('statusLaporanLpj')} /> },
-    ];
-    return (
-      <div className="space-y-6 font-sans">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-[25px] font-extrabold text-[#16211D] flex items-center gap-2">
-              <Building2 className="w-6 h-6 text-[#0F9D6E]" /> Dashboard Mitra Penyalur (Partner)
-            </h1>
-            <p className="text-[13px] text-[#7D938A] mt-0.5">Lembaga executing partner & audit Laporan Pertanggungjawaban (LPJ)</p>
-          </div>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => toast.success('Mitra Penyalur Baru Terdaftar')}>Tambah Mitra Baru</Button>
-        </div>
-        <DataTable columns={cols} data={INITIAL_MITRA} searchPlaceholder="Cari nama mitra atau MoU..." />
-      </div>
-    );
-  }
-
   // Render UPZ Page
   if (screenId === 'upz') {
     const cols: ColumnDef<any, any>[] = [

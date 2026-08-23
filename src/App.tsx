@@ -9,6 +9,7 @@ import { PenyaluranPage } from './pages/PenyaluranPage';
 import { MuzakkiPage } from './pages/MuzakkiPage';
 import { MustahikPage } from './pages/MustahikPage';
 import { ProgramPage } from './pages/ProgramPage';
+import { MitraPage } from './pages/MitraPage';
 import { LaporanKeuanganPage } from './pages/LaporanKeuanganPage';
 import { JurnalGLPage } from './pages/JurnalGLPage';
 import { ClosingPage } from './pages/ClosingPage';
@@ -176,6 +177,8 @@ export function App() {
         );
       case 'program':
         return <ProgramPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+      case 'mitra':
+        return <MitraPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'laporan':
         return <LaporanKeuanganPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'jurnal':
