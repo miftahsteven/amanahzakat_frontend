@@ -6,8 +6,15 @@ import { fileURLToPath, URL } from 'node:url';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  base: '/erp/',
+  preview: {
+    port: 7037,
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
   server: {
     port: 5173,
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://localhost:5005',
@@ -17,7 +24,6 @@ export default defineConfig({
         target: 'http://localhost:5005',
         changeOrigin: true,
       },
-
     },
   },
   resolve: {
