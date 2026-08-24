@@ -102,9 +102,8 @@
   font-family: inherit;
 }
 
-.mustahik-map-label {
-  background: transparent !important;
-  border: none !important;
+.mustahik-sebaran-map .leaflet-marker-icon.mustahik-map-label {
+  pointer-events: none !important;
 }
 
 .mustahik-map-label span {
@@ -125,6 +124,17 @@
   background: rgba(165, 228, 203, 0.95);
   color: #04241a;
   box-shadow: 0 0 0 2px rgba(15, 157, 110, 0.8), 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.mustahik-map-label span.mustahik-map-label--program-chip {
+  background: rgba(200, 147, 58, 0.92);
+  color: #fff;
+}
+
+.mustahik-map-label span.mustahik-map-label--program-active {
+  background: rgba(253, 230, 138, 0.98);
+  color: #04241a;
+  box-shadow: 0 0 0 2px rgba(200, 147, 58, 0.85), 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
 /* GPS pin — high contrast amber on OSM tiles */
