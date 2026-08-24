@@ -81,7 +81,17 @@ export function inputFormatToIndoDate(dateStr: string): string {
   return dateStr;
 }
 
-export const CampaignsManagementPage: React.FC = () => {
+export interface CampaignsManagementPageProps {
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+}
+
+export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = ({
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -111,7 +121,7 @@ export const CampaignsManagementPage: React.FC = () => {
     cerita: '',
     imageUrl: '',
     status: 'Berjalan',
-    isFeatured: true,
+    isFeatured: false,
   });
 
   const loadCampaigns = async () => {
@@ -145,7 +155,7 @@ export const CampaignsManagementPage: React.FC = () => {
       cerita: '',
       imageUrl: '',
       status: 'Berjalan',
-      isFeatured: true,
+      isFeatured: false,
     });
     setIsModalOpen(true);
   };
@@ -173,27 +183,64 @@ export const CampaignsManagementPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    applySelectedImage(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
-    // Validate 50 MB limit
+  const applySelectedImage = (file: File) => {
     const MAX_SIZE_MB = 50;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Hanya file gambar (JPG, PNG, WEBP) yang diperbolehkan.');
+      return;
+    }
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      toast.error(`Ukuran file terlalu besar (${(file.size / (1024 * 1024)).toFixed(1)} MB). Batas maksimal adalah ${MAX_SIZE_MB} MB.`);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      toast.error(
+        `Ukuran file terlalu besar (${(file.size / (1024 * 1024)).toFixed(1)} MB). Batas maksimal adalah ${MAX_SIZE_MB} MB.`,
+      );
       return;
     }
 
     setSelectedFile(file);
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
+    setPreviewUrl((prev) => {
+      if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+  };
+
+  const handleDropImage = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files?.[0];
+    if (file) applySelectedImage(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nama || !formData.target) {
-      toast.error('Nama kampanye dan target dana wajib diisi.');
+    const nama = formData.nama.trim();
+    const program = formData.program.trim();
+    const ringkas = formData.ringkas.trim();
+    const target = Number(formData.target);
+
+    if (!nama || nama.length < 5) {
+      toast.error('Nama kampanye wajib diisi (minimal 5 karakter).');
       return;
     }
-
+    if (!program) {
+      toast.error('Pilar / kategori program wajib diisi.');
+      return;
+    }
+    if (!Number.isFinite(target) || target < 1_000_000) {
+      toast.error('Target dana minimal Rp 1.000.000.');
+      return;
+    }
+    if (!formData.tenggatDateInput || !/^\d{4}-\d{2}-\d{2}$/.test(formData.tenggatDateInput)) {
+      toast.error('Tenggat waktu wajib diisi dengan format tanggal yang valid.');
+      return;
+    }
+    if (!ringkas || ringkas.length < 10) {
+      toast.error('Ringkasan singkat wajib diisi (minimal 10 karakter).');
+      return;
+    }
     if (!selectedFile && !formData.imageUrl) {
       toast.error('Silakan upload gambar banner kampanye terlebih dahulu.');
       return;
@@ -203,7 +250,6 @@ export const CampaignsManagementPage: React.FC = () => {
     try {
       let finalImageUrl = formData.imageUrl;
 
-      // Upload file if new file chosen
       if (selectedFile) {
         setIsUploading(true);
         const uploadRes = await cmsApi.uploadCampaign(selectedFile);
@@ -214,14 +260,13 @@ export const CampaignsManagementPage: React.FC = () => {
       const formattedTenggat = inputFormatToIndoDate(formData.tenggatDateInput);
 
       const payload = {
-        nama: formData.nama,
-        program: formData.program,
-        lokasi: formData.lokasi || 'Indonesia',
-        target: Number(formData.target),
-        terkumpul: Number(formData.terkumpul) || 0,
+        nama,
+        program,
+        lokasi: formData.lokasi.trim() || 'Indonesia',
+        target,
         tenggat: formattedTenggat,
-        ringkas: formData.ringkas || formData.nama,
-        cerita: formData.cerita || formData.ringkas || formData.nama,
+        ringkas,
+        cerita: formData.cerita.trim() || ringkas,
         imageUrl: finalImageUrl,
         status: formData.status,
         isFeatured: formData.isFeatured,
@@ -298,15 +343,17 @@ export const CampaignsManagementPage: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={openCreateModal}
-            className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#0B7C56] text-white"
-          >
-            <Plus className="w-4 h-4" />
-            Buat Kampanye Baru
-          </Button>
+          {canCreate && (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={openCreateModal}
+              className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#0B7C56] text-white"
+            >
+              <Plus className="w-4 h-4" />
+              Buat Kampanye Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -356,7 +403,8 @@ export const CampaignsManagementPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filtered.map((camp) => {
-            const pct = Math.min(100, Math.round((camp.terkumpul / camp.target) * 100));
+            const pct =
+              camp.target > 0 ? Math.min(100, Math.round((camp.terkumpul / camp.target) * 100)) : 0;
             const isReached = pct >= 100;
             const isGreenZakat = /Pohon|Oksigen|DAS|Sumur|Agroforestry|Pertanian|Surya|Sampah|Pangan/i.test(
               camp.program
@@ -479,25 +527,29 @@ export const CampaignsManagementPage: React.FC = () => {
                     </a>
 
                     <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => openEditModal(camp)}
-                        className="p-1.5 rounded-lg border border-[#DDE3DF] hover:bg-[#E6F6EF] text-[#4D5C56] hover:text-[#0F9D6E] transition-colors cursor-pointer"
-                        title="Edit Kampanye"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedCampaign(camp);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-[#B83D32] transition-colors cursor-pointer"
-                        title="Hapus Kampanye"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {canUpdate && (
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(camp)}
+                          className="p-1.5 rounded-lg border border-[#DDE3DF] hover:bg-[#E6F6EF] text-[#4D5C56] hover:text-[#0F9D6E] transition-colors cursor-pointer"
+                          title="Edit Kampanye"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCampaign(camp);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-[#B83D32] transition-colors cursor-pointer"
+                          title="Hapus Kampanye"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -513,9 +565,41 @@ export const CampaignsManagementPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         title={selectedCampaign ? 'Edit Program Kampanye' : 'Buat Program Kampanye Baru'}
         subtitle="Form entri data program penggalangan dana ZIS publik"
-        maxWidth="lg"
+        maxWidth="3xl"
+        maximizable
+        defaultMaximized
+        footer={
+          <div className="flex items-center justify-end gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              disabled={isSubmitting}
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              form="campaign-form"
+              variant="primary"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 bg-[#0F9D6E] hover:bg-[#0B7C56] text-white"
+            >
+              {isSubmitting || isUploading ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  {isUploading ? 'Mengunggah Foto (Max 50MB)...' : 'Menyimpan...'}
+                </>
+              ) : selectedCampaign ? (
+                'Simpan Perubahan'
+              ) : (
+                'Terbitkan Kampanye'
+              )}
+            </Button>
+          </div>
+        }
       >
-        <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs">
+        <form id="campaign-form" onSubmit={handleSubmit} className="space-y-3.5 font-sans text-xs">
           {/* 1. Upload Langsung Gambar Banner (Max 50MB) */}
           <div className="space-y-2">
             <label className="block font-bold text-[#16211D]">
@@ -528,7 +612,7 @@ export const CampaignsManagementPage: React.FC = () => {
                 <img
                   src={resolveMediaUrl(previewUrl)}
                   alt="Preview Kampanye"
-                  className="w-full h-44 object-cover"
+                  className="w-full h-36 object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.dataset.triedFallback) {
@@ -552,7 +636,10 @@ export const CampaignsManagementPage: React.FC = () => {
                     variant="danger"
                     onClick={() => {
                       setSelectedFile(null);
-                      setPreviewUrl('');
+                      setPreviewUrl((prev) => {
+                        if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+                        return '';
+                      });
                       setFormData({ ...formData, imageUrl: '' });
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
@@ -570,10 +657,15 @@ export const CampaignsManagementPage: React.FC = () => {
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#BFE4D4] hover:border-[#0F9D6E] bg-[#E6F6EF]/40 hover:bg-[#E6F6EF]/70 transition-all rounded-2xl p-6 text-center cursor-pointer space-y-2 group"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onDrop={handleDropImage}
+                className="border-2 border-dashed border-[#BFE4D4] hover:border-[#0F9D6E] bg-[#E6F6EF]/40 hover:bg-[#E6F6EF]/70 transition-all rounded-2xl p-4 text-center cursor-pointer space-y-1.5 group"
               >
-                <div className="w-12 h-12 rounded-full bg-white text-[#0F9D6E] flex items-center justify-center mx-auto shadow-xs group-hover:scale-110 transition-transform">
-                  <UploadCloud className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-full bg-white text-[#0F9D6E] flex items-center justify-center mx-auto shadow-xs group-hover:scale-110 transition-transform">
+                  <UploadCloud className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="font-bold text-sm text-[#16211D]">
@@ -626,7 +718,7 @@ export const CampaignsManagementPage: React.FC = () => {
           </div>
 
           {/* 3. Lokasi, Target Dana & Tenggat Waktu (Datepicker) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
             <div className="space-y-1.5">
               <label className="block font-bold text-[#16211D]">
                 Lokasi Penyaluran
@@ -651,9 +743,9 @@ export const CampaignsManagementPage: React.FC = () => {
                 className="w-full px-3.5 py-2 rounded-xl border border-[#DDE3DF] bg-white text-[#16211D] font-mono font-bold focus:ring-2 focus:ring-[#0F9D6E] focus:outline-none"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
               <label className="block font-bold text-[#16211D]">
-                Tenggat Waktu (Datepicker) *
+                Tenggat Waktu *
               </label>
               <input
                 type="date"
@@ -689,7 +781,7 @@ export const CampaignsManagementPage: React.FC = () => {
               Cerita Lengkap & Urgensi Program
             </label>
             <textarea
-              rows={4}
+              rows={3}
               value={formData.cerita}
               onChange={(e) => setFormData({ ...formData, cerita: e.target.value })}
               placeholder="Tuliskan latar belakang masalah, kondisi mustahik, dan urgensi penyaluran..."
@@ -713,7 +805,7 @@ export const CampaignsManagementPage: React.FC = () => {
                 <option value="Selesai">Selesai (Sudah Disalurkan)</option>
               </select>
             </div>
-            <div className="flex items-center pt-6">
+            <div className="flex items-center md:pt-6">
               <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -728,35 +820,6 @@ export const CampaignsManagementPage: React.FC = () => {
               </label>
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E3E8E4]">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsModalOpen(false)}
-              disabled={isSubmitting}
-            >
-              Batal
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={isSubmitting}
-              className="flex items-center gap-2 bg-[#0F9D6E] hover:bg-[#0B7C56] text-white"
-            >
-              {isSubmitting || isUploading ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  {isUploading ? 'Mengunggah Foto (Max 50MB)...' : 'Menyimpan...'}
-                </>
-              ) : selectedCampaign ? (
-                'Simpan Perubahan'
-              ) : (
-                'Terbitkan Kampanye'
-              )}
-            </Button>
-          </div>
         </form>
       </Modal>
 
@@ -770,6 +833,10 @@ export const CampaignsManagementPage: React.FC = () => {
         <div className="space-y-4 font-sans text-xs">
           <p className="text-[#16211D]">
             Apakah Anda yakin ingin menghapus program "<strong>{selectedCampaign?.nama}</strong>"?
+          </p>
+          <p className="text-[#7D938A]">
+            Kampanye yang sudah punya transaksi donasi tidak dapat dihapus — ubah status menjadi Selesai
+            jika ingin menutupnya.
           </p>
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E3E8E4]">
             <Button

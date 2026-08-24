@@ -15,6 +15,7 @@ export interface InboxPageProps {
 export const InboxPage: React.FC<InboxPageProps> = ({ onNavigate }) => {
   const [dataList, setDataList] = useState<NotifikasiItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [kategoriFilter, setKategoriFilter] = useState<'Semua' | NotifikasiItem['kategori']>('Semua');
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -30,6 +31,17 @@ export const InboxPage: React.FC<InboxPageProps> = ({ onNavigate }) => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const kategoriTabs: Array<'Semua' | NotifikasiItem['kategori']> = [
+    'Semua',
+    'Approval',
+    'Penerimaan',
+    'Penyaluran',
+    'System',
+    'Closing',
+  ];
+
+  const filteredData = kategoriFilter === 'Semua' ? dataList : dataList.filter((n) => n.kategori === kategoriFilter);
 
   const handleMarkAllRead = async () => {
     try {
@@ -87,7 +99,25 @@ export const InboxPage: React.FC<InboxPageProps> = ({ onNavigate }) => {
           <Button variant="outline" icon={<CheckCheck className="w-4 h-4" />} onClick={handleMarkAllRead}>Tandai Semua Dibaca</Button>
         </div>
       </div>
-      <DataTable columns={columns} data={dataList} isLoading={isLoading} searchPlaceholder="Cari pemberitahuan..." />
+
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-semibold">
+        {kategoriTabs.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setKategoriFilter(tab)}
+            className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
+              kategoriFilter === tab
+                ? 'bg-[#0F9D6E] text-white shadow-md'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      <DataTable columns={columns} data={filteredData} isLoading={isLoading} searchPlaceholder="Cari pemberitahuan..." />
     </div>
   );
 };

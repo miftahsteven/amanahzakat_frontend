@@ -645,6 +645,11 @@ export const programApi = {
       body: JSON.stringify(data),
     });
   },
+  async remove(id: string) {
+    return apiFetch<any>(`/program/${id}`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 export const mitraApi = {
