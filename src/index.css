@@ -127,3 +127,46 @@
   box-shadow: 0 0 0 2px rgba(15, 157, 110, 0.8), 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
+/* GPS pin — high contrast amber on OSM tiles */
+.mustahik-gps-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+.mustahik-gps-pin__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mustahik-gps-pin__dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #C8933A;
+  border: 3px solid #ffffff;
+  box-shadow:
+    0 0 0 2px rgba(13, 23, 20, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mustahik-gps-pin__btn:hover .mustahik-gps-pin__dot,
+.mustahik-gps-pin__btn--active .mustahik-gps-pin__dot {
+  transform: scale(1.25);
+  background: #E0A84A;
+  box-shadow:
+    0 0 0 3px rgba(200, 147, 58, 0.55),
+    0 0 0 5px rgba(13, 23, 20, 0.35),
+    0 3px 12px rgba(0, 0, 0, 0.5);
+}
+
