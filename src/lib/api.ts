@@ -849,3 +849,16 @@ export const approvalApi = {
   },
 };
 
+export const portalApi = {
+  async summary() {
+    return apiFetch<any>('/portal/summary');
+  },
+  async listPengajuan(limit?: number) {
+    const q = limit ? `?limit=${limit}` : '';
+    return apiFetch<any[]>(`/portal/pengajuan${q}`);
+  },
+  async track(query: string) {
+    return apiFetch<any>(`/portal/pengajuan/track?q=${encodeURIComponent(query)}`);
+  },
+};
+

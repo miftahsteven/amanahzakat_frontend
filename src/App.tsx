@@ -204,7 +204,7 @@ export function App() {
       case 'portalUpz':
         return <PortalUpzPage />;
       case 'portal':
-        return <PortalPublicPage />;
+        return <PortalPublicPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'inbox':
         return <InboxPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'cms-hero':
