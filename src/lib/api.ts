@@ -862,3 +862,29 @@ export const portalApi = {
   },
 };
 
+export const kalkulatorApi = {
+  async getConfig() {
+    return apiFetch<import('./zakatCalculator').ZakatConfigView>('/kalkulator/config');
+  },
+  async updateConfig(data: import('./zakatCalculator').ZakatConfigParams) {
+    return apiFetch<import('./zakatCalculator').ZakatConfigView>('/kalkulator/config', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  async hitung(payload: { jenis: string; input: Record<string, unknown> }) {
+    return apiFetch<any>('/kalkulator/hitung', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  async listRiwayat(params?: { limit?: number; jenis?: string; sumber?: string }) {
+    const q = new URLSearchParams();
+    if (params?.limit) q.set('limit', String(params.limit));
+    if (params?.jenis) q.set('jenis', params.jenis);
+    if (params?.sumber) q.set('sumber', params.sumber);
+    const query = q.toString() ? `?${q.toString()}` : '';
+    return apiFetch<any[]>(`/kalkulator/riwayat${query}`);
+  },
+};
+

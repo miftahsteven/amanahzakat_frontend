@@ -17,7 +17,7 @@ import { DampakPublikPage } from './pages/DampakPublikPage';
 import { JurnalGLPage } from './pages/JurnalGLPage';
 import { ClosingPage } from './pages/ClosingPage';
 import { SimbaPage } from './pages/SimbaPage';
-import { KalkulatorPage } from './pages/KalkulatorPage';
+import { KalkulatorPage, type QuickZisOptions } from './pages/KalkulatorPage';
 import { PetaSebaranPage } from './pages/PetaSebaranPage';
 import { PortalUpzPage } from './pages/PortalUpzPage';
 import { PortalPublicPage } from './pages/PortalPublicPage';
@@ -104,6 +104,12 @@ export function App() {
     setIsQuickZisModalOpen(false);
   };
 
+  const openQuickZis = (opts?: QuickZisOptions) => {
+    if (opts?.nominal && opts.nominal > 0) setQuickNominal(opts.nominal);
+    if (opts?.jenis) setQuickJenis(opts.jenis);
+    setIsQuickZisModalOpen(true);
+  };
+
   const handleLoginSuccess = (user: AuthUser) => {
     setIsLoggedIn(true);
     applySession(user);
@@ -143,7 +149,7 @@ export function App() {
         return (
           <DashboardPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            onOpenQuickZis={() => setIsQuickZisModalOpen(true)}
+            onOpenQuickZis={() => openQuickZis()}
           />
         );
       case 'penerimaan':
@@ -196,7 +202,7 @@ export function App() {
       case 'simba':
         return <SimbaPage />;
       case 'kalkulator':
-        return <KalkulatorPage onOpenQuickZis={() => setIsQuickZisModalOpen(true)} />;
+        return <KalkulatorPage onOpenQuickZis={openQuickZis} />;
       case 'peta':
         return <PetaSebaranPage />;
       case 'dampak':
@@ -267,7 +273,7 @@ export function App() {
       <AppLayout
         currentScreen={currentScreen}
         onNavigate={(screen) => setCurrentScreen(screen)}
-        onOpenQuickZis={() => setIsQuickZisModalOpen(true)}
+        onOpenQuickZis={openQuickZis}
         onLogout={handleLogout}
         navigation={navigation}
         currentUser={currentUser}
