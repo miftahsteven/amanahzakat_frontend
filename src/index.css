@@ -89,3 +89,34 @@
   background: rgba(9, 29, 21, 0.95);
   border-color: rgba(138, 150, 145, 0.4);
 }
+
+/* Leaflet — Peta Sebaran Mustahik */
+.mustahik-sebaran-map {
+  z-index: 0;
+}
+
+.mustahik-sebaran-map .leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #04241a;
+  font-family: inherit;
+}
+
+.mustahik-map-label {
+  background: transparent !important;
+  border: none !important;
+}
+
+.mustahik-map-label span {
+  display: inline-block;
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(15, 157, 110, 0.9);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
