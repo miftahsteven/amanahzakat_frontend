@@ -9,6 +9,7 @@ export interface AppLayoutProps {
   currentScreen: string;
   onNavigate: (screen: string) => void;
   onOpenQuickZis: () => void;
+  onSearchSelect?: (screen: string, id: string) => void;
   onLogout?: () => void;
   navigation?: NavModul[];
   currentUser?: AuthUser | null;
@@ -19,6 +20,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   currentScreen,
   onNavigate,
   onOpenQuickZis,
+  onSearchSelect,
   onLogout,
   navigation = [],
   currentUser,
@@ -60,6 +62,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           currentScreen={currentScreen}
           onNavigate={onNavigate}
           onOpenQuickZis={onOpenQuickZis}
+          onSearchSelect={onSearchSelect}
           onLogout={onLogout}
           navigation={navigation}
           currentUser={currentUser}

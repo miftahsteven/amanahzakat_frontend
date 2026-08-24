@@ -52,7 +52,7 @@ export function App() {
   const [allowedMenuIds, setAllowedMenuIds] = useState<string[]>([]);
   const [navigation, setNavigation] = useState<NavModul[]>([]);
   const [currentScreen, setCurrentScreen] = useState<string>('dashboard');
-  const [selectedTrxId, setSelectedTrxId] = useState<string | null>(null);
+  const [focusRecord, setFocusRecord] = useState<{ screen: string; id: string } | null>(null);
   const [isQuickZisModalOpen, setIsQuickZisModalOpen] = useState<boolean>(false);
   const [isCheckingSession, setIsCheckingSession] = useState<boolean>(true);
 
@@ -203,33 +203,32 @@ export function App() {
         return (
           <PenerimaanPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            onSelectTrx={(id) => {
-              setSelectedTrxId(id);
-              toast.info(`Membuka Detail Transaksi Penerimaan #${id}`);
-            }}
+            focusId={focusRecord?.screen === 'penerimaan' ? focusRecord.id : undefined}
+            onFocusConsumed={() => setFocusRecord(null)}
           />
         );
       case 'penyaluran':
         return (
           <PenyaluranPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            onSelectSalur={(id) => {
-              toast.info(`Membuka Detail Penyaluran #${id}`);
-            }}
+            focusId={focusRecord?.screen === 'penyaluran' ? focusRecord.id : undefined}
+            onFocusConsumed={() => setFocusRecord(null)}
           />
         );
       case 'muzakki':
         return (
           <MuzakkiPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            onSelectMuzakki={(id) => toast.info(`Membuka Profil Muzakki #${id}`)}
+            focusId={focusRecord?.screen === 'muzakki' ? focusRecord.id : undefined}
+            onFocusConsumed={() => setFocusRecord(null)}
           />
         );
       case 'mustahik':
         return (
           <MustahikPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            onSelectMustahik={(id) => toast.info(`Membuka Profil Mustahik #${id}`)}
+            focusId={focusRecord?.screen === 'mustahik' ? focusRecord.id : undefined}
+            onFocusConsumed={() => setFocusRecord(null)}
           />
         );
       case 'program':
@@ -321,6 +320,10 @@ export function App() {
         currentScreen={currentScreen}
         onNavigate={(screen) => setCurrentScreen(screen)}
         onOpenQuickZis={openQuickZis}
+        onSearchSelect={(screen, id) => {
+          setCurrentScreen(screen);
+          setFocusRecord(id ? { screen, id } : null);
+        }}
         onLogout={handleLogout}
         navigation={navigation}
         currentUser={currentUser}

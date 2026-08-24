@@ -5,6 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { DetailFields } from '../components/ui/DetailFields';
 import { BszPdfModal } from '../components/shared/BszPdfModal';
 import { Plus, Printer, CheckCircle, FileText, ArrowDownLeft, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
@@ -13,10 +14,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { penerimaanApi } from '../lib/api';
+import { useFocusRecord } from '../hooks/useFocusRecord';
 
 export interface PenerimaanPageProps {
   onNavigate: (screen: string) => void;
-  onSelectTrx: (id: string) => void;
+  onSelectTrx?: (id: string) => void;
+  focusId?: string;
+  onFocusConsumed?: () => void;
 }
 
 const formSchema = z.object({
@@ -29,11 +33,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onSelectTrx }) => {
+export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onSelectTrx, focusId, onFocusConsumed }) => {
   const [dataList, setDataList] = useState<TransaksiPenerimaan[]>([]);
   const [muzakkiList, setMuzakkiList] = useState<Muzakki[]>([]);
   const [filterJenis, setFilterJenis] = useState<string>('Semua');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState<TransaksiPenerimaan | null>(null);
   const [selectedBszData, setSelectedBszData] = useState<TransaksiPenerimaan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,6 +77,17 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onSelectTrx }) =
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    if (focusId) setFilterJenis('Semua');
+  }, [focusId]);
+
+  useFocusRecord(focusId, dataList, setSelectedDetail, onFocusConsumed);
+
+  const openDetail = (row: TransaksiPenerimaan) => {
+    setSelectedDetail(row);
+    onSelectTrx?.(row.id);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
@@ -109,7 +125,7 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onSelectTrx }) =
       header: 'No. Kwitansi',
       cell: ({ row }: any) => (
         <span
-          onClick={() => onSelectTrx(row.original.id)}
+          onClick={() => openDetail(row.original)}
           className="font-mono font-bold text-[#0F9D6E] hover:underline cursor-pointer"
         >
           {row.getValue('noKwitansi')}
@@ -162,7 +178,7 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onSelectTrx }) =
           <Button variant="outline" size="sm" onClick={() => setSelectedBszData(row.original)} title="Cetak BSZ">
             <Printer className="w-3.5 h-3.5" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => onSelectTrx(row.original.id)}>
+          <Button variant="ghost" size="sm" onClick={() => openDetail(row.original)}>
             <FileText className="w-3.5 h-3.5" />
           </Button>
         </div>
@@ -298,6 +314,46 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onSelectTrx }) =
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={!!selectedDetail}
+        onClose={() => setSelectedDetail(null)}
+        title="Detail Penerimaan ZIS"
+        subtitle={selectedDetail?.noKwitansi}
+        maxWidth="md"
+      >
+        {selectedDetail && (
+          <div className="space-y-4">
+            <DetailFields
+              rows={[
+                { label: 'No. Kwitansi', value: selectedDetail.noKwitansi },
+                { label: 'Tanggal', value: selectedDetail.tanggal },
+                { label: 'Muzakki', value: `${selectedDetail.muzakkiNama} (${selectedDetail.muzakkiTipe})` },
+                { label: 'Jenis ZIS', value: selectedDetail.jenisZis },
+                { label: 'Nominal', value: formatRP(selectedDetail.nominal) },
+                { label: 'Kanal', value: selectedDetail.kanal },
+                { label: 'Rekening', value: selectedDetail.rekeningTujuan },
+                { label: 'Status', value: selectedDetail.status },
+                { label: 'Catatan', value: selectedDetail.catatan },
+              ]}
+            />
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#E3E8E4]">
+              <Button variant="outline" onClick={() => setSelectedDetail(null)}>
+                Tutup
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setSelectedBszData(selectedDetail);
+                  setSelectedDetail(null);
+                }}
+              >
+                Cetak BSZ
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       <BszPdfModal isOpen={!!selectedBszData} onClose={() => setSelectedBszData(null)} data={selectedBszData} />

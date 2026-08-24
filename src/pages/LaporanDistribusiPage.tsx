@@ -7,7 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { Download, FileBarChart, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { laporanApi } from '../lib/api';
-import { toast } from 'sonner';
+import { printLaporanDistribusi } from '../lib/printReport';
 
 export interface LaporanDistribusiPageProps {
   onNavigate: (screen: string) => void;
@@ -81,9 +81,17 @@ export const LaporanDistribusiPage: React.FC<LaporanDistribusiPageProps> = () =>
           <Button
             variant="primary"
             icon={<Download className="w-4 h-4" />}
-            onClick={() => toast.success('Laporan distribusi siap di-export (fitur PDF segera hadir)')}
+            disabled={isLoading || !data}
+            onClick={() => {
+              if (!data) return;
+              try {
+                printLaporanDistribusi(data, dariDate, sampaiDate);
+              } catch (err: any) {
+                toast.error(err.message || 'Gagal membuka jendela cetak PDF');
+              }
+            }}
           >
-            Export
+            Export PDF
           </Button>
         </div>
       </div>

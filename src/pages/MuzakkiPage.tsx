@@ -5,6 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { DetailFields } from '../components/ui/DetailFields';
 import { Users, Plus, FileSpreadsheet, Mail, Phone, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -12,10 +13,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { muzakkiApi } from '../lib/api';
+import { useFocusRecord } from '../hooks/useFocusRecord';
 
 export interface MuzakkiPageProps {
   onNavigate: (screen: string) => void;
-  onSelectMuzakki: (id: string) => void;
+  onSelectMuzakki?: (id: string) => void;
+  focusId?: string;
+  onFocusConsumed?: () => void;
 }
 
 const formSchema = z.object({
@@ -29,9 +33,10 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMuzakki }) => {
+export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMuzakki, focusId, onFocusConsumed }) => {
   const [dataList, setDataList] = useState<Muzakki[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState<Muzakki | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,6 +68,13 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
     loadData();
   }, [loadData]);
 
+  useFocusRecord(focusId, dataList, setSelectedDetail, onFocusConsumed);
+
+  const openDetail = (row: Muzakki) => {
+    setSelectedDetail(row);
+    onSelectMuzakki?.(row.id);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
@@ -84,7 +96,7 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
       header: 'ID Muzakki',
       cell: ({ row }: any) => (
         <span
-          onClick={() => onSelectMuzakki(row.original.id)}
+          onClick={() => openDetail(row.original)}
           className="font-mono font-bold text-[#0f9d6e] hover:underline cursor-pointer"
         >
           {row.getValue('nomor')}
@@ -258,6 +270,38 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onSelectMu
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={!!selectedDetail}
+        onClose={() => setSelectedDetail(null)}
+        title="Profil Muzakki"
+        subtitle={selectedDetail?.nomor}
+        maxWidth="md"
+      >
+        {selectedDetail && (
+          <div className="space-y-4">
+            <DetailFields
+              rows={[
+                { label: 'Nomor', value: selectedDetail.nomor },
+                { label: 'Nama', value: selectedDetail.nama },
+                { label: 'Kategori', value: selectedDetail.tipe },
+                { label: 'NIK / NPWP', value: selectedDetail.nikAtauNpwp },
+                { label: 'HP', value: selectedDetail.hp },
+                { label: 'Email', value: selectedDetail.email },
+                { label: 'Alamat', value: selectedDetail.alamat },
+                { label: 'Bergabung', value: selectedDetail.tanggalBergabung },
+                { label: 'Total Setoran', value: formatRP(selectedDetail.totalSetoran) },
+                { label: 'Jumlah Transaksi', value: `${selectedDetail.transaksiCount} kali` },
+              ]}
+            />
+            <div className="flex justify-end pt-2 border-t border-[#E3E8E4]">
+              <Button variant="outline" onClick={() => setSelectedDetail(null)}>
+                Tutup
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

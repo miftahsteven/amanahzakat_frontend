@@ -3,11 +3,13 @@ import { Bell, Monitor, Moon, PanelLeftClose, PanelLeftOpen, Sun, Wallet } from 
 import type { AuthUser, NavModul } from '../../types/acl';
 import { findMenuLabel } from '../../types/acl';
 import { useTheme } from '../../hooks/useTheme';
+import { GlobalSearch } from './GlobalSearch';
 
 export interface HeaderProps {
   currentScreen: string;
   onNavigate: (screen: string) => void;
   onOpenQuickZis: () => void;
+  onSearchSelect?: (screen: string, id: string) => void;
   onLogout?: () => void;
   navigation?: NavModul[];
   currentUser?: AuthUser | null;
@@ -26,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentScreen,
   onNavigate,
   onOpenQuickZis,
+  onSearchSelect,
   onLogout,
   navigation = [],
   currentUser,
@@ -71,14 +74,18 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative w-64">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#0F9D6E] absolute left-3 top-1/2 -translate-y-1/2"></span>
-          <input
-            type="text"
-            placeholder="Cari data…"
-            className="w-full pl-7 pr-3 py-1.5 text-xs bg-[#F1F4F1] border border-[#E3E8E4] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0F9D6E] text-[#16211D] placeholder:text-[#9FB3AA]"
-          />
-        </div>
+        {onSearchSelect ? (
+          <GlobalSearch onSelect={onSearchSelect} />
+        ) : (
+          <div className="relative w-64">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0F9D6E] absolute left-3 top-1/2 -translate-y-1/2"></span>
+            <input
+              type="text"
+              placeholder="Cari data…"
+              className="w-full pl-7 pr-3 py-1.5 text-xs bg-[#F1F4F1] border border-[#E3E8E4] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0F9D6E] text-[#16211D] placeholder:text-[#9FB3AA]"
+            />
+          </div>
+        )}
 
         <button
           type="button"

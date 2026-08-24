@@ -768,6 +768,15 @@ export const dashboardApi = {
     const query = q.toString() ? `?${q.toString()}` : '';
     return apiFetch<any>(`/dashboard/summary${query}`);
   },
+  async search(q: string) {
+    return apiFetch<{
+      menus: Array<{ id: string; screen: string; title: string; subtitle: string }>;
+      muzakki: Array<{ id: string; screen: 'muzakki'; title: string; subtitle: string }>;
+      mustahik: Array<{ id: string; screen: 'mustahik'; title: string; subtitle: string }>;
+      penerimaan: Array<{ id: string; screen: 'penerimaan'; title: string; subtitle: string }>;
+      penyaluran: Array<{ id: string; screen: 'penyaluran'; title: string; subtitle: string }>;
+    }>(`/dashboard/search?q=${encodeURIComponent(q)}`);
+  },
 };
 
 export const laporanApi = {
