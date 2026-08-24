@@ -752,3 +752,18 @@ export const payrollApi = {
   },
 };
 
+export const dashboardApi = {
+  async summary(params?: {
+    dari?: string;
+    sampai?: string;
+    skala?: 'harian' | 'bulanan' | 'tahunan';
+  }) {
+    const q = new URLSearchParams();
+    if (params?.dari) q.set('dari', params.dari);
+    if (params?.sampai) q.set('sampai', params.sampai);
+    if (params?.skala) q.set('skala', params.skala);
+    const query = q.toString() ? `?${q.toString()}` : '';
+    return apiFetch<any>(`/dashboard/summary${query}`);
+  },
+};
+
