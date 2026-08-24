@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, Monitor, Moon, PanelLeftClose, PanelLeftOpen, Sun } from 'lucide-react';
+import { Bell, Monitor, Moon, PanelLeftClose, PanelLeftOpen, Sun, Wallet } from 'lucide-react';
 import type { AuthUser, NavModul } from '../../types/acl';
 import { findMenuLabel } from '../../types/acl';
 import { useTheme } from '../../hooks/useTheme';
@@ -25,6 +25,7 @@ function initialsFromName(nama?: string): string {
 export const Header: React.FC<HeaderProps> = ({
   currentScreen,
   onNavigate,
+  onOpenQuickZis,
   onLogout,
   navigation = [],
   currentUser,
@@ -36,6 +37,10 @@ export const Header: React.FC<HeaderProps> = ({
   const canOpenInbox = currentUser?.menus?.includes('inbox') ?? navigation.some((modul) =>
     modul.menus.some((menu) => menu.kodeMenu === 'inbox')
   );
+  const canQuickZis =
+    currentUser?.permissions?.includes('penerimaan.create') ||
+    currentUser?.menus?.includes('penerimaan') ||
+    navigation.some((modul) => modul.menus.some((menu) => menu.kodeMenu === 'penerimaan'));
   const roleLabel = currentUser?.roles?.[0]?.replace(/_/g, ' ') || 'Pengguna';
   const themeLabel =
     preference === 'system' ? 'Ikuti sistem' : preference === 'light' ? 'Mode terang' : 'Mode gelap';
@@ -83,6 +88,18 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <ThemeIcon className="w-4 h-4" />
         </button>
+
+        {canQuickZis && (
+          <button
+            type="button"
+            onClick={onOpenQuickZis}
+            title="Catat penerimaan ZIS kilat"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0F9D6E] hover:bg-[#0B7C56] text-white text-[11px] font-bold transition-colors cursor-pointer"
+          >
+            <Wallet className="w-3.5 h-3.5" />
+            Quick ZIS
+          </button>
+        )}
 
         {canOpenInbox && (
           <button

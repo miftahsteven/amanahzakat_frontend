@@ -41,7 +41,7 @@ import { Modal } from './components/ui/Modal';
 
 
 import { Button } from './components/ui/Button';
-import { authApi, isSessionValid, getStoredUser, removeStoredToken } from './lib/api';
+import { authApi, isSessionValid, getStoredUser, removeStoredToken, penerimaanApi } from './lib/api';
 import type { AuthUser, NavModul } from './types/acl';
 import { menuCodesFromUser } from './types/acl';
 
@@ -59,6 +59,11 @@ export function App() {
   // Quick ZIS Form State
   const [quickNominal, setQuickNominal] = useState<number>(1000000);
   const [quickJenis, setQuickJenis] = useState<string>('Zakat Maal');
+  const [quickMuzakkiId, setQuickMuzakkiId] = useState<string>('');
+  const [quickKanal, setQuickKanal] = useState<string>('Cash / Konter');
+  const [quickMuzakkiList, setQuickMuzakkiList] = useState<Array<{ id: string; nama: string; nomor: string }>>([]);
+  const [quickSubmitting, setQuickSubmitting] = useState(false);
+  const [quickLoadingMuzakki, setQuickLoadingMuzakki] = useState(false);
 
   const applySession = (user: AuthUser) => {
     const menus = menuCodesFromUser(user);
@@ -98,10 +103,52 @@ export function App() {
     checkSession();
   }, []);
 
-  const handleQuickZisSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    if (!isQuickZisModalOpen) return;
+
+    setQuickLoadingMuzakki(true);
+    penerimaanApi
+      .listMuzakki()
+      .then((rows) => {
+        setQuickMuzakkiList(rows);
+        if (rows.length > 0 && !quickMuzakkiId) {
+          setQuickMuzakkiId(rows[0].id);
+        }
+      })
+      .catch((err: Error) => {
+        toast.error(err.message || 'Gagal memuat daftar muzakki');
+      })
+      .finally(() => setQuickLoadingMuzakki(false));
+  }, [isQuickZisModalOpen]);
+
+  const handleQuickZisSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(`Penerimaan ZIS baru ${quickJenis} sebesar Rp ${quickNominal.toLocaleString('id-ID')} berhasil dicatat!`);
-    setIsQuickZisModalOpen(false);
+    if (!quickMuzakkiId) {
+      toast.error('Pilih muzakki terlebih dahulu');
+      return;
+    }
+    if (!quickNominal || quickNominal < 10000) {
+      toast.error('Nominal minimal Rp 10.000');
+      return;
+    }
+
+    setQuickSubmitting(true);
+    try {
+      const created = await penerimaanApi.create({
+        muzakkiId: quickMuzakkiId,
+        jenisZis: quickJenis,
+        nominal: quickNominal,
+        kanal: quickKanal,
+      });
+      toast.success(
+        `Penerimaan ${quickJenis} Rp ${quickNominal.toLocaleString('id-ID')} tercatat — Kwitansi ${created.noKwitansi}`
+      );
+      setIsQuickZisModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mencatat penerimaan');
+    } finally {
+      setQuickSubmitting(false);
+    }
   };
 
   const openQuickZis = (opts?: QuickZisOptions) => {
@@ -294,6 +341,26 @@ export function App() {
       >
         <form onSubmit={handleQuickZisSubmit} className="space-y-4 text-xs">
           <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Muzakki *</label>
+            <select
+              value={quickMuzakkiId}
+              onChange={(e) => setQuickMuzakkiId(e.target.value)}
+              disabled={quickLoadingMuzakki}
+              className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+            >
+              {quickLoadingMuzakki && <option value="">Memuat muzakki…</option>}
+              {!quickLoadingMuzakki && quickMuzakkiList.length === 0 && (
+                <option value="">Belum ada muzakki terdaftar</option>
+              )}
+              {quickMuzakkiList.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nomor} — {m.nama}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Jenis ZIS *</label>
             <select
               value={quickJenis}
@@ -319,12 +386,27 @@ export function App() {
             />
           </div>
 
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Kanal Pembayaran *</label>
+            <select
+              value={quickKanal}
+              onChange={(e) => setQuickKanal(e.target.value)}
+              className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+            >
+              <option value="Cash / Konter">Cash / Konter</option>
+              <option value="Transfer Bank BSI">Transfer Bank BSI</option>
+              <option value="QRIS">QRIS</option>
+              <option value="Payroll UPZ">Payroll UPZ</option>
+              <option value="Marketplace">Marketplace</option>
+            </select>
+          </div>
+
           <div className="flex items-center justify-end gap-3 pt-3 border-t">
-            <Button type="button" variant="outline" onClick={() => setIsQuickZisModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setIsQuickZisModalOpen(false)} disabled={quickSubmitting}>
               Batal
             </Button>
-            <Button type="submit" variant="primary">
-              Simpan & Cetak Kwitansi
+            <Button type="submit" variant="primary" disabled={quickSubmitting || quickLoadingMuzakki}>
+              {quickSubmitting ? 'Menyimpan…' : 'Simpan & Cetak Kwitansi'}
             </Button>
           </div>
         </form>
