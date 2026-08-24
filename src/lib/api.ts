@@ -1,5 +1,5 @@
 import type { AuthUser, CatalogModul } from '../types/acl';
-import type { PenerimaanDetail } from '../types/zis';
+import type { PenerimaanDetail, PenyaluranDetail, MuzakkiDetail, MustahikDetail } from '../types/zis';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 export const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Hours in ms
@@ -525,7 +525,7 @@ export const muzakkiApi = {
     return apiFetch<any[]>('/muzakki');
   },
   async getById(id: string) {
-    return apiFetch<any>(`/muzakki/${id}`);
+    return apiFetch<MuzakkiDetail>(`/muzakki/${id}`);
   },
   async create(data: {
     nama: string;
@@ -548,7 +548,7 @@ export const penyaluranApi = {
     return apiFetch<any[]>(`/penyaluran${query}`);
   },
   async getById(id: string) {
-    return apiFetch<any>(`/penyaluran/${id}`);
+    return apiFetch<PenyaluranDetail>(`/penyaluran/${id}`);
   },
   async listMustahik() {
     return apiFetch<any[]>('/penyaluran/mustahik');
@@ -570,7 +570,7 @@ export const penyaluranApi = {
     });
   },
   async disburse(id: string) {
-    return apiFetch<any>(`/penyaluran/${id}/disburse`, {
+    return apiFetch<PenyaluranDetail>(`/penyaluran/${id}/disburse`, {
       method: 'PATCH',
     });
   },
@@ -582,10 +582,10 @@ export const mustahikApi = {
     return apiFetch<any[]>(`/mustahik${query}`);
   },
   async getById(id: string) {
-    return apiFetch<any>(`/mustahik/${id}`);
+    return apiFetch<MustahikDetail>(`/mustahik/${id}`);
   },
   async updateGps(id: string, lat: number, lng: number) {
-    return apiFetch<any>(`/mustahik/${id}/gps`, {
+    return apiFetch<MustahikDetail>(`/mustahik/${id}/gps`, {
       method: 'PATCH',
       body: JSON.stringify({ lat, lng }),
     });

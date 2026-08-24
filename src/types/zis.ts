@@ -56,6 +56,61 @@ export interface TransaksiPenyaluran {
   danaMustahik: number;
 }
 
+export interface PenyaluranDetail extends TransaksiPenyaluran {
+  noTransaksi: string;
+  mustahikNik: string;
+  mustahikWilayah: string;
+  mustahikTotalBantuan: number;
+  mustahikRiwayatProgram: string;
+  programPagu: number;
+  programTerpakai: number;
+  programPenanggungJawab: string;
+  porsiPaguPct: number;
+  mitraNama: string;
+  mitraPic: string;
+  akunDebit: string;
+  akunKredit: string;
+  refTransfer: string;
+  dokumen: Array<{ nama: string; status: string }>;
+  riwayat: Array<{ title: string; desc: string; waktu?: string; done: boolean }>;
+}
+
+export interface MuzakkiDetail extends Muzakki {
+  inisial: string;
+  kontak: string;
+  jenisRows: Array<{ label: string; nominal: number; pct: number }>;
+  kampanyeRows: Array<{ nama: string; program: string; nominal: number }>;
+  trxRows: Array<{
+    id: string;
+    noKwitansi: string;
+    tanggal: string;
+    jenisZis: string;
+    kanal: string;
+    nominal: number;
+    status: string;
+  }>;
+  rataRataDonasi: number;
+  donasiTerakhir?: { nominal: number; tanggal: string };
+}
+
+export interface MustahikDetail extends Mustahik {
+  inisial: string;
+  wilayah: string;
+  programList: string[];
+  programCount: number;
+  penyaluranRows: Array<{
+    id: string;
+    noPenyaluran: string;
+    tanggal: string;
+    programNama: string;
+    nominal: number;
+    danaMustahik: number;
+    status: string;
+  }>;
+  dokumen: Array<{ nama: string; status: string }>;
+  riwayatSurvei: Array<{ title: string; desc: string; waktu?: string; done: boolean }>;
+}
+
 export interface Muzakki {
   id: string;
   nomor: string;
