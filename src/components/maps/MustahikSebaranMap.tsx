@@ -15,6 +15,8 @@ export interface WilayahMarker {
 interface MustahikSebaranMapProps {
   wilayah: WilayahMarker[];
   className?: string;
+  /** Trigger Leaflet resize when container size changes (e.g. modal open) */
+  resizeKey?: number | boolean;
 }
 
 function formatRpShort(n: number) {
@@ -23,7 +25,7 @@ function formatRpShort(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
-export function MustahikSebaranMap({ wilayah, className = '' }: MustahikSebaranMapProps) {
+export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: MustahikSebaranMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -109,6 +111,28 @@ export function MustahikSebaranMap({ wilayah, className = '' }: MustahikSebaranM
       map.setView([-6.2, 106.8], 7);
     }
   }, [wilayah]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const timer = window.setTimeout(() => {
+      map.invalidateSize();
+      const bounds: L.LatLngExpression[] = [];
+      wilayah.forEach((w) => {
+        const lat = Number(w.lat);
+        const lng = Number(w.lng);
+        if (isValidIndonesiaCoord(lat, lng)) bounds.push([lat, lng]);
+      });
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 9);
+      } else if (bounds.length > 1) {
+        map.fitBounds(L.latLngBounds(bounds), { padding: [48, 48], maxZoom: 10 });
+      }
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [resizeKey, wilayah]);
 
   return <div ref={containerRef} className={`mustahik-sebaran-map ${className}`} />;
 }

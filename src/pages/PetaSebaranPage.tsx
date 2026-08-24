@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { Modal } from '../components/ui/Modal';
 import { MustahikSebaranMap } from '../components/maps/MustahikSebaranMap';
-import { ExternalLink, MapPin, RefreshCw } from 'lucide-react';
+import { Maximize2, MapPin, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { laporanApi } from '../lib/api';
 import { resolveWilayahCoords } from '../lib/wilayahCoords';
@@ -12,6 +13,7 @@ import { toast } from 'sonner';
 export const PetaSebaranPage: React.FC = () => {
   const [data, setData] = useState<Awaited<ReturnType<typeof laporanApi.sebaran>> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -29,22 +31,26 @@ export const PetaSebaranPage: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  const wilayahMarkers = (data?.wilayah ?? []).map((w) => {
-    const coords = resolveWilayahCoords({
-      id: (w as { id?: string }).id,
-      nama: w.nama,
-      lat: (w as { lat?: number }).lat,
-      lng: (w as { lng?: number }).lng,
-    });
-    return {
-      nama: w.nama,
-      lat: coords.lat,
-      lng: coords.lng,
-      jiwa: w.jiwa,
-      nominal: w.nominal,
-      program: w.program,
-    };
-  });
+  const wilayahMarkers = useMemo(
+    () =>
+      (data?.wilayah ?? []).map((w) => {
+        const coords = resolveWilayahCoords({
+          id: (w as { id?: string }).id,
+          nama: w.nama,
+          lat: (w as { lat?: number }).lat,
+          lng: (w as { lng?: number }).lng,
+        });
+        return {
+          nama: w.nama,
+          lat: coords.lat,
+          lng: coords.lng,
+          jiwa: w.jiwa,
+          nominal: w.nominal,
+          program: w.program,
+        };
+      }),
+    [data]
+  );
 
   return (
     <div className="space-y-6">
@@ -63,8 +69,9 @@ export const PetaSebaranPage: React.FC = () => {
           </Button>
           <Button
             variant="outline"
-            icon={<ExternalLink className="w-4 h-4" />}
-            onClick={() => window.open('https://www.openstreetmap.org/#map=5/-2.5/118.0', '_blank')}
+            icon={<Maximize2 className="w-4 h-4" />}
+            onClick={() => setIsFullscreenOpen(true)}
+            disabled={isLoading || wilayahMarkers.length === 0}
           >
             Buka Peta Penuh
           </Button>
@@ -119,6 +126,40 @@ export const PetaSebaranPage: React.FC = () => {
           </div>
         )}
       </Card>
+
+      <Modal
+        isOpen={isFullscreenOpen}
+        onClose={() => setIsFullscreenOpen(false)}
+        fullscreen
+        title="Peta Sebaran Mustahik — Tampilan Penuh"
+        subtitle={
+          isLoading
+            ? 'Memuat data...'
+            : `${data?.totalMustahik ?? 0} mustahik terverifikasi · ${wilayahMarkers.length} wilayah · Update ${data?.lastUpdated ?? '-'}`
+        }
+      >
+        <div className="flex flex-col lg:flex-row h-full min-h-0">
+          <div className="flex-1 min-h-[50vh] lg:min-h-0 relative border-b lg:border-b-0 lg:border-r border-emerald-950">
+            <MustahikSebaranMap
+              key={isFullscreenOpen ? 'fullscreen-map' : 'hidden'}
+              wilayah={wilayahMarkers}
+              resizeKey={isFullscreenOpen}
+              className="h-full min-h-[50vh] lg:min-h-0 w-full"
+            />
+          </div>
+          <aside className="w-full lg:w-80 shrink-0 overflow-y-auto bg-[#04241a] p-4 space-y-3 max-h-[40vh] lg:max-h-none">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Rekapitulasi Wilayah</p>
+            {wilayahMarkers.map((w) => (
+              <div key={w.nama} className="p-3 rounded-xl border border-emerald-900/60 bg-[#0D1714]/80 text-xs">
+                <div className="font-bold text-white">{w.nama.split('(')[0].trim()}</div>
+                <div className="text-emerald-400 font-extrabold mt-1">{formatRP(w.nominal)}</div>
+                <div className="text-slate-400 mt-0.5">{w.jiwa} penerima · {w.program}</div>
+              </div>
+            ))}
+            <p className="text-[10px] text-slate-500 pt-1">Tekan Esc untuk menutup</p>
+          </aside>
+        </div>
+      </Modal>
     </div>
   );
 };
