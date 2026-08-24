@@ -6,7 +6,6 @@ import { DataTable } from '../components/shared/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   FolderKanban,
-  Building2,
   Building,
   Megaphone,
   CreditCard,
@@ -25,7 +24,6 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import {
-  INITIAL_UPZ,
   INITIAL_KAMPANYE,
   INITIAL_AMIL,
   INITIAL_COA,
@@ -39,32 +37,6 @@ export interface GenericPageProps {
 }
 
 export const GenericPage: React.FC<GenericPageProps> = ({ screenId, onNavigate }) => {
-  // Render UPZ Page
-  if (screenId === 'upz') {
-    const cols: ColumnDef<any, any>[] = [
-      { accessorKey: 'kodeUpz', header: 'Kode UPZ', cell: ({ row }: any) => <span className="font-mono font-bold text-[#16211D]">{row.getValue('kodeUpz')}</span> },
-      { accessorKey: 'nama', header: 'Nama Unit UPZ', cell: ({ row }: any) => <span className="font-bold text-[#16211D]">{row.getValue('nama')}</span> },
-      { accessorKey: 'kategori', header: 'Kategori UPZ', cell: ({ row }: any) => <Badge variant="emerald">{row.getValue('kategori')}</Badge> },
-      { accessorKey: 'totalPenghimpunan', header: 'Total Penghimpunan', cell: ({ row }: any) => <span className="font-bold text-[#0F9D6E]">{formatRP(row.getValue('totalPenghimpunan'))}</span> },
-      { accessorKey: 'hakPengelolaanPct', header: 'Hak Operasional', cell: ({ row }: any) => <span className="font-bold text-amber-600">{row.getValue('hakPengelolaanPct')}%</span> },
-      { accessorKey: 'statusKepatuhan', header: 'Status Audit', cell: ({ row }: any) => <Badge statusText={row.getValue('statusKepatuhan')} /> },
-    ];
-    return (
-      <div className="space-y-6 font-sans">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-[25px] font-extrabold text-[#16211D] flex items-center gap-2">
-              <Building className="w-6 h-6 text-[#0F9D6E]" /> UPZ (Unit Pengumpul Zakat) Cabang
-            </h1>
-            <p className="text-[13px] text-[#7D938A] mt-0.5">Manajemen UPZ Masjid, Instansi Pemerintah, BUMN, dan Kampus</p>
-          </div>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => toast.success('UPZ Cabang Baru Terdaftar')}>Registrasi UPZ</Button>
-        </div>
-        <DataTable columns={cols} data={INITIAL_UPZ} searchPlaceholder="Cari UPZ..." />
-      </div>
-    );
-  }
-
   // Render Kampanye Page
   if (screenId === 'kampanye') {
     const cols: ColumnDef<any, any>[] = [

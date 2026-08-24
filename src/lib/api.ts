@@ -662,3 +662,42 @@ export const mitraApi = {
   },
 };
 
+export const upzApi = {
+  async list(kategori?: string, statusKepatuhan?: string) {
+    const params = new URLSearchParams();
+    if (kategori && kategori !== 'Semua') params.set('kategori', kategori);
+    if (statusKepatuhan && statusKepatuhan !== 'Semua') params.set('statusKepatuhan', statusKepatuhan);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return apiFetch<any[]>(`/upz${query}`);
+  },
+  async create(data: {
+    nama: string;
+    kategori: string;
+    hakPengelolaanPct?: number;
+    totalPenghimpunan?: number;
+    totalPenyaluran?: number;
+    statusKepatuhan?: string;
+  }) {
+    return apiFetch<any>('/upz', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async update(
+    id: string,
+    data: Partial<{
+      nama: string;
+      kategori: string;
+      hakPengelolaanPct: number;
+      totalPenghimpunan: number;
+      totalPenyaluran: number;
+      statusKepatuhan: string;
+    }>,
+  ) {
+    return apiFetch<any>(`/upz/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+};
+
