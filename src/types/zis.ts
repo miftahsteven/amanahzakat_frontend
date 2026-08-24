@@ -9,17 +9,33 @@ export type StatusPenyaluran = 'Disetujui' | 'Sedang Diproses' | 'Siap Bayar' | 
 export interface TransaksiPenerimaan {
   id: string;
   noKwitansi: string;
+  noSbmz?: string;
   tanggal: string;
   muzakkiId: string;
   muzakkiNama: string;
   muzakkiTipe: 'Perorangan' | 'Korporat' | 'UPZ';
   jenisZis: JenisZis;
+  programNama?: string;
   nominal: number;
   kanal: 'Transfer Bank BSI' | 'QRIS' | 'Cash / Konter' | 'Payroll UPZ' | 'Marketplace';
   rekeningTujuan: string;
   status: StatusPenerimaan;
   catatan?: string;
   buktiUrl?: string;
+}
+
+export interface PenerimaanDetail extends TransaksiPenerimaan {
+  noTransaksi: string;
+  muzakkiNomor: string;
+  muzakkiNikNpwp: string;
+  muzakkiTotalSetoran: number;
+  hakAmilPct: number;
+  hakAmil: number;
+  danaMustahik: number;
+  danaMustahikPct: number;
+  referensiBank: string;
+  jurnalGl: Array<{ akun: string; debit: number; kredit: number }>;
+  riwayat: Array<{ title: string; desc: string; waktu?: string; done: boolean }>;
 }
 
 export interface TransaksiPenyaluran {
@@ -68,4 +84,6 @@ export interface Mustahik {
   statusSurvei: 'Terverifikasi' | 'Perlu Survei' | 'Indikasi Ganda';
   skorKelayakan: number; // 0 - 100
   totalBantuanDiterima: number;
+  lat?: number;
+  lng?: number;
 }

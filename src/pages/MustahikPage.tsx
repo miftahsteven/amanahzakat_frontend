@@ -5,7 +5,6 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { DetailFields } from '../components/ui/DetailFields';
 import { HeartHandshake, Plus, ShieldCheck, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -13,13 +12,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { mustahikApi } from '../lib/api';
-import { useFocusRecord } from '../hooks/useFocusRecord';
 
 export interface MustahikPageProps {
   onNavigate: (screen: string) => void;
-  onSelectMustahik?: (id: string) => void;
-  focusId?: string;
-  onFocusConsumed?: () => void;
+  onOpenDetail: (id: string) => void;
 }
 
 const formSchema = z.object({
@@ -36,11 +32,10 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const MustahikPage: React.FC<MustahikPageProps> = ({ onSelectMustahik, focusId, onFocusConsumed }) => {
+export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
   const [dataList, setDataList] = useState<Mustahik[]>([]);
   const [filterAsnaf, setFilterAsnaf] = useState<string>('Semua');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedDetail, setSelectedDetail] = useState<Mustahik | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -74,16 +69,7 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onSelectMustahik, fo
     loadData();
   }, [loadData]);
 
-  useEffect(() => {
-    if (focusId) setFilterAsnaf('Semua');
-  }, [focusId]);
-
-  useFocusRecord(focusId, dataList, setSelectedDetail, onFocusConsumed);
-
-  const openDetail = (row: Mustahik) => {
-    setSelectedDetail(row);
-    onSelectMustahik?.(row.id);
-  };
+  const openDetail = (row: Mustahik) => onOpenDetail(row.id);
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
@@ -336,40 +322,6 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onSelectMustahik, fo
             </Button>
           </div>
         </form>
-      </Modal>
-
-      <Modal
-        isOpen={!!selectedDetail}
-        onClose={() => setSelectedDetail(null)}
-        title="Profil Mustahik"
-        subtitle={selectedDetail?.nik}
-        maxWidth="md"
-      >
-        {selectedDetail && (
-          <div className="space-y-4">
-            <DetailFields
-              rows={[
-                { label: 'NIK', value: selectedDetail.nik },
-                { label: 'Nama', value: selectedDetail.nama },
-                { label: 'Asnaf', value: selectedDetail.kategoriAsnaf },
-                { label: 'Pekerjaan', value: selectedDetail.pekerjaan },
-                { label: 'HP', value: selectedDetail.hp },
-                { label: 'Alamat', value: selectedDetail.alamat },
-                { label: 'Tanggungan', value: String(selectedDetail.jumlahTanggungan) },
-                { label: 'Penghasilan / Bln', value: formatRP(selectedDetail.penghasilanBulanan) },
-                { label: 'Rekening', value: selectedDetail.rekeningBank },
-                { label: 'Skor Kelayakan', value: `${selectedDetail.skorKelayakan} / 100` },
-                { label: 'Total Bantuan', value: formatRP(selectedDetail.totalBantuanDiterima) },
-                { label: 'Status Survei', value: selectedDetail.statusSurvei },
-              ]}
-            />
-            <div className="flex justify-end pt-2 border-t border-[#E3E8E4]">
-              <Button variant="outline" onClick={() => setSelectedDetail(null)}>
-                Tutup
-              </Button>
-            </div>
-          </div>
-        )}
       </Modal>
     </div>
   );

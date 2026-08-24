@@ -13,6 +13,11 @@ import { MitraPage } from './pages/MitraPage';
 import { UpzPage } from './pages/UpzPage';
 import { PayrollPage } from './pages/PayrollPage';
 import { LaporanDistribusiPage } from './pages/LaporanDistribusiPage';
+import { LaporanKeuanganPage } from './pages/LaporanKeuanganPage';
+import { PenerimaanDetailPage } from './pages/details/PenerimaanDetailPage';
+import { PenyaluranDetailPage } from './pages/details/PenyaluranDetailPage';
+import { MuzakkiDetailPage } from './pages/details/MuzakkiDetailPage';
+import { MustahikDetailPage } from './pages/details/MustahikDetailPage';
 import { DampakPublikPage } from './pages/DampakPublikPage';
 import { JurnalGLPage } from './pages/JurnalGLPage';
 import { ClosingPage } from './pages/ClosingPage';
@@ -45,6 +50,7 @@ import { authApi, isSessionValid, getStoredUser, removeStoredToken, penerimaanAp
 import type { AuthUser, NavModul } from './types/acl';
 import { menuCodesFromUser } from './types/acl';
 
+type DetailModule = 'penerimaan' | 'penyaluran' | 'muzakki' | 'mustahik';
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -52,7 +58,7 @@ export function App() {
   const [allowedMenuIds, setAllowedMenuIds] = useState<string[]>([]);
   const [navigation, setNavigation] = useState<NavModul[]>([]);
   const [currentScreen, setCurrentScreen] = useState<string>('dashboard');
-  const [focusRecord, setFocusRecord] = useState<{ screen: string; id: string } | null>(null);
+  const [detailRoute, setDetailRoute] = useState<{ module: DetailModule; id: string } | null>(null);
   const [isQuickZisModalOpen, setIsQuickZisModalOpen] = useState<boolean>(false);
   const [isCheckingSession, setIsCheckingSession] = useState<boolean>(true);
 
@@ -191,6 +197,19 @@ export function App() {
       );
     }
 
+    if (detailRoute) {
+      switch (detailRoute.module) {
+        case 'penerimaan':
+          return <PenerimaanDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
+        case 'penyaluran':
+          return <PenyaluranDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
+        case 'muzakki':
+          return <MuzakkiDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
+        case 'mustahik':
+          return <MustahikDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
+      }
+    }
+
     switch (currentScreen) {
       case 'dashboard':
         return (
@@ -203,32 +222,28 @@ export function App() {
         return (
           <PenerimaanPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            focusId={focusRecord?.screen === 'penerimaan' ? focusRecord.id : undefined}
-            onFocusConsumed={() => setFocusRecord(null)}
+            onOpenDetail={(id) => setDetailRoute({ module: 'penerimaan', id })}
           />
         );
       case 'penyaluran':
         return (
           <PenyaluranPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            focusId={focusRecord?.screen === 'penyaluran' ? focusRecord.id : undefined}
-            onFocusConsumed={() => setFocusRecord(null)}
+            onOpenDetail={(id) => setDetailRoute({ module: 'penyaluran', id })}
           />
         );
       case 'muzakki':
         return (
           <MuzakkiPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            focusId={focusRecord?.screen === 'muzakki' ? focusRecord.id : undefined}
-            onFocusConsumed={() => setFocusRecord(null)}
+            onOpenDetail={(id) => setDetailRoute({ module: 'muzakki', id })}
           />
         );
       case 'mustahik':
         return (
           <MustahikPage
             onNavigate={(screen) => setCurrentScreen(screen)}
-            focusId={focusRecord?.screen === 'mustahik' ? focusRecord.id : undefined}
-            onFocusConsumed={() => setFocusRecord(null)}
+            onOpenDetail={(id) => setDetailRoute({ module: 'mustahik', id })}
           />
         );
       case 'program':
@@ -241,6 +256,8 @@ export function App() {
         return <PayrollPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'laporan':
         return <LaporanDistribusiPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+      case 'laporan-keuangan':
+        return <LaporanKeuanganPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'jurnal':
         return <JurnalGLPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'closing':
@@ -318,11 +335,19 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <AppLayout
         currentScreen={currentScreen}
-        onNavigate={(screen) => setCurrentScreen(screen)}
+        onNavigate={(screen) => {
+          setDetailRoute(null);
+          setCurrentScreen(screen);
+        }}
         onOpenQuickZis={openQuickZis}
         onSearchSelect={(screen, id) => {
           setCurrentScreen(screen);
-          setFocusRecord(id ? { screen, id } : null);
+          const detailModules: DetailModule[] = ['penerimaan', 'penyaluran', 'muzakki', 'mustahik'];
+          if (id && detailModules.includes(screen as DetailModule)) {
+            setDetailRoute({ module: screen as DetailModule, id });
+          } else {
+            setDetailRoute(null);
+          }
         }}
         onLogout={handleLogout}
         navigation={navigation}

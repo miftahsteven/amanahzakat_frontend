@@ -1,4 +1,5 @@
 import type { AuthUser, CatalogModul } from '../types/acl';
+import type { PenerimaanDetail } from '../types/zis';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 export const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Hours in ms
@@ -492,6 +493,9 @@ export const penerimaanApi = {
     const query = jenisZis && jenisZis !== 'Semua' ? `?jenisZis=${encodeURIComponent(jenisZis)}` : '';
     return apiFetch<any[]>(`/penerimaan${query}`);
   },
+  async getById(id: string) {
+    return apiFetch<PenerimaanDetail>(`/penerimaan/${id}`);
+  },
   async listMuzakki() {
     return apiFetch<any[]>('/penerimaan/muzakki');
   },
@@ -520,6 +524,9 @@ export const muzakkiApi = {
   async list() {
     return apiFetch<any[]>('/muzakki');
   },
+  async getById(id: string) {
+    return apiFetch<any>(`/muzakki/${id}`);
+  },
   async create(data: {
     nama: string;
     tipe: string;
@@ -539,6 +546,9 @@ export const penyaluranApi = {
   async list(asnaf?: string) {
     const query = asnaf && asnaf !== 'Semua' ? `?asnaf=${encodeURIComponent(asnaf)}` : '';
     return apiFetch<any[]>(`/penyaluran${query}`);
+  },
+  async getById(id: string) {
+    return apiFetch<any>(`/penyaluran/${id}`);
   },
   async listMustahik() {
     return apiFetch<any[]>('/penyaluran/mustahik');
@@ -570,6 +580,15 @@ export const mustahikApi = {
   async list(asnaf?: string) {
     const query = asnaf && asnaf !== 'Semua' ? `?asnaf=${encodeURIComponent(asnaf)}` : '';
     return apiFetch<any[]>(`/mustahik${query}`);
+  },
+  async getById(id: string) {
+    return apiFetch<any>(`/mustahik/${id}`);
+  },
+  async updateGps(id: string, lat: number, lng: number) {
+    return apiFetch<any>(`/mustahik/${id}/gps`, {
+      method: 'PATCH',
+      body: JSON.stringify({ lat, lng }),
+    });
   },
   async create(data: {
     nik: string;
@@ -831,6 +850,13 @@ export const keuanganApi = {
       method: 'PATCH',
       body: JSON.stringify({ periode, lock }),
     });
+  },
+  async laporanKeuangan(params?: { dari?: string; sampai?: string }) {
+    const q = new URLSearchParams();
+    if (params?.dari) q.set('dari', params.dari);
+    if (params?.sampai) q.set('sampai', params.sampai);
+    const query = q.toString() ? `?${q.toString()}` : '';
+    return apiFetch<any>(`/keuangan/laporan${query}`);
   },
 };
 

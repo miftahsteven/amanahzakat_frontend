@@ -125,3 +125,45 @@ export function printLaporanDistribusi(data: DistribusiData, dari: string, sampa
     popup.print();
   }, 350);
 }
+
+export function printReport(opts: { title: string; subtitle?: string; rows: Array<{ label: string; value: string }> }) {
+  const rows = opts.rows
+    .map(
+      (r) =>
+        `<tr><td>${escapeHtml(r.label)}</td><td class="num">${escapeHtml(r.value)}</td></tr>`
+    )
+    .join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(opts.title)}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; color: #16211D; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    p { font-size: 11px; color: #7D938A; margin: 0 0 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid #E3E8E4; padding: 8px 10px; text-align: left; }
+    th { background: #F4F6F4; }
+    .num { text-align: right; white-space: nowrap; font-family: monospace; font-weight: 600; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(opts.title)}</h1>
+  ${opts.subtitle ? `<p>${escapeHtml(opts.subtitle)}</p>` : ''}
+  <table><thead><tr><th>Pos</th><th>Nominal</th></tr></thead><tbody>${rows}</tbody></table>
+</body>
+</html>`;
+
+  const popup = window.open('', '_blank', 'width=800,height=600');
+  if (!popup) {
+    throw new Error('Popup diblokir. Izinkan jendela baru untuk mencetak PDF.');
+  }
+  popup.document.open();
+  popup.document.write(html);
+  popup.document.close();
+  popup.focus();
+  window.setTimeout(() => popup.print(), 350);
+}

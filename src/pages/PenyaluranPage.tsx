@@ -6,7 +6,6 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { DetailFields } from '../components/ui/DetailFields';
 import { Plus, ArrowUpRight, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -14,13 +13,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { penyaluranApi } from '../lib/api';
-import { useFocusRecord } from '../hooks/useFocusRecord';
 
 export interface PenyaluranPageProps {
   onNavigate: (screen: string) => void;
-  onSelectSalur?: (id: string) => void;
-  focusId?: string;
-  onFocusConsumed?: () => void;
+  onOpenDetail: (id: string) => void;
 }
 
 const formSchema = z.object({
@@ -34,13 +30,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur, focusId, onFocusConsumed }) => {
+export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) => {
   const [dataList, setDataList] = useState<TransaksiPenyaluran[]>([]);
   const [mustahikList, setMustahikList] = useState<Mustahik[]>([]);
   const [programList, setProgramList] = useState<ProgramZis[]>([]);
   const [filterAsnaf, setFilterAsnaf] = useState<string>('Semua');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedDetail, setSelectedDetail] = useState<TransaksiPenyaluran | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -80,16 +75,7 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur, f
     loadData();
   }, [loadData]);
 
-  useEffect(() => {
-    if (focusId) setFilterAsnaf('Semua');
-  }, [focusId]);
-
-  useFocusRecord(focusId, dataList, setSelectedDetail, onFocusConsumed);
-
-  const openDetail = (row: TransaksiPenyaluran) => {
-    setSelectedDetail(row);
-    onSelectSalur?.(row.id);
-  };
+  const openDetail = (row: TransaksiPenyaluran) => onOpenDetail(row.id);
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
@@ -330,40 +316,6 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur, f
             </Button>
           </div>
         </form>
-      </Modal>
-
-      <Modal
-        isOpen={!!selectedDetail}
-        onClose={() => setSelectedDetail(null)}
-        title="Detail Penyaluran ZIS"
-        subtitle={selectedDetail?.noPenyaluran}
-        maxWidth="md"
-      >
-        {selectedDetail && (
-          <div className="space-y-4">
-            <DetailFields
-              rows={[
-                { label: 'No. Penyaluran', value: selectedDetail.noPenyaluran },
-                { label: 'Tanggal', value: selectedDetail.tanggal },
-                { label: 'Mustahik', value: selectedDetail.mustahikNama },
-                { label: 'Asnaf', value: selectedDetail.asnaf },
-                { label: 'Program', value: selectedDetail.programNama },
-                { label: 'Nominal', value: formatRP(selectedDetail.nominal) },
-                { label: 'Dana Mustahik', value: formatRP(selectedDetail.danaMustahik) },
-                { label: 'Potongan Amil', value: formatRP(selectedDetail.potonganAmil) },
-                { label: 'Metode', value: selectedDetail.metodePembayaran },
-                { label: 'Rekening', value: selectedDetail.rekeningTujuan },
-                { label: 'Status', value: selectedDetail.status },
-                { label: 'Keterangan', value: selectedDetail.keterangan },
-              ]}
-            />
-            <div className="flex justify-end pt-2 border-t border-[#E3E8E4]">
-              <Button variant="outline" onClick={() => setSelectedDetail(null)}>
-                Tutup
-              </Button>
-            </div>
-          </div>
-        )}
       </Modal>
     </div>
   );
