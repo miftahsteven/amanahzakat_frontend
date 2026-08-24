@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import {
   INITIAL_KAMPANYE,
-  INITIAL_AMIL,
   INITIAL_COA,
 } from '../mock/mockData';
 import { formatRP } from '../lib/utils';
@@ -59,32 +58,6 @@ export const GenericPage: React.FC<GenericPageProps> = ({ screenId, onNavigate }
           <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => toast.success('Kampanye Baru Diluncurkan')}>Buat Kampanye Baru</Button>
         </div>
         <DataTable columns={cols} data={INITIAL_KAMPANYE} searchPlaceholder="Cari kampanye..." />
-      </div>
-    );
-  }
-
-  // Render Amil & Payroll Page
-  if (screenId === 'amil' || screenId === 'payroll') {
-    const cols: ColumnDef<any, any>[] = [
-      { accessorKey: 'nip', header: 'NIP Amil', cell: ({ row }: any) => <span className="font-mono font-bold text-[#16211D]">{row.getValue('nip')}</span> },
-      { accessorKey: 'nama', header: 'Nama Amil / Staf', cell: ({ row }: any) => <span className="font-bold text-[#16211D]">{row.getValue('nama')}</span> },
-      { accessorKey: 'jabatan', header: 'Jabatan', cell: ({ row }: any) => <span>{row.getValue('jabatan')}</span> },
-      { accessorKey: 'divisi', header: 'Divisi', cell: ({ row }: any) => <Badge variant="blue">{row.getValue('divisi')}</Badge> },
-      { accessorKey: 'gajiPokok', header: 'Gaji Pokok', cell: ({ row }: any) => <span className="font-semibold">{formatRP(row.getValue('gajiPokok'))}</span> },
-      { accessorKey: 'tunjanganAmil', header: 'Hak Amil / Tunjangan', cell: ({ row }: any) => <span className="font-bold text-[#0F9D6E]">{formatRP(row.getValue('tunjanganAmil'))}</span> },
-    ];
-    return (
-      <div className="space-y-6 font-sans">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-[25px] font-extrabold text-[#16211D] flex items-center gap-2">
-              <CreditCard className="w-6 h-6 text-[#0F9D6E]" /> SDM Amil & Payroll Hak Amil (12.5%)
-            </h1>
-            <p className="text-[13px] text-[#7D938A] mt-0.5">Pengelolaan alokasi 1/8 Asnaf Hak Amil & Penggajian Karyawan LAZNAS</p>
-          </div>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => toast.success('Slip Gaji Amil Agustus 2026 Diproses!')}>Proses Payroll Gaji</Button>
-        </div>
-        <DataTable columns={cols} data={INITIAL_AMIL} searchPlaceholder="Cari NIP atau nama amil..." />
       </div>
     );
   }

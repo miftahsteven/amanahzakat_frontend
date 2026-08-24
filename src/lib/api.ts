@@ -701,3 +701,54 @@ export const upzApi = {
   },
 };
 
+export const payrollApi = {
+  async list(divisi?: string) {
+    const query = divisi && divisi !== 'Semua' ? `?divisi=${encodeURIComponent(divisi)}` : '';
+    return apiFetch<any[]>(`/payroll${query}`);
+  },
+  async create(data: {
+    nama: string;
+    jabatan: string;
+    divisi: string;
+    gajiPokok: number;
+    tunjanganAmil: number;
+    keikutsertaanPayroll?: boolean;
+    statusKerja?: string;
+  }) {
+    return apiFetch<any>('/payroll', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async update(
+    id: string,
+    data: Partial<{
+      nama: string;
+      jabatan: string;
+      divisi: string;
+      gajiPokok: number;
+      tunjanganAmil: number;
+      keikutsertaanPayroll: boolean;
+      statusKerja: string;
+    }>,
+  ) {
+    return apiFetch<any>(`/payroll/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+  async process(periode?: string) {
+    return apiFetch<{
+      periode: string;
+      jumlahAmil: number;
+      totalBruto: number;
+      totalPotonganZakat: number;
+      totalNetto: number;
+      slips: any[];
+    }>('/payroll/process', {
+      method: 'POST',
+      body: JSON.stringify({ periode }),
+    });
+  },
+};
+

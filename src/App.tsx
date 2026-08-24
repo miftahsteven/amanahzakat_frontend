@@ -11,6 +11,7 @@ import { MustahikPage } from './pages/MustahikPage';
 import { ProgramPage } from './pages/ProgramPage';
 import { MitraPage } from './pages/MitraPage';
 import { UpzPage } from './pages/UpzPage';
+import { PayrollPage } from './pages/PayrollPage';
 import { LaporanKeuanganPage } from './pages/LaporanKeuanganPage';
 import { JurnalGLPage } from './pages/JurnalGLPage';
 import { ClosingPage } from './pages/ClosingPage';
@@ -182,6 +183,8 @@ export function App() {
         return <MitraPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'upz':
         return <UpzPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+      case 'payroll':
+        return <PayrollPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'laporan':
         return <LaporanKeuanganPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'jurnal':
