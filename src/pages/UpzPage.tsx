@@ -5,7 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Building, Plus, RefreshCw, Pencil, ShieldCheck } from 'lucide-react';
+import { Building, Plus, RefreshCw, Pencil, ShieldCheck, FileText } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import { upzApi } from '../lib/api';
 
 export interface UpzPageProps {
   onNavigate: (screen: string) => void;
+  onOpenDetail: (id: string) => void;
 }
 
 const formSchema = z.object({
@@ -28,7 +29,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const UpzPage: React.FC<UpzPageProps> = () => {
+export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail }) => {
+  const openDetail = (row: UpzCabang) => onOpenDetail(row.id);
   const [dataList, setDataList] = useState<UpzCabang[]>([]);
   const [filterKategori, setFilterKategori] = useState<string>('Semua');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -130,7 +132,12 @@ export const UpzPage: React.FC<UpzPageProps> = () => {
       accessorKey: 'kodeUpz',
       header: 'Kode UPZ',
       cell: ({ row }: any) => (
-        <span className="font-mono font-bold text-[#16211D] dark:text-slate-100">{row.getValue('kodeUpz')}</span>
+        <span
+          onClick={() => openDetail(row.original)}
+          className="font-mono font-bold text-[#0F9D6E] hover:underline cursor-pointer"
+        >
+          {row.getValue('kodeUpz')}
+        </span>
       ),
     },
     {
@@ -138,7 +145,12 @@ export const UpzPage: React.FC<UpzPageProps> = () => {
       header: 'Nama Unit UPZ',
       cell: ({ row }: any) => (
         <div>
-          <div className="font-bold text-[#16211D] dark:text-slate-100">{row.getValue('nama')}</div>
+          <div
+            onClick={() => openDetail(row.original)}
+            className="font-bold text-[#0F9D6E] hover:underline cursor-pointer"
+          >
+            {row.getValue('nama')}
+          </div>
           <div className="text-[10px] text-slate-400">
             Penyaluran: {formatRP(row.original.totalPenyaluran)}
           </div>
@@ -173,7 +185,10 @@ export const UpzPage: React.FC<UpzPageProps> = () => {
       id: 'actions',
       header: 'Aksi',
       cell: ({ row }: any) => (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="sm" onClick={() => openDetail(row.original)} title="Detail">
+            <FileText className="w-3.5 h-3.5" />
+          </Button>
           {row.original.statusKepatuhan !== 'Patuh' && (
             <Button
               variant="primary"

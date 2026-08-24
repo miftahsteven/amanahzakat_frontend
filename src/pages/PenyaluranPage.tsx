@@ -82,7 +82,7 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
     try {
       const created = await penyaluranApi.create(values);
       setDataList((prev) => [created, ...prev]);
-      toast.success(`Pengajuan Penyaluran ${created.noPenyaluran} berhasil dibuat & masuk antrean pembayaran!`);
+      toast.success(`Pengajuan ${created.noPenyaluran} masuk antrean approval berjenjang`);
       reset();
       setIsCreateModalOpen(false);
       penyaluranApi.listMustahik().then(setMustahikList);

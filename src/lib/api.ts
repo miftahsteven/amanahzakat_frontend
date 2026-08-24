@@ -1,5 +1,6 @@
 import type { AuthUser, CatalogModul } from '../types/acl';
 import type { PenerimaanDetail, PenyaluranDetail, MuzakkiDetail, MustahikDetail } from '../types/zis';
+import type { ProgramDetail, MitraDetail, UpzDetail } from '../types/system';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 export const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Hours in ms
@@ -612,6 +613,9 @@ export const programApi = {
   async list() {
     return apiFetch<any[]>('/program');
   },
+  async getById(id: string) {
+    return apiFetch<ProgramDetail>(`/program/${id}`);
+  },
   async create(data: {
     nama: string;
     pilar: string;
@@ -647,6 +651,9 @@ export const mitraApi = {
   async list(statusLpj?: string) {
     const query = statusLpj && statusLpj !== 'Semua' ? `?statusLpj=${encodeURIComponent(statusLpj)}` : '';
     return apiFetch<any[]>(`/mitra${query}`);
+  },
+  async getById(id: string) {
+    return apiFetch<MitraDetail>(`/mitra/${id}`);
   },
   async create(data: {
     nama: string;
@@ -688,6 +695,9 @@ export const upzApi = {
     if (statusKepatuhan && statusKepatuhan !== 'Semua') params.set('statusKepatuhan', statusKepatuhan);
     const query = params.toString() ? `?${params.toString()}` : '';
     return apiFetch<any[]>(`/upz${query}`);
+  },
+  async getById(id: string) {
+    return apiFetch<UpzDetail>(`/upz/${id}`);
   },
   async create(data: {
     nama: string;
@@ -873,14 +883,18 @@ export const inboxApi = {
 };
 
 export const approvalApi = {
-  async list() {
-    return apiFetch<any[]>('/approval');
+  async list(status?: string) {
+    const query = status && status !== 'Menunggu' ? `?status=${encodeURIComponent(status)}` : '';
+    return apiFetch<any[]>(`/approval${query}`);
   },
   async approve(id: string) {
     return apiFetch<any>(`/approval/${id}/approve`, { method: 'PATCH' });
   },
-  async reject(id: string) {
-    return apiFetch<any>(`/approval/${id}/reject`, { method: 'PATCH' });
+  async reject(id: string, catatan?: string) {
+    return apiFetch<any>(`/approval/${id}/reject`, {
+      method: 'PATCH',
+      body: JSON.stringify({ catatan: catatan || '' }),
+    });
   },
 };
 

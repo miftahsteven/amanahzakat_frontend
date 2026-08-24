@@ -18,6 +18,9 @@ import { PenerimaanDetailPage } from './pages/details/PenerimaanDetailPage';
 import { PenyaluranDetailPage } from './pages/details/PenyaluranDetailPage';
 import { MuzakkiDetailPage } from './pages/details/MuzakkiDetailPage';
 import { MustahikDetailPage } from './pages/details/MustahikDetailPage';
+import { ProgramDetailPage } from './pages/details/ProgramDetailPage';
+import { MitraDetailPage } from './pages/details/MitraDetailPage';
+import { UpzDetailPage } from './pages/details/UpzDetailPage';
 import { DampakPublikPage } from './pages/DampakPublikPage';
 import { JurnalGLPage } from './pages/JurnalGLPage';
 import { ClosingPage } from './pages/ClosingPage';
@@ -50,7 +53,7 @@ import { authApi, isSessionValid, getStoredUser, removeStoredToken, penerimaanAp
 import type { AuthUser, NavModul } from './types/acl';
 import { menuCodesFromUser } from './types/acl';
 
-type DetailModule = 'penerimaan' | 'penyaluran' | 'muzakki' | 'mustahik';
+type DetailModule = 'penerimaan' | 'penyaluran' | 'muzakki' | 'mustahik' | 'program' | 'mitra' | 'upz';
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -207,6 +210,12 @@ export function App() {
           return <MuzakkiDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
         case 'mustahik':
           return <MustahikDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
+        case 'program':
+          return <ProgramDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
+        case 'mitra':
+          return <MitraDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
+        case 'upz':
+          return <UpzDetailPage id={detailRoute.id} onBack={() => setDetailRoute(null)} />;
       }
     }
 
@@ -247,11 +256,26 @@ export function App() {
           />
         );
       case 'program':
-        return <ProgramPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+        return (
+          <ProgramPage
+            onNavigate={(screen) => setCurrentScreen(screen)}
+            onOpenDetail={(id) => setDetailRoute({ module: 'program', id })}
+          />
+        );
       case 'mitra':
-        return <MitraPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+        return (
+          <MitraPage
+            onNavigate={(screen) => setCurrentScreen(screen)}
+            onOpenDetail={(id) => setDetailRoute({ module: 'mitra', id })}
+          />
+        );
       case 'upz':
-        return <UpzPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+        return (
+          <UpzPage
+            onNavigate={(screen) => setCurrentScreen(screen)}
+            onOpenDetail={(id) => setDetailRoute({ module: 'upz', id })}
+          />
+        );
       case 'payroll':
         return <PayrollPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'laporan':
@@ -301,7 +325,19 @@ export function App() {
       case 'acl-management':
         return <AclManagementPage />;
       case 'approval':
-        return <ApprovalPage />;
+        return (
+          <ApprovalPage
+            canApprove={
+              Boolean(currentUser?.permissions?.includes('approval.approve')) ||
+              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
+            }
+            canReject={
+              Boolean(currentUser?.permissions?.includes('approval.reject')) ||
+              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
+            }
+            onOpenPenyaluran={(id) => setDetailRoute({ module: 'penyaluran', id })}
+          />
+        );
       case 'login':
         return <LoginPage onLoginSuccess={handleLoginSuccess} />;
       default:
@@ -342,7 +378,15 @@ export function App() {
         onOpenQuickZis={openQuickZis}
         onSearchSelect={(screen, id) => {
           setCurrentScreen(screen);
-          const detailModules: DetailModule[] = ['penerimaan', 'penyaluran', 'muzakki', 'mustahik'];
+          const detailModules: DetailModule[] = [
+            'penerimaan',
+            'penyaluran',
+            'muzakki',
+            'mustahik',
+            'program',
+            'mitra',
+            'upz',
+          ];
           if (id && detailModules.includes(screen as DetailModule)) {
             setDetailRoute({ module: screen as DetailModule, id });
           } else {

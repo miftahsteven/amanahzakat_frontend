@@ -5,7 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Building2, Plus, RefreshCw, Pencil, CheckCircle2 } from 'lucide-react';
+import { Building2, Plus, RefreshCw, Pencil, CheckCircle2, FileText } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import { mitraApi } from '../lib/api';
 
 export interface MitraPageProps {
   onNavigate: (screen: string) => void;
+  onOpenDetail: (id: string) => void;
 }
 
 const formSchema = z.object({
@@ -29,7 +30,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const MitraPage: React.FC<MitraPageProps> = () => {
+export const MitraPage: React.FC<MitraPageProps> = ({ onOpenDetail }) => {
+  const openDetail = (row: MitraPenyalur) => onOpenDetail(row.id);
   const [dataList, setDataList] = useState<MitraPenyalur[]>([]);
   const [filterLpj, setFilterLpj] = useState<string>('Semua');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -132,7 +134,12 @@ export const MitraPage: React.FC<MitraPageProps> = () => {
       header: 'Nama Lembaga Mitra',
       cell: ({ row }: any) => (
         <div>
-          <div className="font-bold text-[#16211D] dark:text-slate-100">{row.getValue('nama')}</div>
+          <div
+            onClick={() => openDetail(row.original)}
+            className="font-bold text-[#0F9D6E] hover:underline cursor-pointer"
+          >
+            {row.getValue('nama')}
+          </div>
           <div className="text-[10px] text-slate-400">
             PIC: {row.original.picKontak} · {row.original.hpPic}
           </div>
@@ -170,7 +177,10 @@ export const MitraPage: React.FC<MitraPageProps> = () => {
       id: 'actions',
       header: 'Aksi',
       cell: ({ row }: any) => (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="sm" onClick={() => openDetail(row.original)} title="Detail">
+            <FileText className="w-3.5 h-3.5" />
+          </Button>
           {row.original.statusLaporanLpj !== 'Terverifikasi' && (
             <Button
               variant="primary"

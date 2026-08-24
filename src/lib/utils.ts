@@ -40,6 +40,7 @@ export function getStatusBadgeClass(status: string): string {
     case 'Sedang Diproses':
     case 'Sedang diproses':
     case 'Siap Bayar':
+    case 'Menunggu Approval':
     case 'Perlu Survei':
     case 'Survei Lapangan':
     case 'Disetujui Verifikator':

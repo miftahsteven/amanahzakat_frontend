@@ -5,7 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { FolderKanban, Plus, RefreshCw, Pencil } from 'lucide-react';
+import { FolderKanban, Plus, RefreshCw, Pencil, FileText } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import { programApi } from '../lib/api';
 
 export interface ProgramPageProps {
   onNavigate: (screen: string) => void;
+  onOpenDetail: (id: string) => void;
 }
 
 const formSchema = z.object({
@@ -28,7 +29,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const ProgramPage: React.FC<ProgramPageProps> = () => {
+export const ProgramPage: React.FC<ProgramPageProps> = ({ onOpenDetail }) => {
+  const openDetail = (row: ProgramZis) => onOpenDetail(row.id);
   const [dataList, setDataList] = useState<ProgramZis[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ProgramZis | null>(null);
@@ -118,7 +120,12 @@ export const ProgramPage: React.FC<ProgramPageProps> = () => {
       accessorKey: 'nama',
       header: 'Nama Program',
       cell: ({ row }: any) => (
-        <span className="font-bold text-[#16211D] dark:text-slate-100">{row.getValue('nama')}</span>
+        <span
+          onClick={() => openDetail(row.original)}
+          className="font-bold text-[#0F9D6E] hover:underline cursor-pointer"
+        >
+          {row.getValue('nama')}
+        </span>
       ),
     },
     {
@@ -164,9 +171,14 @@ export const ProgramPage: React.FC<ProgramPageProps> = () => {
       id: 'actions',
       header: 'Aksi',
       cell: ({ row }: any) => (
-        <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
-          Ubah
-        </Button>
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="sm" onClick={() => openDetail(row.original)} title="Detail">
+            <FileText className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+            Ubah
+          </Button>
+        </div>
       ),
     },
   ];

@@ -84,14 +84,18 @@ export function PenyaluranDetailPage({ id, onBack }: { id: string; onBack: () =>
             >
               Unduh Berita Acara
             </Button>
-            {tersalur ? (
+            {data.status === 'Siap Bayar' ? (
+              <Button variant="primary" size="sm" disabled={disbursing} onClick={handleDisburse}>
+                {disbursing ? 'Mencairkan…' : 'Cairkan Dana'}
+              </Button>
+            ) : tersalur ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/20 text-[#A5E4CB] border border-emerald-500/30">
                 <ShieldCheck className="w-3.5 h-3.5" /> Sudah Tersalurkan
               </span>
             ) : (
-              <Button variant="primary" size="sm" disabled={disbursing} onClick={handleDisburse}>
-                {disbursing ? 'Mencairkan…' : 'Cairkan Dana'}
-              </Button>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-100 border border-amber-500/30">
+                {data.status}
+              </span>
             )}
           </>
         }
