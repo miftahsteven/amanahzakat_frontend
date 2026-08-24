@@ -6,6 +6,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { DetailFields } from '../components/ui/DetailFields';
 import { Plus, ArrowUpRight, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -13,10 +14,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { penyaluranApi } from '../lib/api';
+import { useFocusRecord } from '../hooks/useFocusRecord';
 
 export interface PenyaluranPageProps {
   onNavigate: (screen: string) => void;
-  onSelectSalur: (id: string) => void;
+  onSelectSalur?: (id: string) => void;
+  focusId?: string;
+  onFocusConsumed?: () => void;
 }
 
 const formSchema = z.object({
@@ -30,12 +34,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur }) => {
+export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur, focusId, onFocusConsumed }) => {
   const [dataList, setDataList] = useState<TransaksiPenyaluran[]>([]);
   const [mustahikList, setMustahikList] = useState<Mustahik[]>([]);
   const [programList, setProgramList] = useState<ProgramZis[]>([]);
   const [filterAsnaf, setFilterAsnaf] = useState<string>('Semua');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState<TransaksiPenyaluran | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,6 +80,17 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur })
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    if (focusId) setFilterAsnaf('Semua');
+  }, [focusId]);
+
+  useFocusRecord(focusId, dataList, setSelectedDetail, onFocusConsumed);
+
+  const openDetail = (row: TransaksiPenyaluran) => {
+    setSelectedDetail(row);
+    onSelectSalur?.(row.id);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
@@ -109,7 +125,7 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur })
       header: 'No. Penyaluran',
       cell: ({ row }: any) => (
         <span
-          onClick={() => onSelectSalur(row.original.id)}
+          onClick={() => openDetail(row.original)}
           className="font-mono font-bold text-blue-600 hover:underline cursor-pointer"
         >
           {row.getValue('noPenyaluran')}
@@ -159,7 +175,7 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur })
               Cairkan Dana
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={() => onSelectSalur(row.original.id)}>
+          <Button variant="outline" size="sm" onClick={() => openDetail(row.original)}>
             Detail
           </Button>
         </div>
@@ -314,6 +330,40 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onSelectSalur })
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={!!selectedDetail}
+        onClose={() => setSelectedDetail(null)}
+        title="Detail Penyaluran ZIS"
+        subtitle={selectedDetail?.noPenyaluran}
+        maxWidth="md"
+      >
+        {selectedDetail && (
+          <div className="space-y-4">
+            <DetailFields
+              rows={[
+                { label: 'No. Penyaluran', value: selectedDetail.noPenyaluran },
+                { label: 'Tanggal', value: selectedDetail.tanggal },
+                { label: 'Mustahik', value: selectedDetail.mustahikNama },
+                { label: 'Asnaf', value: selectedDetail.asnaf },
+                { label: 'Program', value: selectedDetail.programNama },
+                { label: 'Nominal', value: formatRP(selectedDetail.nominal) },
+                { label: 'Dana Mustahik', value: formatRP(selectedDetail.danaMustahik) },
+                { label: 'Potongan Amil', value: formatRP(selectedDetail.potonganAmil) },
+                { label: 'Metode', value: selectedDetail.metodePembayaran },
+                { label: 'Rekening', value: selectedDetail.rekeningTujuan },
+                { label: 'Status', value: selectedDetail.status },
+                { label: 'Keterangan', value: selectedDetail.keterangan },
+              ]}
+            />
+            <div className="flex justify-end pt-2 border-t border-[#E3E8E4]">
+              <Button variant="outline" onClick={() => setSelectedDetail(null)}>
+                Tutup
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
