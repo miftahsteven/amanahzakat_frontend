@@ -12,12 +12,14 @@ import { ProgramPage } from './pages/ProgramPage';
 import { MitraPage } from './pages/MitraPage';
 import { UpzPage } from './pages/UpzPage';
 import { PayrollPage } from './pages/PayrollPage';
-import { LaporanKeuanganPage } from './pages/LaporanKeuanganPage';
+import { LaporanDistribusiPage } from './pages/LaporanDistribusiPage';
+import { DampakPublikPage } from './pages/DampakPublikPage';
 import { JurnalGLPage } from './pages/JurnalGLPage';
 import { ClosingPage } from './pages/ClosingPage';
 import { SimbaPage } from './pages/SimbaPage';
 import { KalkulatorPage } from './pages/KalkulatorPage';
 import { PetaSebaranPage } from './pages/PetaSebaranPage';
+import { PortalUpzPage } from './pages/PortalUpzPage';
 import { PortalPublicPage } from './pages/PortalPublicPage';
 import { InboxPage } from './pages/InboxPage';
 import { GenericPage } from './pages/GenericPage';
@@ -186,7 +188,7 @@ export function App() {
       case 'payroll':
         return <PayrollPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'laporan':
-        return <LaporanKeuanganPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+        return <LaporanDistribusiPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'jurnal':
         return <JurnalGLPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'closing':
@@ -197,6 +199,10 @@ export function App() {
         return <KalkulatorPage onOpenQuickZis={() => setIsQuickZisModalOpen(true)} />;
       case 'peta':
         return <PetaSebaranPage />;
+      case 'dampak':
+        return <DampakPublikPage />;
+      case 'portalUpz':
+        return <PortalUpzPage />;
       case 'portal':
         return <PortalPublicPage />;
       case 'inbox':

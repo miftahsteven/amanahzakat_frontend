@@ -699,6 +699,9 @@ export const upzApi = {
       body: JSON.stringify(data),
     });
   },
+  async portalSummary() {
+    return apiFetch<any>('/upz/portal');
+  },
 };
 
 export const payrollApi = {
@@ -764,6 +767,85 @@ export const dashboardApi = {
     if (params?.skala) q.set('skala', params.skala);
     const query = q.toString() ? `?${q.toString()}` : '';
     return apiFetch<any>(`/dashboard/summary${query}`);
+  },
+};
+
+export const laporanApi = {
+  async distribusi(params?: { dari?: string; sampai?: string }) {
+    const q = new URLSearchParams();
+    if (params?.dari) q.set('dari', params.dari);
+    if (params?.sampai) q.set('sampai', params.sampai);
+    const query = q.toString() ? `?${q.toString()}` : '';
+    return apiFetch<any>(`/laporan/distribusi${query}`);
+  },
+  async sebaran() {
+    return apiFetch<any>('/laporan/sebaran');
+  },
+  async dampak() {
+    return apiFetch<any>('/laporan/dampak');
+  },
+};
+
+export const keuanganApi = {
+  async listCoa() {
+    return apiFetch<any[]>('/keuangan/coa');
+  },
+  async listJurnal() {
+    return apiFetch<any[]>('/keuangan/jurnal');
+  },
+  async createJurnal(data: {
+    tanggal: string;
+    keterangan: string;
+    debitKode: string;
+    kreditKode: string;
+    nominal: number;
+  }) {
+    return apiFetch<any>('/keuangan/jurnal', { method: 'POST', body: JSON.stringify(data) });
+  },
+  async listSimba() {
+    return apiFetch<any[]>('/keuangan/simba');
+  },
+  async exportSimba(kodeForm: string) {
+    return apiFetch<any>(`/keuangan/simba/${kodeForm}/export`, { method: 'PATCH' });
+  },
+  async getClosing() {
+    return apiFetch<any>('/keuangan/closing');
+  },
+  async updateClosingStep(periode: string, stepId: string, done: boolean) {
+    return apiFetch<any>('/keuangan/closing/step', {
+      method: 'PATCH',
+      body: JSON.stringify({ periode, stepId, done }),
+    });
+  },
+  async toggleClosingLock(periode: string, lock: boolean) {
+    return apiFetch<any>('/keuangan/closing/lock', {
+      method: 'PATCH',
+      body: JSON.stringify({ periode, lock }),
+    });
+  },
+};
+
+export const inboxApi = {
+  async list() {
+    return apiFetch<any[]>('/inbox');
+  },
+  async markRead(id: string) {
+    return apiFetch<any>(`/inbox/${id}/read`, { method: 'PATCH' });
+  },
+  async markAllRead() {
+    return apiFetch<any>('/inbox/read-all', { method: 'PATCH' });
+  },
+};
+
+export const approvalApi = {
+  async list() {
+    return apiFetch<any[]>('/approval');
+  },
+  async approve(id: string) {
+    return apiFetch<any>(`/approval/${id}/approve`, { method: 'PATCH' });
+  },
+  async reject(id: string) {
+    return apiFetch<any>(`/approval/${id}/reject`, { method: 'PATCH' });
   },
 };
 
