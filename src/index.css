@@ -118,5 +118,12 @@
   font-size: 10px;
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.mustahik-map-label span.mustahik-map-label--active {
+  background: rgba(165, 228, 203, 0.95);
+  color: #04241a;
+  box-shadow: 0 0 0 2px rgba(15, 157, 110, 0.8), 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 

@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { isValidIndonesiaCoord } from '../../lib/wilayahCoords';
 
 export interface WilayahMarker {
+  id?: string;
   nama: string;
   lat: number;
   lng: number;
@@ -12,11 +13,19 @@ export interface WilayahMarker {
   program: string;
 }
 
+export interface MapFocusTarget {
+  key: string;
+  lat: number;
+  lng: number;
+}
+
 interface MustahikSebaranMapProps {
   wilayah: WilayahMarker[];
   className?: string;
   /** Trigger Leaflet resize when container size changes (e.g. modal open) */
   resizeKey?: number | boolean;
+  /** Fly map to this wilayah when user clicks recap card */
+  focusTarget?: MapFocusTarget | null;
 }
 
 function formatRpShort(n: number) {
@@ -25,9 +34,19 @@ function formatRpShort(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
-export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: MustahikSebaranMapProps) {
+function markerKey(w: WilayahMarker): string {
+  return w.id ?? w.nama;
+}
+
+export function MustahikSebaranMap({
+  wilayah,
+  className = '',
+  resizeKey,
+  focusTarget,
+}: MustahikSebaranMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const layersRef = useRef<Map<string, L.CircleMarker>>(new Map());
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -51,6 +70,7 @@ export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: Musta
     return () => {
       map.remove();
       mapRef.current = null;
+      layersRef.current.clear();
     };
   }, []);
 
@@ -63,23 +83,27 @@ export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: Musta
         map.removeLayer(layer);
       }
     });
+    layersRef.current.clear();
 
     const bounds: L.LatLngExpression[] = [];
+    const focusedKey = focusTarget?.key;
 
     wilayah.forEach((w) => {
       const lat = Number(w.lat);
       const lng = Number(w.lng);
       if (!isValidIndonesiaCoord(lat, lng)) return;
 
+      const key = markerKey(w);
       const label = w.nama.split('(')[0].trim();
       const radius = Math.min(28, 10 + w.jiwa * 3);
+      const isFocused = focusedKey === key;
 
       const circle = L.circleMarker([lat, lng], {
-        radius,
-        color: '#0F9D6E',
-        weight: 2,
+        radius: isFocused ? radius + 4 : radius,
+        color: isFocused ? '#A5E4CB' : '#0F9D6E',
+        weight: isFocused ? 3 : 2,
         fillColor: '#0F9D6E',
-        fillOpacity: 0.35,
+        fillOpacity: isFocused ? 0.55 : 0.35,
       }).addTo(map);
 
       circle.bindPopup(
@@ -91,9 +115,11 @@ export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: Musta
         </div>`
       );
 
+      layersRef.current.set(key, circle);
+
       const icon = L.divIcon({
         className: 'mustahik-map-label',
-        html: `<span>${label} (${w.jiwa})</span>`,
+        html: `<span class="${isFocused ? 'mustahik-map-label--active' : ''}">${label} (${w.jiwa})</span>`,
         iconSize: [0, 0],
         iconAnchor: [0, -radius - 4],
       });
@@ -103,14 +129,33 @@ export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: Musta
       bounds.push([lat, lng]);
     });
 
-    if (bounds.length === 1) {
-      map.setView(bounds[0], 9);
-    } else if (bounds.length > 1) {
-      map.fitBounds(L.latLngBounds(bounds), { padding: [48, 48], maxZoom: 9 });
-    } else {
-      map.setView([-6.2, 106.8], 7);
+    if (!focusTarget) {
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 9);
+      } else if (bounds.length > 1) {
+        map.fitBounds(L.latLngBounds(bounds), { padding: [48, 48], maxZoom: 9 });
+      } else {
+        map.setView([-6.2, 106.8], 7);
+      }
     }
-  }, [wilayah]);
+  }, [wilayah, focusTarget?.key]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focusTarget) return;
+
+    const { lat, lng, key } = focusTarget;
+    if (!isValidIndonesiaCoord(lat, lng)) return;
+
+    map.flyTo([lat, lng], 10, { duration: 1.25, easeLinearity: 0.25 });
+
+    const timer = window.setTimeout(() => {
+      const circle = layersRef.current.get(key);
+      circle?.openPopup();
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [focusTarget]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -118,6 +163,8 @@ export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: Musta
 
     const timer = window.setTimeout(() => {
       map.invalidateSize();
+      if (focusTarget) return;
+
       const bounds: L.LatLngExpression[] = [];
       wilayah.forEach((w) => {
         const lat = Number(w.lat);
@@ -132,7 +179,7 @@ export function MustahikSebaranMap({ wilayah, className = '', resizeKey }: Musta
     }, 120);
 
     return () => window.clearTimeout(timer);
-  }, [resizeKey, wilayah]);
+  }, [resizeKey, wilayah, focusTarget]);
 
   return <div ref={containerRef} className={`mustahik-sebaran-map ${className}`} />;
 }
