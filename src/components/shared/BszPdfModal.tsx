@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import {
   BszRecord,
   buildSbmzNumber,
-  buildVerifyUrl,
+  displayVerifyUrl,
   formatBszDate,
   formatBszNominal,
   getAkunGlPenerimaan,
@@ -39,11 +39,15 @@ export const BszPdfModal: React.FC<BszPdfModalProps> = ({ isOpen, onClose, data 
 
   const tgl = formatBszDate(data.tanggal);
   const nomorSbmz = buildSbmzNumber(data);
-  const verifyUrl = buildVerifyUrl(data.noKwitansi);
+  const verifyUrl = data.verifyUrl?.trim() || '';
   const akun = getAkunGlPenerimaan(data.jenisZis);
-  const qrPayload = `${nomorSbmz}|${data.muzakkiNama}|${data.nominal}|${data.noKwitansi}`;
-
+  /** QR must encode the signed public URL so scanners open the verify page. */
+  const qrPayload = verifyUrl;
   const handleDownloadPdf = () => {
+    if (!verifyUrl) {
+      toast.error('Tautan verifikasi belum tersedia. Muat ulang data lalu coba lagi.');
+      return;
+    }
     const node = printRef.current;
     if (!node) return;
 
@@ -157,15 +161,25 @@ export const BszPdfModal: React.FC<BszPdfModalProps> = ({ isOpen, onClose, data 
           </div>
 
           <div className="qr-box flex gap-[18px] items-center p-4 border border-[#E5EAE6] rounded-xl">
-            <img
-              src={qrImageUrl(qrPayload, 120)}
-              alt={`QR ${nomorSbmz}`}
-              className="w-[120px] h-[120px] rounded-md border border-[#E5EAE6] bg-white shrink-0"
-            />
+            {verifyUrl ? (
+              <img
+                src={qrImageUrl(qrPayload, 120)}
+                alt={`QR ${nomorSbmz}`}
+                className="w-[120px] h-[120px] rounded-md border border-[#E5EAE6] bg-white shrink-0"
+              />
+            ) : (
+              <div className="w-[120px] h-[120px] rounded-md border border-dashed border-[#E5EAE6] bg-[#F8FAF9] shrink-0 flex items-center justify-center p-2 text-center text-[10px] text-[#8B9992]">
+                Tautan verifikasi belum tersedia
+              </div>
+            )}
             <div className="min-w-0 space-y-1.5">
               <div className="text-[11px] font-bold uppercase tracking-[0.7px] text-[#8B9992]">Nomor SBMZ</div>
               <div className="font-mono text-[12.5px] font-bold break-all">{nomorSbmz}</div>
-              <div className="font-mono text-[11px] text-[#7C8B84] break-all">{verifyUrl}</div>
+              {verifyUrl ? (
+                <div className="font-mono text-[11px] text-[#7C8B84] break-all">{displayVerifyUrl(verifyUrl)}</div>
+              ) : (
+                <div className="text-[11px] text-amber-700">Muat ulang data penerimaan untuk mendapatkan QR bertanda tangan.</div>
+              )}
             </div>
           </div>
 

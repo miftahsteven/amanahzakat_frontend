@@ -22,6 +22,8 @@ export interface TransaksiPenerimaan {
   status: StatusPenerimaan;
   catatan?: string;
   buktiUrl?: string;
+  /** Signed public BSZ verify URL (from backend HMAC). */
+  verifyUrl?: string | null;
 }
 
 export interface PenerimaanDetail extends TransaksiPenerimaan {

@@ -12,6 +12,8 @@ export type BszRecord = {
   kanal: string;
   status?: string;
   catatan?: string | null;
+  /** Signed public verify URL from backend (QR payload). */
+  verifyUrl?: string | null;
 };
 
 export function formatBszDate(tanggal: string): string {
@@ -53,9 +55,9 @@ export function buildSbmzNumber(row: Pick<BszRecord, 'noKwitansi' | 'noSbmz' | '
   return `SBMZ/20${yy}/${mm}/${code}`;
 }
 
-export function buildVerifyUrl(noBukti: string): string {
-  const slug = noBukti.replace(/\//g, '-').toLowerCase();
-  return `verify.amanahzakat.id/zis/${slug}`;
+/** Display host/path without scheme for compact UI under QR. */
+export function displayVerifyUrl(verifyUrl: string): string {
+  return verifyUrl.replace(/^https?:\/\//i, '');
 }
 
 export function jenisDanaBadgeClass(jenis: string): string {

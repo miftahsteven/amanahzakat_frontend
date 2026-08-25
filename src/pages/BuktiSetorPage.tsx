@@ -26,6 +26,7 @@ type PenerimaanRow = {
   kanal: string;
   status: string;
   catatan?: string | null;
+  verifyUrl?: string | null;
 };
 
 export const BuktiSetorPage: React.FC = () => {
@@ -52,6 +53,7 @@ export const BuktiSetorPage: React.FC = () => {
             kanal: r.kanal,
             status: r.status,
             catatan: r.catatan,
+            verifyUrl: r.verifyUrl,
           }),
         )
         .sort((a, b) => {
