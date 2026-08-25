@@ -17,6 +17,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ImageUrlField } from '../../components/ui/ImageUrlField';
 import { cmsApi } from '../../lib/api';
+import { resolveMediaUrl } from '../../lib/media-url';
 
 export interface TestimonialItem {
   id: string;
@@ -283,7 +284,7 @@ export const TestimonialsManagementPage: React.FC<TestimonialsManagementPageProp
               <div className="pt-4 mt-4 border-t border-slate-100  flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <img
-                    src={t.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'}
+                    src={resolveMediaUrl(t.avatarUrl) || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'}
                     alt={t.name}
                     className="w-9 h-9 rounded-full object-cover border border-slate-200 "
                   />
@@ -411,10 +412,11 @@ export const TestimonialsManagementPage: React.FC<TestimonialsManagementPageProp
           </div>
 
           <ImageUrlField
-            label="URL / Foto Profil Avatar"
+            label="Foto Profil Avatar (Upload / Drag / Paste)"
             value={formData.avatarUrl ?? ''}
             onChange={(avatarUrl) => setFormData({ ...formData, avatarUrl })}
             pasteEnabled={isModalOpen}
+            hint="JPG, PNG, WEBP · Maks 50 MB · Bisa paste dari browser / clipboard"
           />
 
           <div>

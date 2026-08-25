@@ -18,7 +18,7 @@ import { Button } from '../../components/ui/Button';
 import { ImageUrlField } from '../../components/ui/ImageUrlField';
 import { IdNumberInput } from '../../components/ui/IdNumberInput';
 import { cmsApi } from '../../lib/api';
-import { webPublicPageUrl } from '../../lib/media-url';
+import { resolveMediaUrl, webPublicPageUrl } from '../../lib/media-url';
 
 export interface DistributionItem {
   id: number;
@@ -257,7 +257,7 @@ export const DistributionsManagementPage: React.FC<DistributionsManagementPagePr
             >
               <div className="relative h-44 bg-slate-800">
                 <img
-                  src={item.imageUrl}
+                  src={resolveMediaUrl(item.imageUrl)}
                   alt={item.judul}
                   className="w-full h-full object-cover"
                 />
@@ -491,10 +491,11 @@ export const DistributionsManagementPage: React.FC<DistributionsManagementPagePr
           </div>
 
           <ImageUrlField
-            label="URL / Foto Dokumentasi Penyaluran"
+            label="Foto / Gambar Dokumentasi Penyaluran (Upload / Drag / Paste)"
             value={formData.imageUrl}
             onChange={(imageUrl) => setFormData({ ...formData, imageUrl })}
             pasteEnabled={isModalOpen}
+            hint="JPG, PNG, WEBP · Maks 50 MB · Bisa paste dari browser / clipboard"
           />
 
           <div>
