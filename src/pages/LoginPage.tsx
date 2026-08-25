@@ -16,6 +16,7 @@ import {
 import { authApi } from '../lib/api';
 import { toast } from 'sonner';
 import type { AuthUser } from '../types/acl';
+import logoAmanahZakat from '../assets/logo-amanahzakat.png';
 
 export interface LoginPageProps {
   onLoginSuccess: (user: AuthUser) => void;
@@ -69,13 +70,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* Top Header Logo */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-[#0F9D6E] text-white flex items-center justify-center font-black text-2xl shadow-xl border border-white/20">
-              A
+            <div className="bg-white px-3.5 py-1.5 rounded-xl shadow-md inline-flex items-center">
+              <img
+                src={logoAmanahZakat}
+                alt="Amanah Zakat"
+                className="h-7 w-auto object-contain"
+              />
             </div>
             <div>
-              <span className="text-2xl font-black text-white tracking-tight block">AmanahZakat</span>
               <span className="text-xs font-bold text-[#A5E4CB] uppercase tracking-widest block">
-                Sistem ERP Lembaga Amil ZIS Indonesia
+                Sistem ERP Lembaga Amil ZIS
               </span>
             </div>
           </div>
@@ -143,14 +147,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         <div className="w-full max-w-md space-y-8 relative z-10">
           
           {/* Mobile Logo View (Hidden on LG) */}
-          <div className="lg:hidden flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#0F9D6E] text-white flex items-center justify-center font-black text-xl shadow-md">
-              A
-            </div>
-            <div>
-              <span className="text-xl font-black text-[#16211D] dark:text-white block">AmanahZakat</span>
-              <span className="text-[10px] font-bold text-[#0F9D6E] uppercase tracking-wider block">Lembaga Amil Zakat</span>
-            </div>
+          <div className="lg:hidden flex items-center justify-between gap-3 mb-4">
+            <img
+              src={logoAmanahZakat}
+              alt="Amanah Zakat"
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-[10px] font-bold text-[#0F9D6E] uppercase tracking-wider bg-[#E6F6EF] px-2 py-0.5 rounded-md">
+              ERP AMIL
+            </span>
           </div>
 
           {/* Header Title */}

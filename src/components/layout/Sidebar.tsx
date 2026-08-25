@@ -3,6 +3,7 @@ import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { getMenuIcon } from '../../lib/menuIcons';
 import type { NavModul } from '../../types/acl';
+import iconAmanahZakat from '../../assets/amanahzakat_icon.png';
 
 export interface SidebarProps {
   currentScreen: string;
@@ -74,9 +75,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             visuallyExpanded ? 'p-5 gap-3' : 'p-3 justify-center'
           )}
         >
-          <div className="w-8 h-8 rounded-xl bg-[#0F9D6E] text-[#04241A] flex items-center justify-center font-extrabold text-base shadow-sm shrink-0">
-            A
-          </div>
+          <img
+            src={iconAmanahZakat}
+            alt="Amanah Zakat"
+            className="w-8 h-8 object-contain shrink-0"
+          />
           {visuallyExpanded && (
             <div className="min-w-0">
               <h1 className="text-sm font-bold text-[#E7EFE9] tracking-tight truncate">AmanahZakat</h1>

@@ -6,6 +6,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { GlobalSearch } from './GlobalSearch';
 import { inboxApi } from '../../lib/api';
 import { hasPermission } from '../../lib/permissions';
+import iconAmanahZakat from '../../assets/amanahzakat_icon.png';
 
 export interface HeaderProps {
   currentScreen: string;
@@ -88,7 +89,12 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
+          <img
+            src={iconAmanahZakat}
+            alt="Amanah Zakat"
+            className="w-5 h-5 object-contain shrink-0"
+          />
           <span>Dashboard ERP</span>
           <span className="text-[#C2CCC6]">/</span>
           <span className="font-semibold text-[#16211D]">{screenLabel}</span>
