@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { ImageUrlField } from '../../components/ui/ImageUrlField';
 import { cmsApi } from '../../lib/api';
 
 export interface TestimonialItem {
@@ -409,18 +410,12 @@ export const TestimonialsManagementPage: React.FC<TestimonialsManagementPageProp
             </div>
           </div>
 
-          <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-              URL / Foto Profil Avatar
-            </label>
-            <input
-              type="text"
-              value={formData.avatarUrl}
-              onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-              placeholder="https://..."
-              className="w-full p-2.5 rounded-xl border border-slate-200  bg-white dark:bg-[#0D241B] text-slate-900 dark:text-white"
-            />
-          </div>
+          <ImageUrlField
+            label="URL / Foto Profil Avatar"
+            value={formData.avatarUrl ?? ''}
+            onChange={(avatarUrl) => setFormData({ ...formData, avatarUrl })}
+            pasteEnabled={isModalOpen}
+          />
 
           <div>
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">

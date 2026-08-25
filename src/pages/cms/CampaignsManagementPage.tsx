@@ -21,6 +21,8 @@ import { Button } from '../../components/ui/Button';
 import { cmsApi } from '../../lib/api';
 import { resolveMediaUrl, webPublicPageUrl } from '../../lib/media-url';
 import { formatIdNumber, parseIdNumber } from '../../lib/utils';
+import { preventFileDragDefaults, validateImageFile } from '../../lib/image-upload';
+import { useClipboardImagePaste } from '../../hooks/useClipboardImagePaste';
 
 export interface CampaignItem {
   id: number;
@@ -228,15 +230,9 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
   };
 
   const applySelectedImage = useCallback((file: File) => {
-    const MAX_SIZE_MB = 50;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Hanya file gambar (JPG, PNG, WEBP) yang diperbolehkan.');
-      return;
-    }
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      toast.error(
-        `Ukuran file terlalu besar (${(file.size / (1024 * 1024)).toFixed(1)} MB). Batas maksimal adalah ${MAX_SIZE_MB} MB.`,
-      );
+    const err = validateImageFile(file);
+    if (err) {
+      toast.error(err);
       return;
     }
 
@@ -248,41 +244,12 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
   }, []);
 
   const handleDropImage = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+    preventFileDragDefaults(e);
     const file = e.dataTransfer.files?.[0];
     if (file) applySelectedImage(file);
   };
 
-  /** Paste gambar dari clipboard (Ctrl+V) saat modal terbuka. */
-  useEffect(() => {
-    if (!isModalOpen) return;
-
-    const onPaste = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items?.length) return;
-
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (!item.type.startsWith('image/')) continue;
-
-        const blob = item.getAsFile();
-        if (!blob) continue;
-
-        e.preventDefault();
-        const ext = (item.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
-        const file = new File([blob], `paste-kampanye-${Date.now()}.${ext}`, {
-          type: item.type,
-        });
-        applySelectedImage(file);
-        toast.success('Gambar dari clipboard berhasil ditempel.');
-        return;
-      }
-    };
-
-    window.addEventListener('paste', onPaste);
-    return () => window.removeEventListener('paste', onPaste);
-  }, [isModalOpen, applySelectedImage]);
+  useClipboardImagePaste(isModalOpen, applySelectedImage);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -698,10 +665,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
               <div
                 className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 shadow-xs group"
                 tabIndex={0}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
+                onDragOver={preventFileDragDefaults}
                 onDrop={handleDropImage}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -753,10 +717,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
+                onDragOver={preventFileDragDefaults}
                 onDrop={handleDropImage}
                 className="border-2 border-dashed border-[#BFE4D4] hover:border-[#0F9D6E] bg-[#E6F6EF]/40 hover:bg-[#E6F6EF]/70 transition-all rounded-2xl p-4 text-center cursor-pointer space-y-1.5 group"
               >

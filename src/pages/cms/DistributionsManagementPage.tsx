@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { ImageUrlField } from '../../components/ui/ImageUrlField';
 import { IdNumberInput } from '../../components/ui/IdNumberInput';
 import { cmsApi } from '../../lib/api';
 import { webPublicPageUrl } from '../../lib/media-url';
@@ -489,18 +490,12 @@ export const DistributionsManagementPage: React.FC<DistributionsManagementPagePr
             </div>
           </div>
 
-          <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-              URL / Foto Dokumentasi Penyaluran
-            </label>
-            <input
-              type="text"
-              value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-              placeholder="https://..."
-              className="w-full p-2.5 rounded-xl border border-slate-200  bg-white dark:bg-[#0D241B] text-slate-900 dark:text-white"
-            />
-          </div>
+          <ImageUrlField
+            label="URL / Foto Dokumentasi Penyaluran"
+            value={formData.imageUrl}
+            onChange={(imageUrl) => setFormData({ ...formData, imageUrl })}
+            pasteEnabled={isModalOpen}
+          />
 
           <div>
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">

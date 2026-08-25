@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Sliders,
   Plus,
@@ -24,6 +24,8 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { cmsApi } from '../../lib/api';
 import { resolveMediaUrl } from '../../lib/media-url';
+import { preventFileDragDefaults, validateImageFile } from '../../lib/image-upload';
+import { useClipboardImagePaste } from '../../hooks/useClipboardImagePaste';
 
 export interface HeroSliderItem {
   id: number;
@@ -142,22 +144,33 @@ export const HeroSliderPage: React.FC<HeroSliderPageProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate 50 MB limit
-    const MAX_SIZE_MB = 50;
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      toast.error(`Ukuran file terlalu besar (${(file.size / (1024 * 1024)).toFixed(1)} MB). Batas maksimal adalah ${MAX_SIZE_MB} MB.`);
+  const applySelectedImage = useCallback((file: File) => {
+    const err = validateImageFile(file);
+    if (err) {
+      toast.error(err);
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
     setSelectedFile(file);
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
+    setPreviewUrl((prev) => {
+      if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) applySelectedImage(file);
   };
+
+  const handleDropImage = (e: React.DragEvent<HTMLDivElement>) => {
+    preventFileDragDefaults(e);
+    const file = e.dataTransfer.files?.[0];
+    if (file) applySelectedImage(file);
+  };
+
+  useClipboardImagePaste(isModalOpen, applySelectedImage);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -552,11 +565,16 @@ export const HeroSliderPage: React.FC<HeroSliderPageProps> = ({
           {/* 1. Upload Langsung Gambar Banner (Max 50 MB) */}
           <div className="space-y-2">
             <label className="block font-bold text-[#16211D]">
-              Gambar Banner Slider (Upload Langsung, Maksimal 50 MB) *
+              Gambar Banner Slider (Upload / Drag / Paste, Maksimal 50 MB) *
             </label>
 
             {previewUrl ? (
-              <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 shadow-xs group">
+              <div
+                className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 shadow-xs group"
+                tabIndex={0}
+                onDragOver={preventFileDragDefaults}
+                onDrop={handleDropImage}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={resolveMediaUrl(previewUrl)}
@@ -585,7 +603,10 @@ export const HeroSliderPage: React.FC<HeroSliderPageProps> = ({
                     variant="danger"
                     onClick={() => {
                       setSelectedFile(null);
-                      setPreviewUrl('');
+                      setPreviewUrl((prev) => {
+                        if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+                        return '';
+                      });
                       setFormData({ ...formData, imageUrl: '' });
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
@@ -603,6 +624,8 @@ export const HeroSliderPage: React.FC<HeroSliderPageProps> = ({
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
+                onDragOver={preventFileDragDefaults}
+                onDrop={handleDropImage}
                 className="border-2 border-dashed border-[#BFE4D4] hover:border-[#0F9D6E] bg-[#E6F6EF]/40 hover:bg-[#E6F6EF]/70 transition-all rounded-2xl p-6 text-center cursor-pointer space-y-2 group"
               >
                 <div className="w-12 h-12 rounded-full bg-white text-[#0F9D6E] flex items-center justify-center mx-auto shadow-xs group-hover:scale-110 transition-transform">
@@ -610,10 +633,10 @@ export const HeroSliderPage: React.FC<HeroSliderPageProps> = ({
                 </div>
                 <div>
                   <p className="font-bold text-sm text-[#16211D]">
-                    Klik untuk Pilih Gambar Banner atau Tarik File ke Sini
+                    Klik, tarik file, atau tempel (Ctrl+V) gambar di sini
                   </p>
                   <p className="text-[11px] text-[#7D938A] mt-0.5">
-                    Format didukung: JPG, PNG, WEBP, SVG · Ukuran Maksimal 50 MB
+                    Format: JPG, PNG, WEBP, SVG · Maks 50 MB · Bisa paste dari browser / clipboard
                   </p>
                 </div>
               </div>
