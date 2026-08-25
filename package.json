@@ -14,8 +14,10 @@
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-table": "^8.20.5",
+    "@types/leaflet": "^1.9.22",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.30.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -38,9 +40,9 @@
     "vite": "^5.4.11"
   },
   "optionalDependencies": {
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.0.0",
     "@tailwindcss/oxide-darwin-arm64": "^4.0.0",
     "@tailwindcss/oxide-darwin-x64": "^4.0.0",
-    "@tailwindcss/oxide-linux-x64-gnu": "^4.0.0"
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.0.0",
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.0.0"
   }
 }

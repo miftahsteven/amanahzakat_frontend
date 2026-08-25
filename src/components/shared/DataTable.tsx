@@ -15,6 +15,7 @@ import { Card } from '../ui/Card';
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  isLoading?: boolean;
   searchPlaceholder?: string;
   actionButton?: React.ReactNode;
 }
@@ -22,6 +23,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
+  isLoading = false,
   searchPlaceholder = 'Cari data...',
   actionButton,
 }: DataTableProps<TData, TValue>) {
@@ -83,7 +85,16 @@ export function DataTable<TData, TValue>({
             ))}
           </thead>
           <tbody className="divide-y divide-[#E3E8E4] dark:divide-slate-800/60">
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={columns.length} className="h-32 text-center text-[#7D938A] font-medium">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-[#0F9D6E] border-t-transparent rounded-full animate-spin" />
+                    <span>Memuat data...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
