@@ -40,7 +40,13 @@ export interface AssistanceItem {
   createdAt: string;
 }
 
-export const AssistanceManagementPage: React.FC = () => {
+export interface AssistanceManagementPageProps {
+  canVerify?: boolean;
+}
+
+export const AssistanceManagementPage: React.FC<AssistanceManagementPageProps> = ({
+  canVerify = false,
+}) => {
   const [submissions, setSubmissions] = useState<AssistanceItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -264,16 +270,18 @@ export const AssistanceManagementPage: React.FC = () => {
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openStatusModal(sub)}
-                          className="p-1.5 h-7 w-7 text-[#0F9D6E] border-emerald-200 hover:bg-emerald-50 dark:border-emerald-900"
-                          title="Update Status / Disposisi Survei"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </Button>
+                        {canVerify && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openStatusModal(sub)}
+                            className="p-1.5 h-7 w-7 text-[#0F9D6E] border-emerald-200 hover:bg-emerald-50 dark:border-emerald-900"
+                            title="Update Status / Disposisi Survei"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -366,7 +374,22 @@ export const AssistanceManagementPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t">
+            <div className="flex justify-end gap-2 pt-3 border-t">
+              {canVerify && (
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => {
+                    if (selectedSub) {
+                      setIsDetailModalOpen(false);
+                      openStatusModal(selectedSub);
+                    }
+                  }}
+                  className="bg-[#0F9D6E] hover:bg-[#09825A] text-white"
+                >
+                  Update Status
+                </Button>
+              )}
               <Button type="button" variant="outline" onClick={() => setIsDetailModalOpen(false)}>
                 Tutup
               </Button>

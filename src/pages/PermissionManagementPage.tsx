@@ -50,7 +50,11 @@ function suggestPermissionCode(kodeMenu: string, aksi: string): string {
   return `${kodeMenu}.${aksi}`.toLowerCase();
 }
 
-export const PermissionManagementPage: React.FC = () => {
+export interface PermissionManagementPageProps {
+  canManage?: boolean;
+}
+
+export const PermissionManagementPage: React.FC<PermissionManagementPageProps> = ({ canManage = false }) => {
   const [permissions, setPermissions] = useState<PermissionRow[]>([]);
   const [modules, setModules] = useState<CatalogModul[]>([]);
   const [roles, setRoles] = useState<RoleOption[]>([]);
@@ -261,10 +265,12 @@ export const PermissionManagementPage: React.FC = () => {
             <RefreshCw className="w-4 h-4" />
             Muat Ulang
           </Button>
-          <Button onClick={openCreate} variant="primary" className="flex items-center gap-2 py-2.5 px-4">
-            <Plus className="w-4 h-4" />
-            Tambah Permission
-          </Button>
+          {canManage && (
+            <Button onClick={openCreate} variant="primary" className="flex items-center gap-2 py-2.5 px-4">
+              <Plus className="w-4 h-4" />
+              Tambah Permission
+            </Button>
+          )}
         </div>
       </div>
 
@@ -348,20 +354,22 @@ export const PermissionManagementPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button onClick={() => openAssign(row)} variant="outline" className="text-xs py-1.5">
-                          <Users className="w-3.5 h-3.5" />
-                          Assign
-                        </Button>
-                        <Button onClick={() => openEdit(row)} variant="outline" className="text-xs py-1.5">
-                          <Pencil className="w-3.5 h-3.5" />
-                          Edit
-                        </Button>
-                        <Button onClick={() => handleDelete(row)} variant="outline" className="text-xs py-1.5">
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Hapus
-                        </Button>
-                      </div>
+                      {canManage && (
+                        <div className="flex items-center justify-end gap-2">
+                          <Button onClick={() => openAssign(row)} variant="outline" className="text-xs py-1.5">
+                            <Users className="w-3.5 h-3.5" />
+                            Assign
+                          </Button>
+                          <Button onClick={() => openEdit(row)} variant="outline" className="text-xs py-1.5">
+                            <Pencil className="w-3.5 h-3.5" />
+                            Edit
+                          </Button>
+                          <Button onClick={() => handleDelete(row)} variant="outline" className="text-xs py-1.5">
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Hapus
+                          </Button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))

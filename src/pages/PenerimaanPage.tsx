@@ -6,8 +6,9 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { BszPdfModal } from '../components/shared/BszPdfModal';
-import { Plus, Printer, CheckCircle, FileText, ArrowDownLeft, RefreshCw } from 'lucide-react';
+import { Plus, Printer, CheckCircle, FileText, ArrowDownLeft, RefreshCw, Pencil, Trash2 } from 'lucide-react';
 import { formatRP } from '../lib/utils';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,6 +18,10 @@ import { penerimaanApi } from '../lib/api';
 export interface PenerimaanPageProps {
   onNavigate: (screen: string) => void;
   onOpenDetail: (id: string) => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+  canVerify?: boolean;
 }
 
 const formSchema = z.object({
@@ -29,11 +34,20 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) => {
+export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({
+  onOpenDetail,
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+  canVerify = false,
+}) => {
   const [dataList, setDataList] = useState<TransaksiPenerimaan[]>([]);
   const [muzakkiList, setMuzakkiList] = useState<Muzakki[]>([]);
   const [filterJenis, setFilterJenis] = useState<string>('Semua');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<TransaksiPenerimaan | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TransaksiPenerimaan | null>(null);
   const [selectedBszData, setSelectedBszData] = useState<TransaksiPenerimaan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +56,8 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -74,22 +90,68 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
 
   const openDetail = (row: TransaksiPenerimaan) => onOpenDetail(row.id);
 
+  const openCreate = () => {
+    setEditTarget(null);
+    reset({ jenisZis: 'Zakat Maal', kanal: 'Transfer Bank BSI', nominal: 1000000, muzakkiId: '', catatan: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (row: TransaksiPenerimaan) => {
+    setEditTarget(row);
+    reset({
+      muzakkiId: row.muzakkiId,
+      jenisZis: row.jenisZis as FormValues['jenisZis'],
+      nominal: row.nominal,
+      kanal: row.kanal as FormValues['kanal'],
+      catatan: row.catatan || '',
+    });
+    setIsModalOpen(true);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      const created = await penerimaanApi.create({
-        muzakkiId: values.muzakkiId,
-        jenisZis: values.jenisZis,
-        nominal: values.nominal,
-        kanal: values.kanal,
-        catatan: values.catatan,
-      });
-      setDataList((prev) => [created, ...prev]);
-      toast.success(`Transaksi Penerimaan ZIS ${created.noKwitansi} berhasil dicatat!`);
-      reset();
-      setIsCreateModalOpen(false);
+      if (editTarget) {
+        const updated = await penerimaanApi.update(editTarget.id, {
+          muzakkiId: values.muzakkiId,
+          jenisZis: values.jenisZis,
+          nominal: values.nominal,
+          kanal: values.kanal,
+          catatan: values.catatan,
+        });
+        setDataList((prev) => prev.map((item) => (item.id === editTarget.id ? updated : item)));
+        toast.success(`Transaksi ${updated.noKwitansi} berhasil diperbarui.`);
+      } else {
+        const created = await penerimaanApi.create({
+          muzakkiId: values.muzakkiId,
+          jenisZis: values.jenisZis,
+          nominal: values.nominal,
+          kanal: values.kanal,
+          catatan: values.catatan,
+        });
+        setDataList((prev) => [created, ...prev]);
+        toast.success(`Transaksi Penerimaan ZIS ${created.noKwitansi} berhasil dicatat!`);
+      }
+      setIsModalOpen(false);
+      setEditTarget(null);
     } catch (err: any) {
       toast.error(err.message || 'Gagal menyimpan penerimaan ZIS');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsSubmitting(true);
+    try {
+      await penerimaanApi.remove(deleteTarget.id);
+      setDataList((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+      toast.success('Transaksi penerimaan berhasil dihapus.');
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus transaksi');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,11 +216,32 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
     {
       id: 'actions',
       header: 'Aksi',
-      cell: ({ row }: any) => (
+      cell: ({ row }: any) => {
+        const pending = row.original.status === 'Menunggu Verifikasi';
+        return (
         <div className="flex items-center gap-1.5">
-          {row.original.status === 'Menunggu Verifikasi' && (
-            <Button variant="secondary" size="sm" onClick={() => handleVerifikasi(row.original.id)}>
+          {pending && canVerify && (
+            <Button variant="secondary" size="sm" onClick={() => handleVerifikasi(row.original.id)} title="Verifikasi">
               <CheckCircle className="w-3.5 h-3.5 text-[#0F9D6E]" />
+            </Button>
+          )}
+          {pending && canUpdate && (
+            <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+              Ubah
+            </Button>
+          )}
+          {pending && canDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-rose-600"
+              title="Hapus"
+              onClick={() => {
+                setDeleteTarget(row.original);
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={() => setSelectedBszData(row.original)} title="Cetak BSZ">
@@ -168,7 +251,8 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
             <FileText className="w-3.5 h-3.5" />
           </Button>
         </div>
-      ),
+        );
+      },
     },
   ];
 
@@ -185,9 +269,11 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
           <Button variant="outline" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
             Muat Ulang
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-            Catat Penerimaan Baru
-          </Button>
+          {canCreate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+              Catat Penerimaan Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -214,10 +300,10 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
       )}
 
       <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Catat Penerimaan ZIS Baru"
-        subtitle="Input transaksi setoran masuk ke rekening penampung Amanah Zakat"
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setEditTarget(null); }}
+        title={editTarget ? 'Ubah Transaksi Penerimaan' : 'Catat Penerimaan ZIS Baru'}
+        subtitle={editTarget ? `Status: Menunggu Verifikasi — ${editTarget.noKwitansi}` : 'Input transaksi setoran masuk ke rekening penampung Amanah Zakat'}
         maxWidth="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
@@ -272,11 +358,11 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
 
           <div>
             <label className="block font-bold text-[#16211D] dark:text-slate-300 mb-1">Nominal (Rp) *</label>
-            <input
-              type="number"
-              {...register('nominal', { valueAsNumber: true })}
-              placeholder="Contoh: 1500000"
-              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E]"
+            <IdNumberInput
+              value={watch('nominal')}
+              onValueChange={(v) => setValue('nominal', v, { shouldValidate: true, shouldDirty: true })}
+              placeholder="Contoh: 1.500.000"
+              className="w-full p-2.5 border border-[#DDE3DF] dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-[#16211D] dark:text-slate-200 focus:ring-2 focus:ring-[#0F9D6E] font-mono"
             />
             {errors.nominal && <p className="text-rose-500 text-[11px] mt-1">{errors.nominal.message}</p>}
           </div>
@@ -292,14 +378,33 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({ onOpenDetail }) 
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E3E8E4] dark:border-slate-800">
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => { setIsModalOpen(false); setEditTarget(null); }}>
               Batal
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Menyimpan...' : 'Simpan Penerimaan'}
+              {isSubmitting ? 'Menyimpan...' : editTarget ? 'Simpan Perubahan' : 'Simpan Penerimaan'}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }}
+        title="Konfirmasi Hapus Penerimaan"
+        maxWidth="sm"
+      >
+        <p className="text-sm text-slate-600 mb-4">
+          Hapus transaksi <strong>{deleteTarget?.noKwitansi}</strong>? Hanya transaksi berstatus Menunggu Verifikasi yang dapat dihapus.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }} disabled={isSubmitting}>
+            Batal
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} disabled={isSubmitting}>
+            {isSubmitting ? 'Menghapus...' : 'Hapus Transaksi'}
+          </Button>
+        </div>
       </Modal>
 
       <BszPdfModal isOpen={!!selectedBszData} onClose={() => setSelectedBszData(null)} data={selectedBszData} />

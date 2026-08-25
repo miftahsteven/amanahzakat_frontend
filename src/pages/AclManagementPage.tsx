@@ -31,7 +31,11 @@ function isMenuAllowed(menu: CatalogMenu, permissionIds: string[]) {
   return menu.permissions.some((permission) => permissionIds.includes(permission.id));
 }
 
-export const AclManagementPage: React.FC = () => {
+export interface AclManagementPageProps {
+  canManage?: boolean;
+}
+
+export const AclManagementPage: React.FC<AclManagementPageProps> = ({ canManage = false }) => {
   const [modules, setModules] = useState<CatalogModul[]>([]);
   const [roles, setRoles] = useState<RoleACL[]>([]);
   const [selectedRoleCode, setSelectedRoleCode] = useState<string>('');
@@ -223,14 +227,16 @@ export const AclManagementPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <Button
-            onClick={() => setIsAddRoleModalOpen(true)}
-            variant="primary"
-            className="flex items-center gap-2 py-2.5 px-4 shadow-md hover:shadow-lg transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tambah Role Baru</span>
-          </Button>
+          {canManage && (
+            <Button
+              onClick={() => setIsAddRoleModalOpen(true)}
+              variant="primary"
+              className="flex items-center gap-2 py-2.5 px-4 shadow-md hover:shadow-lg transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tambah Role Baru</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -306,19 +312,21 @@ export const AclManagementPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <Button onClick={handleSelectAllGlobal} variant="outline" className="text-xs font-bold py-2 px-3">
-                  Pilih Semua Menu ({allMenus.length})
-                </Button>
-                <Button
-                  onClick={handleSaveRoleMapping}
-                  variant="primary"
-                  className="flex items-center gap-2 text-xs font-bold py-2 px-4 shadow-sm"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Simpan Akses</span>
-                </Button>
-              </div>
+              {canManage && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button onClick={handleSelectAllGlobal} variant="outline" className="text-xs font-bold py-2 px-3">
+                    Pilih Semua Menu ({allMenus.length})
+                  </Button>
+                  <Button
+                    onClick={handleSaveRoleMapping}
+                    variant="primary"
+                    className="flex items-center gap-2 text-xs font-bold py-2 px-4 shadow-sm"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Simpan Akses</span>
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">
@@ -342,21 +350,23 @@ export const AclManagementPage: React.FC = () => {
                         </span>
                       </h4>
 
-                      <button
-                        type="button"
-                        onClick={() => handleSelectAllSection(modul)}
-                        className="text-[11px] font-bold text-[#0F9D6E] hover:underline cursor-pointer flex items-center gap-1"
-                      >
-                        {isAllSectionChecked ? (
-                          <>
-                            <CheckSquare className="w-3.5 h-3.5" /> Batal Pilih Kategori
-                          </>
-                        ) : (
-                          <>
-                            <Square className="w-3.5 h-3.5" /> Pilih Semua Kategori
-                          </>
-                        )}
-                      </button>
+                      {canManage && (
+                        <button
+                          type="button"
+                          onClick={() => handleSelectAllSection(modul)}
+                          className="text-[11px] font-bold text-[#0F9D6E] hover:underline cursor-pointer flex items-center gap-1"
+                        >
+                          {isAllSectionChecked ? (
+                            <>
+                              <CheckSquare className="w-3.5 h-3.5" /> Batal Pilih Kategori
+                            </>
+                          ) : (
+                            <>
+                              <Square className="w-3.5 h-3.5" /> Pilih Semua Kategori
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
@@ -367,8 +377,10 @@ export const AclManagementPage: React.FC = () => {
                         return (
                           <div
                             key={menu.id}
-                            onClick={() => handleToggleMenuPermission(menu)}
-                            className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between select-none ${
+                            onClick={canManage ? () => handleToggleMenuPermission(menu) : undefined}
+                            className={`p-3 rounded-xl border transition-all flex items-center justify-between select-none ${
+                              canManage ? 'cursor-pointer' : 'cursor-default'
+                            } ${
                               isChecked
                                 ? 'bg-white dark:bg-slate-900 border-[#0F9D6E] shadow-2xs'
                                 : 'bg-white/60 dark:bg-slate-900/40 border-transparent opacity-60 hover:opacity-100 hover:border-[#DDE3DF]'
@@ -392,7 +404,8 @@ export const AclManagementPage: React.FC = () => {
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => {}}
-                              className="w-4 h-4 text-[#0F9D6E] accent-[#0F9D6E] cursor-pointer"
+                              disabled={!canManage}
+                              className="w-4 h-4 text-[#0F9D6E] accent-[#0F9D6E] cursor-pointer disabled:cursor-default"
                             />
                           </div>
                         );
@@ -409,14 +422,16 @@ export const AclManagementPage: React.FC = () => {
                 <span>Perubahan berlaku setelah disimpan, pada sesi login berikutnya.</span>
               </div>
 
-              <Button
-                onClick={handleSaveRoleMapping}
-                variant="primary"
-                className="flex items-center gap-2 py-3 px-6 shadow-md hover:shadow-lg transition-all"
-              >
-                <Save className="w-4 h-4" />
-                <span>Simpan Perubahan Hak Akses</span>
-              </Button>
+              {canManage && (
+                <Button
+                  onClick={handleSaveRoleMapping}
+                  variant="primary"
+                  className="flex items-center gap-2 py-3 px-6 shadow-md hover:shadow-lg transition-all"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Simpan Perubahan Hak Akses</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>

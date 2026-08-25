@@ -31,8 +31,8 @@ export interface ApprovalPageProps {
 }
 
 export const ApprovalPage: React.FC<ApprovalPageProps> = ({
-  canApprove = true,
-  canReject = true,
+  canApprove = false,
+  canReject = false,
   onOpenPenyaluran,
 }) => {
   const [approvals, setApprovals] = useState<ApprovalItem[]>([]);

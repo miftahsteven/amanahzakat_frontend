@@ -6,8 +6,9 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Plus, ArrowUpRight, RefreshCw } from 'lucide-react';
+import { Plus, ArrowUpRight, RefreshCw, Pencil, Trash2 } from 'lucide-react';
 import { formatRP } from '../lib/utils';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,6 +18,10 @@ import { penyaluranApi } from '../lib/api';
 export interface PenyaluranPageProps {
   onNavigate: (screen: string) => void;
   onOpenDetail: (id: string) => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+  canVerify?: boolean;
 }
 
 const formSchema = z.object({
@@ -30,12 +35,21 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) => {
+export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({
+  onOpenDetail,
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+  canVerify = false,
+}) => {
   const [dataList, setDataList] = useState<TransaksiPenyaluran[]>([]);
   const [mustahikList, setMustahikList] = useState<Mustahik[]>([]);
   const [programList, setProgramList] = useState<ProgramZis[]>([]);
   const [filterAsnaf, setFilterAsnaf] = useState<string>('Semua');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<TransaksiPenyaluran | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TransaksiPenyaluran | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,6 +57,8 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -77,17 +93,58 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
 
   const openDetail = (row: TransaksiPenyaluran) => onOpenDetail(row.id);
 
+  const openCreate = () => {
+    setEditTarget(null);
+    reset({ asnaf: 'Fakir', metodePembayaran: 'Transfer Bank BSI', nominal: 2500000, mustahikId: '', programId: '', keterangan: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (row: TransaksiPenyaluran) => {
+    setEditTarget(row);
+    reset({
+      mustahikId: row.mustahikId,
+      programId: row.programId,
+      asnaf: row.asnaf as FormValues['asnaf'],
+      nominal: row.nominal,
+      metodePembayaran: row.metodePembayaran,
+      keterangan: row.keterangan,
+    });
+    setIsModalOpen(true);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      const created = await penyaluranApi.create(values);
-      setDataList((prev) => [created, ...prev]);
-      toast.success(`Pengajuan ${created.noPenyaluran} masuk antrean approval berjenjang`);
-      reset();
-      setIsCreateModalOpen(false);
-      penyaluranApi.listMustahik().then(setMustahikList);
+      if (editTarget) {
+        const updated = await penyaluranApi.update(editTarget.id, values);
+        setDataList((prev) => prev.map((item) => (item.id === editTarget.id ? updated : item)));
+        toast.success(`Pengajuan ${updated.noPenyaluran} berhasil diperbarui.`);
+      } else {
+        const created = await penyaluranApi.create(values);
+        setDataList((prev) => [created, ...prev]);
+        toast.success(`Pengajuan ${created.noPenyaluran} masuk antrean approval berjenjang`);
+        penyaluranApi.listMustahik().then(setMustahikList);
+      }
+      setIsModalOpen(false);
+      setEditTarget(null);
     } catch (err: any) {
       toast.error(err.message || 'Gagal menyimpan pengajuan penyaluran');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsSubmitting(true);
+    try {
+      await penyaluranApi.remove(deleteTarget.id);
+      setDataList((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+      toast.success('Pengajuan penyaluran berhasil dihapus.');
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus pengajuan');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,18 +211,40 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
     {
       id: 'actions',
       header: 'Aksi',
-      cell: ({ row }: any) => (
+      cell: ({ row }: any) => {
+        const pending = row.original.status === 'Menunggu Approval';
+        return (
         <div className="flex items-center gap-1.5">
-          {row.original.status === 'Siap Bayar' && (
+          {row.original.status === 'Siap Bayar' && canVerify && (
             <Button variant="primary" size="sm" onClick={() => handleSalurkan(row.original.id)}>
               Cairkan Dana
+            </Button>
+          )}
+          {pending && canUpdate && (
+            <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+              Ubah
+            </Button>
+          )}
+          {pending && canDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-rose-600"
+              title="Hapus"
+              onClick={() => {
+                setDeleteTarget(row.original);
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={() => openDetail(row.original)}>
             Detail
           </Button>
         </div>
-      ),
+        );
+      },
     },
   ];
 
@@ -185,9 +264,11 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
           <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
             Refresh
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-            Buat Penyaluran Baru
-          </Button>
+          {canCreate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+              Buat Penyaluran Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -215,10 +296,10 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
       )}
 
       <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Pengajuan Penyaluran Dana ZIS"
-        subtitle="Pencairan dana zakat ke rekening mustahik terdaftar"
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setEditTarget(null); }}
+        title={editTarget ? 'Ubah Pengajuan Penyaluran' : 'Pengajuan Penyaluran Dana ZIS'}
+        subtitle={editTarget ? `Status: Menunggu Approval — ${editTarget.noPenyaluran}` : 'Pencairan dana zakat ke rekening mustahik terdaftar'}
         maxWidth="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
@@ -276,11 +357,11 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nominal Bantuan (Rp) *</label>
-              <input
-                type="number"
-                {...register('nominal', { valueAsNumber: true })}
-                placeholder="Contoh: 2500000"
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e]"
+              <IdNumberInput
+                value={watch('nominal')}
+                onValueChange={(v) => setValue('nominal', v, { shouldValidate: true, shouldDirty: true })}
+                placeholder="Contoh: 2.500.000"
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e] font-mono"
               />
               {errors.nominal && <p className="text-rose-500 text-[11px] mt-1">{errors.nominal.message}</p>}
             </div>
@@ -308,14 +389,33 @@ export const PenyaluranPage: React.FC<PenyaluranPageProps> = ({ onOpenDetail }) 
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => { setIsModalOpen(false); setEditTarget(null); }}>
               Batal
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Menyimpan...' : 'Ajukan Penyaluran'}
+              {isSubmitting ? 'Menyimpan...' : editTarget ? 'Simpan Perubahan' : 'Ajukan Penyaluran'}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }}
+        title="Konfirmasi Hapus Penyaluran"
+        maxWidth="sm"
+      >
+        <p className="text-sm text-slate-600 mb-4">
+          Hapus pengajuan <strong>{deleteTarget?.noPenyaluran}</strong>? Hanya pengajuan berstatus Menunggu Approval yang dapat dihapus.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }} disabled={isSubmitting}>
+            Batal
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} disabled={isSubmitting}>
+            {isSubmitting ? 'Menghapus...' : 'Hapus Pengajuan'}
+          </Button>
+        </div>
       </Modal>
     </div>
   );

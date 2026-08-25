@@ -210,7 +210,11 @@ export const RoleSearchSelect: React.FC<RoleSearchSelectProps> = ({
   );
 };
 
-export const UserManagementPage: React.FC = () => {
+export interface UserManagementPageProps {
+  canManage?: boolean;
+}
+
+export const UserManagementPage: React.FC<UserManagementPageProps> = ({ canManage = false }) => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [dynamicRoles, setDynamicRoles] = useState<{ id?: string; code: string; name: string; desc: string }[]>([
@@ -285,7 +289,9 @@ export const UserManagementPage: React.FC = () => {
   // Modal Create & Edit States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UserData | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -423,20 +429,28 @@ export const UserManagementPage: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (user: UserData) => {
+  const handleDeleteUser = (user: UserData) => {
     if (user.username === 'admin') {
       toast.error('Akun Super Admin utama tidak boleh dihapus!');
       return;
     }
-    if (confirm(`Apakah Anda yakin ingin menghapus akun pengguna "${user.namaLengkap}"?`)) {
-      try {
-        await usersApi.deleteUser(user.id);
-        toast.success(`Pengguna ${user.namaLengkap} telah dinonaktifkan/dihapus dari backend.`);
-        fetchUsers();
-      } catch (err: any) {
-        setUsers(users.filter((u) => u.id !== user.id));
-        toast.success(`Pengguna ${user.namaLengkap} telah dihapus.`);
-      }
+    setDeleteTarget(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deleteTarget) return;
+    try {
+      await usersApi.deleteUser(deleteTarget.id);
+      toast.success(`Pengguna ${deleteTarget.namaLengkap} telah dinonaktifkan/dihapus dari backend.`);
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+      fetchUsers();
+    } catch (err: any) {
+      setUsers(users.filter((u) => u.id !== deleteTarget.id));
+      toast.success(`Pengguna ${deleteTarget.namaLengkap} telah dihapus.`);
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -469,14 +483,16 @@ export const UserManagementPage: React.FC = () => {
           </p>
         </div>
 
-        <Button
-          onClick={handleOpenAddModal}
-          variant="primary"
-          className="flex items-center gap-2 shrink-0 py-3 px-5 shadow-md hover:shadow-lg transition-all"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Tambah Pengguna Baru</span>
-        </Button>
+        {canManage && (
+          <Button
+            onClick={handleOpenAddModal}
+            variant="primary"
+            className="flex items-center gap-2 shrink-0 py-3 px-5 shadow-md hover:shadow-lg transition-all"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Tambah Pengguna Baru</span>
+          </Button>
+        )}
       </div>
 
       {/* Summary KPI Cards */}
@@ -644,26 +660,48 @@ export const UserManagementPage: React.FC = () => {
                     </td>
 
                     <td className="p-4">
-                      <button
-                        onClick={() => handleToggleActive(user)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black border cursor-pointer transition-all ${
-                          user.isActive
-                            ? 'bg-[#E6F6EF] text-[#0F9D6E] border-[#A5E4CB] hover:bg-emerald-200'
-                            : 'bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-950 dark:text-rose-300'
-                        }`}
-                      >
-                        {user.isActive ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Aktif</span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-3 h-3" />
-                            <span>Nonaktif</span>
-                          </>
-                        )}
-                      </button>
+                      {canManage ? (
+                        <button
+                          onClick={() => handleToggleActive(user)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black border cursor-pointer transition-all ${
+                            user.isActive
+                              ? 'bg-[#E6F6EF] text-[#0F9D6E] border-[#A5E4CB] hover:bg-emerald-200'
+                              : 'bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-950 dark:text-rose-300'
+                          }`}
+                        >
+                          {user.isActive ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Aktif</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3 h-3" />
+                              <span>Nonaktif</span>
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black border ${
+                            user.isActive
+                              ? 'bg-[#E6F6EF] text-[#0F9D6E] border-[#A5E4CB]'
+                              : 'bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-950 dark:text-rose-300'
+                          }`}
+                        >
+                          {user.isActive ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Aktif</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3 h-3" />
+                              <span>Nonaktif</span>
+                            </>
+                          )}
+                        </span>
+                      )}
                     </td>
 
                     <td className="p-4 font-mono text-[#7D938A] text-[11px]">
@@ -671,22 +709,24 @@ export const UserManagementPage: React.FC = () => {
                     </td>
 
                     <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleOpenEditModal(user)}
-                          className="p-1.5 rounded-lg border border-[#DDE3DF] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#16211D] dark:text-slate-300 transition-colors cursor-pointer"
-                          title="Edit Pengguna"
-                        >
-                          <Edit3 className="w-3.5 h-3.5 text-[#0F9D6E]" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user)}
-                          className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950 text-rose-600 transition-colors cursor-pointer"
-                          title="Hapus Pengguna"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      {canManage && (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenEditModal(user)}
+                            className="p-1.5 rounded-lg border border-[#DDE3DF] dark:border-slate-700 hover:bg-[#F3F6F4] dark:hover:bg-slate-800 text-[#16211D] dark:text-slate-300 transition-colors cursor-pointer"
+                            title="Edit Pengguna"
+                          >
+                            <Edit3 className="w-3.5 h-3.5 text-[#0F9D6E]" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user)}
+                            className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950 text-rose-600 transition-colors cursor-pointer"
+                            title="Hapus Pengguna"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -910,6 +950,43 @@ export const UserManagementPage: React.FC = () => {
             </div>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeleteTarget(null);
+        }}
+        title="Hapus Pengguna"
+        subtitle="Apakah Anda yakin ingin menghapus akun ini?"
+        maxWidth="sm"
+      >
+        <div className="space-y-4 text-xs">
+          <p className="text-slate-600 dark:text-slate-300">
+            Pengguna &quot;<strong>{deleteTarget?.namaLengkap}</strong>&quot; akan dihapus/dinonaktifkan.
+          </p>
+          <div className="flex items-center justify-end gap-3 pt-3 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setDeleteTarget(null);
+              }}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={confirmDeleteUser}
+              className="bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              Ya, Hapus
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

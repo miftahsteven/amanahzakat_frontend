@@ -52,6 +52,8 @@ import { Button } from './components/ui/Button';
 import { authApi, isSessionValid, getStoredUser, removeStoredToken, penerimaanApi } from './lib/api';
 import type { AuthUser, NavModul } from './types/acl';
 import { menuCodesFromUser } from './types/acl';
+import { hasPermission } from './lib/permissions';
+import { IdNumberInput } from './components/ui/IdNumberInput';
 
 type DetailModule = 'penerimaan' | 'penyaluran' | 'muzakki' | 'mustahik' | 'program' | 'mitra' | 'upz';
 
@@ -232,6 +234,10 @@ export function App() {
           <PenerimaanPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'penerimaan', id })}
+            canCreate={hasPermission(currentUser, 'penerimaan.create')}
+            canUpdate={hasPermission(currentUser, 'penerimaan.update')}
+            canDelete={hasPermission(currentUser, 'penerimaan.delete')}
+            canVerify={hasPermission(currentUser, 'penerimaan.verify')}
           />
         );
       case 'penyaluran':
@@ -239,6 +245,10 @@ export function App() {
           <PenyaluranPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'penyaluran', id })}
+            canCreate={hasPermission(currentUser, 'penyaluran.create')}
+            canUpdate={hasPermission(currentUser, 'penyaluran.update')}
+            canDelete={hasPermission(currentUser, 'penyaluran.delete')}
+            canVerify={hasPermission(currentUser, 'penyaluran.verify')}
           />
         );
       case 'muzakki':
@@ -246,6 +256,9 @@ export function App() {
           <MuzakkiPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'muzakki', id })}
+            canCreate={hasPermission(currentUser, 'muzakki.create')}
+            canUpdate={hasPermission(currentUser, 'muzakki.update')}
+            canDelete={hasPermission(currentUser, 'muzakki.delete')}
           />
         );
       case 'mustahik':
@@ -253,6 +266,9 @@ export function App() {
           <MustahikPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'mustahik', id })}
+            canCreate={hasPermission(currentUser, 'mustahik.create')}
+            canUpdate={hasPermission(currentUser, 'mustahik.update')}
+            canDelete={hasPermission(currentUser, 'mustahik.delete')}
           />
         );
       case 'program':
@@ -260,14 +276,8 @@ export function App() {
           <ProgramPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'program', id })}
-            canUpdate={
-              Boolean(currentUser?.permissions?.includes('program.update')) ||
-              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
-            }
-            canDelete={
-              Boolean(currentUser?.permissions?.includes('program.delete')) ||
-              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
-            }
+            canUpdate={hasPermission(currentUser, 'program.update')}
+            canDelete={hasPermission(currentUser, 'program.delete')}
           />
         );
       case 'mitra':
@@ -275,6 +285,8 @@ export function App() {
           <MitraPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'mitra', id })}
+            canCreate={hasPermission(currentUser, 'mitra.create')}
+            canUpdate={hasPermission(currentUser, 'mitra.update')}
           />
         );
       case 'upz':
@@ -282,22 +294,28 @@ export function App() {
           <UpzPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'upz', id })}
+            canUpdate={hasPermission(currentUser, 'upz.update')}
           />
         );
       case 'payroll':
-        return <PayrollPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+        return <PayrollPage onNavigate={(screen) => setCurrentScreen(screen)} canUpdate={hasPermission(currentUser, 'payroll.update')} />;
       case 'laporan':
         return <LaporanDistribusiPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'laporan-keuangan':
         return <LaporanKeuanganPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'jurnal':
-        return <JurnalGLPage onNavigate={(screen) => setCurrentScreen(screen)} />;
+        return <JurnalGLPage onNavigate={(screen) => setCurrentScreen(screen)} canCreate={hasPermission(currentUser, 'jurnal.create')} />;
       case 'closing':
-        return <ClosingPage />;
+        return <ClosingPage canExecute={hasPermission(currentUser, 'closing.execute')} />;
       case 'simba':
-        return <SimbaPage />;
+        return <SimbaPage canExport={hasPermission(currentUser, 'simba.export')} />;
       case 'kalkulator':
-        return <KalkulatorPage onOpenQuickZis={openQuickZis} />;
+        return (
+          <KalkulatorPage
+            onOpenQuickZis={openQuickZis}
+            canUpdate={hasPermission(currentUser, 'kalkulator.update')}
+          />
+        );
       case 'peta':
         return <PetaSebaranPage />;
       case 'dampak':
@@ -309,55 +327,64 @@ export function App() {
       case 'inbox':
         return <InboxPage onNavigate={(screen) => setCurrentScreen(screen)} />;
       case 'cms-hero':
-        return <HeroSliderPage />;
+        return (
+          <HeroSliderPage
+            canCreate={hasPermission(currentUser, 'cms-hero.create')}
+            canUpdate={hasPermission(currentUser, 'cms-hero.update')}
+            canDelete={hasPermission(currentUser, 'cms-hero.delete')}
+          />
+        );
       case 'cms-campaigns':
         return (
           <CampaignsManagementPage
-            canCreate={
-              Boolean(currentUser?.permissions?.includes('cms-campaigns.create')) ||
-              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
-            }
-            canUpdate={
-              Boolean(currentUser?.permissions?.includes('cms-campaigns.update')) ||
-              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
-            }
-            canDelete={
-              Boolean(currentUser?.permissions?.includes('cms-campaigns.delete')) ||
-              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
-            }
+            canCreate={hasPermission(currentUser, 'cms-campaigns.create')}
+            canUpdate={hasPermission(currentUser, 'cms-campaigns.update')}
+            canDelete={hasPermission(currentUser, 'cms-campaigns.delete')}
           />
         );
       case 'cms-distributions':
-        return <DistributionsManagementPage />;
+        return (
+          <DistributionsManagementPage
+            canCreate={hasPermission(currentUser, 'cms-distributions.create')}
+            canUpdate={hasPermission(currentUser, 'cms-distributions.update')}
+            canDelete={hasPermission(currentUser, 'cms-distributions.delete')}
+          />
+        );
       case 'cms-testimonials':
-        return <TestimonialsManagementPage />;
+        return (
+          <TestimonialsManagementPage
+            canCreate={hasPermission(currentUser, 'cms-testimonials.create')}
+            canUpdate={hasPermission(currentUser, 'cms-testimonials.update')}
+            canDelete={hasPermission(currentUser, 'cms-testimonials.delete')}
+          />
+        );
       case 'cms-faqs':
-        return <FaqManagementPage />;
+        return (
+          <FaqManagementPage
+            canCreate={hasPermission(currentUser, 'cms-faqs.create')}
+            canUpdate={hasPermission(currentUser, 'cms-faqs.update')}
+            canDelete={hasPermission(currentUser, 'cms-faqs.delete')}
+          />
+        );
       case 'cms-impact':
-        return <ImpactManagementPage />;
+        return <ImpactManagementPage canUpdate={hasPermission(currentUser, 'cms-impact.update')} />;
       case 'cms-assistance':
-        return <AssistanceManagementPage />;
+        return <AssistanceManagementPage canVerify={hasPermission(currentUser, 'cms-assistance.verify')} />;
       case 'cms-settings':
-        return <WebSettingsPage />;
+        return <WebSettingsPage canUpdate={hasPermission(currentUser, 'cms-settings.update')} />;
       case 'user-management':
-        return <UserManagementPage />;
+        return <UserManagementPage canManage={hasPermission(currentUser, 'user-management.manage')} />;
       case 'module-management':
-        return <ModuleManagementPage />;
+        return <ModuleManagementPage canManage={hasPermission(currentUser, 'module-management.manage')} />;
       case 'permission-management':
-        return <PermissionManagementPage />;
+        return <PermissionManagementPage canManage={hasPermission(currentUser, 'permission-management.manage')} />;
       case 'acl-management':
-        return <AclManagementPage />;
+        return <AclManagementPage canManage={hasPermission(currentUser, 'acl-management.manage')} />;
       case 'approval':
         return (
           <ApprovalPage
-            canApprove={
-              Boolean(currentUser?.permissions?.includes('approval.approve')) ||
-              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
-            }
-            canReject={
-              Boolean(currentUser?.permissions?.includes('approval.reject')) ||
-              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
-            }
+            canApprove={hasPermission(currentUser, 'approval.approve')}
+            canReject={hasPermission(currentUser, 'approval.reject')}
             onOpenPenyaluran={(id) => setDetailRoute({ module: 'penyaluran', id })}
           />
         );
@@ -472,12 +499,11 @@ export function App() {
 
           <div>
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nominal Setoran (Rp) *</label>
-            <input
-              type="number"
+            <IdNumberInput
               value={quickNominal}
-              onChange={(e) => setQuickNominal(Number(e.target.value))}
-              placeholder="Contoh: 1000000"
-              className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              onValueChange={setQuickNominal}
+              placeholder="Contoh: 1.000.000"
+              className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
             />
           </div>
 

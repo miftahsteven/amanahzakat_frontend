@@ -7,14 +7,16 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { FileCheck2, Plus, RefreshCw } from 'lucide-react';
 import { formatRP } from '../lib/utils';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { keuanganApi } from '../lib/api';
 import { toast } from 'sonner';
 
 export interface JurnalGLPageProps {
   onNavigate: (screen: string) => void;
+  canCreate?: boolean;
 }
 
-export const JurnalGLPage: React.FC<JurnalGLPageProps> = () => {
+export const JurnalGLPage: React.FC<JurnalGLPageProps> = ({ canCreate = false }) => {
   const [dataList, setDataList] = useState<JurnalEntry[]>([]);
   const [coaList, setCoaList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +96,9 @@ export const JurnalGLPage: React.FC<JurnalGLPageProps> = () => {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>Refresh</Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsModalOpen(true)}>Tambah Jurnal Manual</Button>
+          {canCreate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsModalOpen(true)}>Tambah Jurnal Manual</Button>
+          )}
         </div>
       </div>
 
@@ -110,7 +114,7 @@ export const JurnalGLPage: React.FC<JurnalGLPageProps> = () => {
           <select value={form.kreditKode} onChange={(e) => setForm({ ...form, kreditKode: e.target.value })} className="w-full p-2.5 border rounded-xl">
             {coaList.map((c) => <option key={c.kode} value={c.kode}>{c.kode} — {c.nama}</option>)}
           </select>
-          <input type="number" placeholder="Nominal" value={form.nominal} onChange={(e) => setForm({ ...form, nominal: Number(e.target.value) })} className="w-full p-2.5 border rounded-xl" />
+          <IdNumberInput placeholder="Nominal" value={form.nominal} onValueChange={(nominal) => setForm({ ...form, nominal })} className="w-full p-2.5 border rounded-xl" />
           <Button variant="primary" className="w-full" onClick={handleCreate}>Posting Jurnal</Button>
         </div>
       </Modal>

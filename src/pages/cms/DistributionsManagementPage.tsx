@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { IdNumberInput } from '../../components/ui/IdNumberInput';
 import { cmsApi } from '../../lib/api';
 import { webPublicPageUrl } from '../../lib/media-url';
 
@@ -36,7 +37,17 @@ export interface DistributionItem {
   imageUrl: string;
 }
 
-export const DistributionsManagementPage: React.FC = () => {
+export interface DistributionsManagementPageProps {
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+}
+
+export const DistributionsManagementPage: React.FC<DistributionsManagementPageProps> = ({
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const [items, setItems] = useState<DistributionItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -195,15 +206,17 @@ export const DistributionsManagementPage: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={openCreateModal}
-            className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
-          >
-            <Plus className="w-4 h-4" />
-            Tulis Kabar Penyaluran
-          </Button>
+          {canCreate && (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={openCreateModal}
+              className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
+            >
+              <Plus className="w-4 h-4" />
+              Tulis Kabar Penyaluran
+            </Button>
+          )}
         </div>
       </div>
 
@@ -310,27 +323,31 @@ export const DistributionsManagementPage: React.FC = () => {
                   </a>
 
                   <div className="flex items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openEditModal(item)}
-                      className="p-2 h-8 w-8 text-slate-700 dark:text-slate-300"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      className="p-2 h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                    {canUpdate && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditModal(item)}
+                        className="p-2 h-8 w-8 text-slate-700 dark:text-slate-300"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                    {canDelete && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="p-2 h-8 w-8 text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -406,11 +423,10 @@ export const DistributionsManagementPage: React.FC = () => {
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Nominal Tersalur (Rp) *
               </label>
-              <input
-                type="number"
+              <IdNumberInput
                 required
                 value={formData.nominal}
-                onChange={(e) => setFormData({ ...formData, nominal: Number(e.target.value) })}
+                onValueChange={(nominal) => setFormData({ ...formData, nominal })}
                 className="w-full p-2.5 rounded-xl border border-slate-200  bg-white dark:bg-[#0D241B] text-slate-900 dark:text-white"
               />
             </div>
@@ -418,10 +434,9 @@ export const DistributionsManagementPage: React.FC = () => {
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Jumlah Penerima (Jiwa)
               </label>
-              <input
-                type="number"
+              <IdNumberInput
                 value={formData.penerima}
-                onChange={(e) => setFormData({ ...formData, penerima: Number(e.target.value) })}
+                onValueChange={(penerima) => setFormData({ ...formData, penerima })}
                 className="w-full p-2.5 rounded-xl border border-slate-200  bg-white dark:bg-[#0D241B] text-slate-900 dark:text-white"
               />
             </div>

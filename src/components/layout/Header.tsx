@@ -5,6 +5,7 @@ import { findMenuLabel } from '../../types/acl';
 import { useTheme } from '../../hooks/useTheme';
 import { GlobalSearch } from './GlobalSearch';
 import { inboxApi } from '../../lib/api';
+import { hasPermission } from '../../lib/permissions';
 
 export interface HeaderProps {
   currentScreen: string;
@@ -41,10 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
   const canOpenInbox = currentUser?.menus?.includes('inbox') ?? navigation.some((modul) =>
     modul.menus.some((menu) => menu.kodeMenu === 'inbox')
   );
-  const canQuickZis =
-    currentUser?.permissions?.includes('penerimaan.create') ||
-    currentUser?.menus?.includes('penerimaan') ||
-    navigation.some((modul) => modul.menus.some((menu) => menu.kodeMenu === 'penerimaan'));
+  const canQuickZis = hasPermission(currentUser, 'penerimaan.create');
   const roleLabel = currentUser?.roles?.[0]?.replace(/_/g, ' ') || 'Pengguna';
   const themeLabel =
     preference === 'system' ? 'Ikuti sistem' : preference === 'light' ? 'Mode terang' : 'Mode gelap';

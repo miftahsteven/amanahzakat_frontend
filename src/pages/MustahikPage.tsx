@@ -5,8 +5,9 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { HeartHandshake, Plus, ShieldCheck, RefreshCw } from 'lucide-react';
+import { HeartHandshake, Plus, ShieldCheck, RefreshCw, Pencil, Trash2, FileText } from 'lucide-react';
 import { formatRP } from '../lib/utils';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,6 +17,9 @@ import { mustahikApi } from '../lib/api';
 export interface MustahikPageProps {
   onNavigate: (screen: string) => void;
   onOpenDetail: (id: string) => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
 const formSchema = z.object({
@@ -32,10 +36,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
+export const MustahikPage: React.FC<MustahikPageProps> = ({
+  onOpenDetail,
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const [dataList, setDataList] = useState<Mustahik[]>([]);
   const [filterAsnaf, setFilterAsnaf] = useState<string>('Semua');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Mustahik | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Mustahik | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,6 +55,8 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -71,18 +85,75 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
 
   const openDetail = (row: Mustahik) => onOpenDetail(row.id);
 
+  const openCreate = () => {
+    setEditTarget(null);
+    reset({ kategoriAsnaf: 'Fakir', penghasilanBulanan: 1000000, jumlahTanggungan: 3, nik: '', nama: '', hp: '', alamat: '', pekerjaan: '', rekeningBank: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (row: Mustahik) => {
+    setEditTarget(row);
+    reset({
+      nik: row.nik,
+      nama: row.nama,
+      kategoriAsnaf: row.kategoriAsnaf,
+      hp: row.hp,
+      alamat: row.alamat,
+      pekerjaan: row.pekerjaan,
+      penghasilanBulanan: row.penghasilanBulanan,
+      jumlahTanggungan: row.jumlahTanggungan,
+      rekeningBank: row.rekeningBank,
+    });
+    setIsModalOpen(true);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      const created = await mustahikApi.create(values);
-      setDataList((prev) => [created, ...prev]);
-      toast.success(
-        `Mustahik ${created.nama} berhasil terdaftar — Skor kelayakan: ${created.skorKelayakan}/100`,
-      );
-      reset();
-      setIsCreateModalOpen(false);
+      if (editTarget) {
+        const updated = await mustahikApi.update(editTarget.id, {
+          nama: values.nama,
+          kategoriAsnaf: values.kategoriAsnaf,
+          hp: values.hp,
+          alamat: values.alamat,
+          pekerjaan: values.pekerjaan,
+          jumlahTanggungan: values.jumlahTanggungan,
+          penghasilanBulanan: values.penghasilanBulanan,
+          rekeningBank: values.rekeningBank,
+        });
+        setDataList((prev) =>
+          prev.map((m) =>
+            m.id === editTarget.id
+              ? { ...m, ...updated, skorKelayakan: updated.skorKelayakan ?? m.skorKelayakan }
+              : m,
+          ),
+        );
+        toast.success(`Data mustahik "${values.nama}" berhasil diperbarui.`);
+      } else {
+        const created = await mustahikApi.create(values);
+        setDataList((prev) => [created, ...prev]);
+        toast.success(`Mustahik ${created.nama} berhasil terdaftar — Skor kelayakan: ${created.skorKelayakan}/100`);
+      }
+      setIsModalOpen(false);
+      setEditTarget(null);
     } catch (err: any) {
-      toast.error(err.message || 'Gagal mendaftarkan mustahik');
+      toast.error(err.message || 'Gagal menyimpan data mustahik');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsSubmitting(true);
+    try {
+      await mustahikApi.remove(deleteTarget.id);
+      setDataList((prev) => prev.filter((m) => m.id !== deleteTarget.id));
+      toast.success(`Mustahik "${deleteTarget.nama}" berhasil diarsipkan.`);
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus mustahik');
     } finally {
       setIsSubmitting(false);
     }
@@ -149,6 +220,36 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
       header: 'Status Survei',
       cell: ({ row }: any) => <Badge statusText={row.getValue('statusSurvei')} />,
     },
+    {
+      id: 'actions',
+      header: 'Aksi',
+      cell: ({ row }: any) => (
+        <div className="flex items-center gap-1.5">
+          <Button variant="ghost" size="sm" onClick={() => openDetail(row.original)} title="Detail">
+            <FileText className="w-3.5 h-3.5" />
+          </Button>
+          {canUpdate && (
+            <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+              Ubah
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-rose-600"
+              title="Arsipkan"
+              onClick={() => {
+                setDeleteTarget(row.original);
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          )}
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -167,9 +268,11 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
           <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
             Refresh
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-            Tambah Mustahik Baru
-          </Button>
+          {canCreate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+              Tambah Mustahik Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -197,10 +300,10 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
       />
 
       <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Registrasi Mustahik Terverifikasi"
-        subtitle="Input data calon penerima bantuan zakat & verifikasi ganda NIK"
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setEditTarget(null); }}
+        title={editTarget ? 'Ubah Data Mustahik' : 'Registrasi Mustahik Terverifikasi'}
+        subtitle={editTarget ? `NIK: ${editTarget.nik}` : 'Input data calon penerima bantuan zakat & verifikasi ganda NIK'}
         maxWidth="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
@@ -211,8 +314,9 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
                 type="text"
                 {...register('nik')}
                 maxLength={16}
+                disabled={!!editTarget}
                 placeholder="Contoh: 3273101508700002"
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 font-mono focus:ring-2 focus:ring-[#0f9d6e]"
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 font-mono focus:ring-2 focus:ring-[#0f9d6e] disabled:opacity-60"
               />
               {errors.nik && <p className="text-rose-500 text-[11px] mt-1">{errors.nik.message}</p>}
             </div>
@@ -259,11 +363,11 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
 
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Penghasilan Bulanan (Rp) *</label>
-              <input
-                type="number"
-                {...register('penghasilanBulanan', { valueAsNumber: true })}
-                placeholder="Contoh: 1200000"
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e]"
+              <IdNumberInput
+                value={watch('penghasilanBulanan')}
+                onValueChange={(v) => setValue('penghasilanBulanan', v, { shouldValidate: true, shouldDirty: true })}
+                placeholder="Contoh: 1.200.000"
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e] font-mono"
               />
             </div>
           </div>
@@ -271,11 +375,11 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Jumlah Tanggungan Keluarga *</label>
-              <input
-                type="number"
-                {...register('jumlahTanggungan', { valueAsNumber: true })}
+              <IdNumberInput
+                value={watch('jumlahTanggungan')}
+                onValueChange={(v) => setValue('jumlahTanggungan', v, { shouldValidate: true, shouldDirty: true })}
                 placeholder="Contoh: 4"
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e]"
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-[#0f9d6e] font-mono"
               />
             </div>
 
@@ -314,14 +418,33 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({ onOpenDetail }) => {
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => { setIsModalOpen(false); setEditTarget(null); }}>
               Batal
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Menyimpan...' : 'Simpan Mustahik'}
+              {isSubmitting ? 'Menyimpan...' : editTarget ? 'Simpan Perubahan' : 'Simpan Mustahik'}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }}
+        title="Konfirmasi Arsip Mustahik"
+        maxWidth="sm"
+      >
+        <p className="text-sm text-slate-600 mb-4">
+          Arsipkan mustahik <strong>{deleteTarget?.nama}</strong>? Data riwayat penyaluran tetap tersimpan, namun mustahik tidak lagi muncul di daftar aktif.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }} disabled={isSubmitting}>
+            Batal
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} disabled={isSubmitting}>
+            {isSubmitting ? 'Mengarsipkan...' : 'Arsipkan Mustahik'}
+          </Button>
+        </div>
       </Modal>
     </div>
   );

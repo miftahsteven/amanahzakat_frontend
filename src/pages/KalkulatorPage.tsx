@@ -26,6 +26,7 @@ export interface QuickZisOptions {
 
 export interface KalkulatorPageProps {
   onOpenQuickZis: (opts?: QuickZisOptions) => void;
+  canUpdate?: boolean;
 }
 
 const JENIS_API: Record<ZakatTab, string> = {
@@ -35,7 +36,7 @@ const JENIS_API: Record<ZakatTab, string> = {
   fitrah: 'FITRAH',
 };
 
-export const KalkulatorPage: React.FC<KalkulatorPageProps> = ({ onOpenQuickZis }) => {
+export const KalkulatorPage: React.FC<KalkulatorPageProps> = ({ onOpenQuickZis, canUpdate = false }) => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<ZakatTab>('profesi');
   const [showConfig, setShowConfig] = useState(false);
@@ -205,9 +206,11 @@ export const KalkulatorPage: React.FC<KalkulatorPageProps> = ({ onOpenQuickZis }
             ))}
           </div>
           <div className="flex gap-2">
-            <Button variant="primary" onClick={() => saveConfig.mutate()} disabled={saveConfig.isPending}>
-              Simpan ke Database
-            </Button>
+            {canUpdate && (
+              <Button variant="primary" onClick={() => saveConfig.mutate()} disabled={saveConfig.isPending}>
+                Simpan ke Database
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setShowConfig(false)}>
               Tutup
             </Button>

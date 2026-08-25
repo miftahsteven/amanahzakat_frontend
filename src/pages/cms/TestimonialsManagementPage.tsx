@@ -30,7 +30,17 @@ export interface TestimonialItem {
   order: number;
 }
 
-export const TestimonialsManagementPage: React.FC = () => {
+export interface TestimonialsManagementPageProps {
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+}
+
+export const TestimonialsManagementPage: React.FC<TestimonialsManagementPageProps> = ({
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -187,15 +197,17 @@ export const TestimonialsManagementPage: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={openCreateModal}
-            className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
-          >
-            <Plus className="w-4 h-4" />
-            Tambah Testimoni Baru
-          </Button>
+          {canCreate && (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={openCreateModal}
+              className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
+            >
+              <Plus className="w-4 h-4" />
+              Tambah Testimoni Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -285,27 +297,31 @@ export const TestimonialsManagementPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditModal(t)}
-                    className="p-1.5 h-7 w-7 text-slate-700 dark:text-slate-300"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedTesti(t);
-                      setIsDeleteModalOpen(true);
-                    }}
-                    className="p-1.5 h-7 w-7 text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  {canUpdate && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditModal(t)}
+                      className="p-1.5 h-7 w-7 text-slate-700 dark:text-slate-300"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedTesti(t);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="p-1.5 h-7 w-7 text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

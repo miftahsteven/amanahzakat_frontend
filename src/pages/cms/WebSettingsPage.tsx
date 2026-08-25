@@ -15,7 +15,13 @@ import { toast } from 'sonner';
 import { Button } from '../../components/ui/Button';
 import { cmsApi } from '../../lib/api';
 
-export const WebSettingsPage: React.FC = () => {
+export interface WebSettingsPageProps {
+  canUpdate?: boolean;
+}
+
+export const WebSettingsPage: React.FC<WebSettingsPageProps> = ({
+  canUpdate = false,
+}) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -68,6 +74,7 @@ export const WebSettingsPage: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canUpdate) return;
     setIsSaving(true);
     try {
       await cmsApi.updateWebSettings(formData);
@@ -128,18 +135,21 @@ export const WebSettingsPage: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isSaving}
-            className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
-          >
-            <Save className="w-4 h-4" />
-            {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan Web'}
-          </Button>
+          {canUpdate && (
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSaving}
+              className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan Web'}
+            </Button>
+          )}
         </div>
       </div>
 
+      <fieldset disabled={!canUpdate} className="space-y-6 border-0 p-0 m-0 min-w-0">
       {/* 1. Identity & Tagline */}
       <div className="bg-white  p-6 rounded-2xl border border-slate-100  space-y-4 shadow-xs text-xs">
         <h2 className="text-sm font-black text-slate-900 dark:text-white">
@@ -380,6 +390,7 @@ export const WebSettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      </fieldset>
     </form>
   );
 };

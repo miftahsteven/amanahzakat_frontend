@@ -5,6 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { CreditCard, Plus, RefreshCw, Pencil, Banknote } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -15,6 +16,7 @@ import { payrollApi } from '../lib/api';
 
 export interface PayrollPageProps {
   onNavigate: (screen: string) => void;
+  canUpdate?: boolean;
 }
 
 const formSchema = z.object({
@@ -29,7 +31,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const PayrollPage: React.FC<PayrollPageProps> = () => {
+export const PayrollPage: React.FC<PayrollPageProps> = ({ canUpdate = false }) => {
   const [dataList, setDataList] = useState<AmilKaryawan[]>([]);
   const [filterDivisi, setFilterDivisi] = useState<string>('Semua');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -195,11 +197,12 @@ export const PayrollPage: React.FC<PayrollPageProps> = () => {
     {
       id: 'actions',
       header: 'Aksi',
-      cell: ({ row }: any) => (
-        <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
-          Ubah
-        </Button>
-      ),
+      cell: ({ row }: any) =>
+        canUpdate ? (
+          <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+            Ubah
+          </Button>
+        ) : null,
     },
   ];
 
@@ -219,17 +222,21 @@ export const PayrollPage: React.FC<PayrollPageProps> = () => {
           <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
             Refresh
           </Button>
-          <Button
-            variant="primary"
-            icon={<Banknote className="w-4 h-4" />}
-            onClick={handleProcessPayroll}
-            disabled={isProcessing}
-          >
-            {isProcessing ? 'Memproses...' : 'Proses Payroll Gaji'}
-          </Button>
-          <Button variant="outline" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
-            Tambah Amil
-          </Button>
+          {canUpdate && (
+            <>
+              <Button
+                variant="primary"
+                icon={<Banknote className="w-4 h-4" />}
+                onClick={handleProcessPayroll}
+                disabled={isProcessing}
+              >
+                {isProcessing ? 'Memproses...' : 'Proses Payroll Gaji'}
+              </Button>
+              <Button variant="outline" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+                Tambah Amil
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -299,19 +306,21 @@ export const PayrollPage: React.FC<PayrollPageProps> = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Gaji Pokok (Rp) *</label>
-              <input
-                type="number"
-                {...register('gajiPokok', { valueAsNumber: true })}
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              <IdNumberInput
+                value={watch('gajiPokok')}
+                onValueChange={(v) => setValue('gajiPokok', v, { shouldValidate: true, shouldDirty: true })}
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
+              {errors.gajiPokok && <p className="text-rose-500 text-[11px] mt-1">{errors.gajiPokok.message}</p>}
             </div>
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Tunjangan Amil (Rp) *</label>
-              <input
-                type="number"
-                {...register('tunjanganAmil', { valueAsNumber: true })}
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              <IdNumberInput
+                value={watch('tunjanganAmil')}
+                onValueChange={(v) => setValue('tunjanganAmil', v, { shouldValidate: true, shouldDirty: true })}
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
+              {errors.tunjanganAmil && <p className="text-rose-500 text-[11px] mt-1">{errors.tunjanganAmil.message}</p>}
             </div>
           </div>
 

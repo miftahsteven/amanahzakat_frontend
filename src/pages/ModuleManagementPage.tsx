@@ -16,7 +16,11 @@ import { aclApi } from '../lib/api';
 import { MENU_ICON_OPTIONS, getMenuIcon } from '../lib/menuIcons';
 import type { CatalogMenu, CatalogModul } from '../types/acl';
 
-export const ModuleManagementPage: React.FC = () => {
+export interface ModuleManagementPageProps {
+  canManage?: boolean;
+}
+
+export const ModuleManagementPage: React.FC<ModuleManagementPageProps> = ({ canManage = false }) => {
   const [modules, setModules] = useState<CatalogModul[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModulId, setSelectedModulId] = useState<string>('');
@@ -236,10 +240,12 @@ export const ModuleManagementPage: React.FC = () => {
             <RefreshCw className="w-4 h-4" />
             Muat Ulang
           </Button>
-          <Button onClick={openCreateModul} variant="primary" className="flex items-center gap-2 py-2.5 px-4">
-            <Plus className="w-4 h-4" />
-            Tambah Modul
-          </Button>
+          {canManage && (
+            <Button onClick={openCreateModul} variant="primary" className="flex items-center gap-2 py-2.5 px-4">
+              <Plus className="w-4 h-4" />
+              Tambah Modul
+            </Button>
+          )}
         </div>
       </div>
 
@@ -298,18 +304,22 @@ export const ModuleManagementPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button onClick={() => openEditModul(selectedModul)} variant="outline" className="text-xs">
-                    <Pencil className="w-3.5 h-3.5" />
-                    Edit Modul
-                  </Button>
-                  <Button onClick={() => handleToggleModul(selectedModul)} variant="outline" className="text-xs">
-                    {selectedModul.isActive === false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                    {selectedModul.isActive === false ? 'Aktifkan' : 'Nonaktifkan'}
-                  </Button>
-                  <Button onClick={openCreateMenu} variant="primary" className="text-xs">
-                    <Plus className="w-3.5 h-3.5" />
-                    Tambah Menu
-                  </Button>
+                  {canManage && (
+                    <>
+                      <Button onClick={() => openEditModul(selectedModul)} variant="outline" className="text-xs">
+                        <Pencil className="w-3.5 h-3.5" />
+                        Edit Modul
+                      </Button>
+                      <Button onClick={() => handleToggleModul(selectedModul)} variant="outline" className="text-xs">
+                        {selectedModul.isActive === false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                        {selectedModul.isActive === false ? 'Aktifkan' : 'Nonaktifkan'}
+                      </Button>
+                      <Button onClick={openCreateMenu} variant="primary" className="text-xs">
+                        <Plus className="w-3.5 h-3.5" />
+                        Tambah Menu
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -350,14 +360,18 @@ export const ModuleManagementPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button onClick={() => openEditMenu(menu)} variant="outline" className="text-xs py-1.5">
-                            <Pencil className="w-3.5 h-3.5" />
-                            Edit
-                          </Button>
-                          <Button onClick={() => handleToggleMenu(menu)} variant="outline" className="text-xs py-1.5">
-                            {menu.isActive === false ? <Eye className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
-                            {menu.isActive === false ? 'Aktifkan' : 'Nonaktifkan'}
-                          </Button>
+                          {canManage && (
+                            <>
+                              <Button onClick={() => openEditMenu(menu)} variant="outline" className="text-xs py-1.5">
+                                <Pencil className="w-3.5 h-3.5" />
+                                Edit
+                              </Button>
+                              <Button onClick={() => handleToggleMenu(menu)} variant="outline" className="text-xs py-1.5">
+                                {menu.isActive === false ? <Eye className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
+                                {menu.isActive === false ? 'Aktifkan' : 'Nonaktifkan'}
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
                     );

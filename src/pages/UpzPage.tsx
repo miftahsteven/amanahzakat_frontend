@@ -5,6 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { Building, Plus, RefreshCw, Pencil, ShieldCheck, FileText } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -16,6 +17,8 @@ import { upzApi } from '../lib/api';
 export interface UpzPageProps {
   onNavigate: (screen: string) => void;
   onOpenDetail: (id: string) => void;
+  /** Buat & ubah — backend memakai upz.update untuk keduanya */
+  canUpdate?: boolean;
 }
 
 const formSchema = z.object({
@@ -29,7 +32,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail }) => {
+export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail, canUpdate = false }) => {
   const openDetail = (row: UpzCabang) => onOpenDetail(row.id);
   const [dataList, setDataList] = useState<UpzCabang[]>([]);
   const [filterKategori, setFilterKategori] = useState<string>('Semua');
@@ -42,6 +45,8 @@ export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail }) => {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -199,9 +204,11 @@ export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail }) => {
               Tandai Patuh
             </Button>
           )}
-          <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
-            Ubah
-          </Button>
+          {canUpdate && (
+            <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+              Ubah
+            </Button>
+          )}
         </div>
       ),
     },
@@ -223,9 +230,11 @@ export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail }) => {
           <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
             Refresh
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
-            Registrasi UPZ
-          </Button>
+          {canUpdate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+              Registrasi UPZ
+            </Button>
+          )}
         </div>
       </div>
 
@@ -302,18 +311,18 @@ export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail }) => {
             </div>
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Penghimpunan (Rp)</label>
-              <input
-                type="number"
-                {...register('totalPenghimpunan', { valueAsNumber: true })}
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              <IdNumberInput
+                value={watch('totalPenghimpunan')}
+                onValueChange={(v) => setValue('totalPenghimpunan', v, { shouldValidate: true, shouldDirty: true })}
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
             </div>
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Penyaluran (Rp)</label>
-              <input
-                type="number"
-                {...register('totalPenyaluran', { valueAsNumber: true })}
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              <IdNumberInput
+                value={watch('totalPenyaluran')}
+                onValueChange={(v) => setValue('totalPenyaluran', v, { shouldValidate: true, shouldDirty: true })}
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
             </div>
           </div>

@@ -41,7 +41,17 @@ export interface HeroSliderItem {
   order: number;
 }
 
-export const HeroSliderPage: React.FC = () => {
+export interface HeroSliderPageProps {
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+}
+
+export const HeroSliderPage: React.FC<HeroSliderPageProps> = ({
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const [sliders, setSliders] = useState<HeroSliderItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -277,15 +287,17 @@ export const HeroSliderPage: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={openCreateModal}
-            className="flex items-center gap-2 text-xs"
-          >
-            <Plus className="w-4 h-4" />
-            Tambah Banner Baru
-          </Button>
+          {canCreate && (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={openCreateModal}
+              className="flex items-center gap-2 text-xs"
+            >
+              <Plus className="w-4 h-4" />
+              Tambah Banner Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -494,25 +506,29 @@ export const HeroSliderPage: React.FC = () => {
                       {/* Aksi Edit / Hapus */}
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => openEditModal(slider)}
-                            className="p-1.5 rounded-lg border border-[#DDE3DF] hover:bg-[#E6F6EF] text-[#4D5C56] hover:text-[#0F9D6E] transition-colors cursor-pointer"
-                            title="Edit Slider"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedSlider(slider);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-[#B83D32] transition-colors cursor-pointer"
-                            title="Hapus Slider"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {canUpdate && (
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(slider)}
+                              className="p-1.5 rounded-lg border border-[#DDE3DF] hover:bg-[#E6F6EF] text-[#4D5C56] hover:text-[#0F9D6E] transition-colors cursor-pointer"
+                              title="Edit Slider"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {canDelete && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedSlider(slider);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 text-[#B83D32] transition-colors cursor-pointer"
+                              title="Hapus Slider"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -544,7 +560,7 @@ export const HeroSliderPage: React.FC = () => {
                 <img
                   src={resolveMediaUrl(previewUrl)}
                   alt="Preview Banner"
-                  className="w-full h-44 object-cover"
+                  className="w-full max-h-72 object-contain bg-slate-100"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.dataset.triedFallback) {

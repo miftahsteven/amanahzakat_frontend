@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
+import { IdNumberInput } from '../../components/ui/IdNumberInput';
 import { cmsApi } from '../../lib/api';
 
 export interface FaqItemData {
@@ -24,7 +25,17 @@ export interface FaqItemData {
   urutan: number;
 }
 
-export const FaqManagementPage: React.FC = () => {
+export interface FaqManagementPageProps {
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+}
+
+export const FaqManagementPage: React.FC<FaqManagementPageProps> = ({
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const [faqs, setFaqs] = useState<FaqItemData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -164,15 +175,17 @@ export const FaqManagementPage: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={openCreateModal}
-            className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
-          >
-            <Plus className="w-4 h-4" />
-            Tambah FAQ Baru
-          </Button>
+          {canCreate && (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={openCreateModal}
+              className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
+            >
+              <Plus className="w-4 h-4" />
+              Tambah FAQ Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -233,27 +246,31 @@ export const FaqManagementPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditModal(faq)}
-                    className="p-1.5 h-7 w-7 text-slate-700 dark:text-slate-300"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedFaq(faq);
-                      setIsDeleteModalOpen(true);
-                    }}
-                    className="p-1.5 h-7 w-7 text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  {canUpdate && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditModal(faq)}
+                      className="p-1.5 h-7 w-7 text-slate-700 dark:text-slate-300"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedFaq(faq);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="p-1.5 h-7 w-7 text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -305,10 +322,9 @@ export const FaqManagementPage: React.FC = () => {
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Urutan (#)
               </label>
-              <input
-                type="number"
+              <IdNumberInput
                 value={formData.urutan}
-                onChange={(e) => setFormData({ ...formData, urutan: Number(e.target.value) })}
+                onValueChange={(urutan) => setFormData({ ...formData, urutan })}
                 className="w-full p-2.5 rounded-xl border border-slate-200  bg-white dark:bg-[#0D241B] text-slate-900 dark:text-white"
               />
             </div>

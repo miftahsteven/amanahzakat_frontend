@@ -5,6 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { Building2, Plus, RefreshCw, Pencil, CheckCircle2, FileText } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -16,6 +17,8 @@ import { mitraApi } from '../lib/api';
 export interface MitraPageProps {
   onNavigate: (screen: string) => void;
   onOpenDetail: (id: string) => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
 }
 
 const formSchema = z.object({
@@ -30,7 +33,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const MitraPage: React.FC<MitraPageProps> = ({ onOpenDetail }) => {
+export const MitraPage: React.FC<MitraPageProps> = ({
+  onOpenDetail,
+  canCreate = false,
+  canUpdate = false,
+}) => {
   const openDetail = (row: MitraPenyalur) => onOpenDetail(row.id);
   const [dataList, setDataList] = useState<MitraPenyalur[]>([]);
   const [filterLpj, setFilterLpj] = useState<string>('Semua');
@@ -43,6 +50,8 @@ export const MitraPage: React.FC<MitraPageProps> = ({ onOpenDetail }) => {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -191,9 +200,11 @@ export const MitraPage: React.FC<MitraPageProps> = ({ onOpenDetail }) => {
               Verifikasi LPJ
             </Button>
           )}
-          <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
-            Ubah
-          </Button>
+          {canUpdate && (
+            <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+              Ubah
+            </Button>
+          )}
         </div>
       ),
     },
@@ -215,9 +226,11 @@ export const MitraPage: React.FC<MitraPageProps> = ({ onOpenDetail }) => {
           <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
             Refresh
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
-            Tambah Mitra Baru
-          </Button>
+          {canCreate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+              Tambah Mitra Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -318,11 +331,11 @@ export const MitraPage: React.FC<MitraPageProps> = ({ onOpenDetail }) => {
 
           <div>
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Total Dana Dikelola (Rp)</label>
-            <input
-              type="number"
-              {...register('totalPenyaluran', { valueAsNumber: true })}
+            <IdNumberInput
+              value={watch('totalPenyaluran')}
+              onValueChange={(v) => setValue('totalPenyaluran', v, { shouldValidate: true, shouldDirty: true })}
               placeholder="0"
-              className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
             />
           </div>
 

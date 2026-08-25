@@ -16,7 +16,13 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { cmsApi } from '../../lib/api';
 
-export const ImpactManagementPage: React.FC = () => {
+export interface ImpactManagementPageProps {
+  canUpdate?: boolean;
+}
+
+export const ImpactManagementPage: React.FC<ImpactManagementPageProps> = ({
+  canUpdate = false,
+}) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -133,16 +139,18 @@ export const ImpactManagementPage: React.FC = () => {
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={handleSaveAll}
-            disabled={isSaving}
-            className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
-          >
-            <Save className="w-4 h-4" />
-            {isSaving ? 'Menyimpan...' : 'Simpan Semua Perubahan'}
-          </Button>
+          {canUpdate && (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleSaveAll}
+              disabled={isSaving}
+              className="flex items-center gap-2 text-xs bg-[#0F9D6E] hover:bg-[#09825A] text-white"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Menyimpan...' : 'Simpan Semua Perubahan'}
+            </Button>
+          )}
         </div>
       </div>
 

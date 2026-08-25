@@ -5,7 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Users, Plus, FileSpreadsheet, Mail, Phone, RefreshCw } from 'lucide-react';
+import { Users, Plus, FileSpreadsheet, Mail, Phone, RefreshCw, Pencil, Trash2, FileText } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,9 @@ import { muzakkiApi } from '../lib/api';
 export interface MuzakkiPageProps {
   onNavigate: (screen: string) => void;
   onOpenDetail: (id: string) => void;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
 const formSchema = z.object({
@@ -29,9 +32,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDetail }) => {
+export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({
+  onNavigate,
+  onOpenDetail,
+  canCreate = false,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const [dataList, setDataList] = useState<Muzakki[]>([]);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Muzakki | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Muzakki | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,9 +54,7 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      tipe: 'Perorangan',
-    },
+    defaultValues: { tipe: 'Perorangan' },
   });
 
   const loadData = useCallback(async () => {
@@ -65,16 +75,57 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
 
   const openDetail = (row: Muzakki) => onOpenDetail(row.id);
 
+  const openCreate = () => {
+    setEditTarget(null);
+    reset({ tipe: 'Perorangan', nama: '', nikAtauNpwp: '', hp: '', email: '', alamat: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (row: Muzakki) => {
+    setEditTarget(row);
+    reset({
+      nama: row.nama,
+      tipe: row.tipe,
+      nikAtauNpwp: row.nikAtauNpwp,
+      hp: row.hp,
+      email: row.email,
+      alamat: row.alamat,
+    });
+    setIsModalOpen(true);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      const created = await muzakkiApi.create(values);
-      setDataList((prev) => [created, ...prev]);
-      toast.success(`Muzakki ${created.nama} berhasil terdaftar dengan nomor ${created.nomor}!`);
-      reset();
-      setIsCreateModalOpen(false);
+      if (editTarget) {
+        const updated = await muzakkiApi.update(editTarget.id, values);
+        setDataList((prev) => prev.map((m) => (m.id === editTarget.id ? updated : m)));
+        toast.success(`Data muzakki "${updated.nama}" berhasil diperbarui.`);
+      } else {
+        const created = await muzakkiApi.create(values);
+        setDataList((prev) => [created, ...prev]);
+        toast.success(`Muzakki ${created.nama} berhasil terdaftar dengan nomor ${created.nomor}!`);
+      }
+      setIsModalOpen(false);
+      setEditTarget(null);
     } catch (err: any) {
-      toast.error(err.message || 'Gagal mendaftarkan muzakki');
+      toast.error(err.message || 'Gagal menyimpan data muzakki');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsSubmitting(true);
+    try {
+      await muzakkiApi.remove(deleteTarget.id);
+      setDataList((prev) => prev.filter((m) => m.id !== deleteTarget.id));
+      toast.success(`Muzakki "${deleteTarget.nama}" berhasil diarsipkan.`);
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus muzakki');
     } finally {
       setIsSubmitting(false);
     }
@@ -131,11 +182,30 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
     {
       id: 'actions',
       header: 'Aksi',
-      cell: () => (
+      cell: ({ row }: any) => (
         <div className="flex items-center gap-1.5">
-          <Button variant="outline" size="sm" onClick={() => onNavigate('rekap')} title="Surat SPT">
-            <FileSpreadsheet className="w-3.5 h-3.5" /> Surat SPT
+          <Button variant="ghost" size="sm" onClick={() => openDetail(row.original)} title="Detail">
+            <FileText className="w-3.5 h-3.5" />
           </Button>
+          {canUpdate && (
+            <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+              Ubah
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-rose-600"
+              title="Arsipkan"
+              onClick={() => {
+                setDeleteTarget(row.original);
+                setIsDeleteModalOpen(true);
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -160,9 +230,11 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
           <Button variant="secondary" icon={<FileSpreadsheet className="w-4 h-4" />} onClick={() => onNavigate('rekap')}>
             Rekap Tahunan SPT
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateModalOpen(true)}>
-            Daftarkan Muzakki Baru
-          </Button>
+          {canCreate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+              Daftarkan Muzakki Baru
+            </Button>
+          )}
         </div>
       </div>
 
@@ -173,10 +245,13 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
       )}
 
       <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Registrasi Muzakki / Donatur Baru"
-        subtitle="Pendaftaran Muzakki perorangan atau korporat untuk penerbitan BSZ"
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditTarget(null);
+        }}
+        title={editTarget ? 'Ubah Data Muzakki' : 'Registrasi Muzakki / Donatur Baru'}
+        subtitle={editTarget ? `Nomor: ${editTarget.nomor}` : 'Pendaftaran Muzakki perorangan atau korporat untuk penerbitan BSZ'}
         maxWidth="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
@@ -192,7 +267,6 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
                 <option value="UPZ">UPZ (Unit Pengumpul Zakat)</option>
               </select>
             </div>
-
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">NIK / NPWP *</label>
               <input
@@ -204,7 +278,6 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
               {errors.nikAtauNpwp && <p className="text-rose-500 text-[11px] mt-1">{errors.nikAtauNpwp.message}</p>}
             </div>
           </div>
-
           <div>
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap / Nama Lembaga *</label>
             <input
@@ -215,7 +288,6 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
             />
             {errors.nama && <p className="text-rose-500 text-[11px] mt-1">{errors.nama.message}</p>}
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nomor WhatsApp / HP *</label>
@@ -227,7 +299,6 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
               />
               {errors.hp && <p className="text-rose-500 text-[11px] mt-1">{errors.hp.message}</p>}
             </div>
-
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Email *</label>
               <input
@@ -239,7 +310,6 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
               {errors.email && <p className="text-rose-500 text-[11px] mt-1">{errors.email.message}</p>}
             </div>
           </div>
-
           <div>
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Alamat Lengkap Domisili *</label>
             <textarea
@@ -250,16 +320,34 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({ onNavigate, onOpenDeta
             />
             {errors.alamat && <p className="text-rose-500 text-[11px] mt-1">{errors.alamat.message}</p>}
           </div>
-
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => { setIsModalOpen(false); setEditTarget(null); }}>
               Batal
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Menyimpan...' : 'Daftarkan Muzakki'}
+              {isSubmitting ? 'Menyimpan...' : editTarget ? 'Simpan Perubahan' : 'Daftarkan Muzakki'}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }}
+        title="Konfirmasi Arsip Muzakki"
+        maxWidth="sm"
+      >
+        <p className="text-sm text-slate-600 mb-4">
+          Arsipkan muzakki <strong>{deleteTarget?.nama}</strong>? Data riwayat transaksi tetap tersimpan, namun muzakki tidak lagi muncul di daftar aktif.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }} disabled={isSubmitting}>
+            Batal
+          </Button>
+          <Button variant="danger" onClick={confirmDelete} disabled={isSubmitting}>
+            {isSubmitting ? 'Mengarsipkan...' : 'Arsipkan Muzakki'}
+          </Button>
+        </div>
       </Modal>
     </div>
   );

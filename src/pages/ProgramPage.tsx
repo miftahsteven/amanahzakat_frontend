@@ -5,6 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { IdNumberInput } from '../components/ui/IdNumberInput';
 import { FolderKanban, Plus, RefreshCw, Pencil, FileText, Trash2 } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -41,13 +42,18 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({
   const [dataList, setDataList] = useState<ProgramZis[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ProgramZis | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProgramZis | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -122,20 +128,24 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({
     }
   };
 
-  const onDelete = async (program: ProgramZis) => {
-    if (
-      !window.confirm(
-        `Hapus program "${program.nama}"?\n\nProgram yang sudah punya transaksi penyaluran tidak dapat dihapus.`,
-      )
-    ) {
-      return;
-    }
+  const openDelete = (program: ProgramZis) => {
+    setDeleteTarget(program);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      await programApi.remove(program.id);
-      setDataList((prev) => prev.filter((p) => p.id !== program.id));
-      toast.success(`Program "${program.nama}" berhasil dihapus.`);
+      await programApi.remove(deleteTarget.id);
+      setDataList((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      toast.success(`Program "${deleteTarget.nama}" berhasil dihapus.`);
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
     } catch (err: any) {
       toast.error(err.message || 'Gagal menghapus program ZIS');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -210,7 +220,7 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({
               size="sm"
               className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
               title="Hapus"
-              onClick={() => onDelete(row.original)}
+              onClick={() => openDelete(row.original)}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
@@ -292,20 +302,21 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Pagu Anggaran (Rp) *</label>
-              <input
-                type="number"
-                {...register('paguAnggaran', { valueAsNumber: true })}
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              <IdNumberInput
+                value={watch('paguAnggaran')}
+                onValueChange={(v) => setValue('paguAnggaran', v, { shouldValidate: true, shouldDirty: true })}
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
               {errors.paguAnggaran && <p className="text-rose-500 text-[11px] mt-1">{errors.paguAnggaran.message}</p>}
             </div>
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Target Penerima *</label>
-              <input
-                type="number"
-                {...register('targetPenerima', { valueAsNumber: true })}
-                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
+              <IdNumberInput
+                value={watch('targetPenerima')}
+                onValueChange={(v) => setValue('targetPenerima', v, { shouldValidate: true, shouldDirty: true })}
+                className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl font-mono"
               />
+              {errors.targetPenerima && <p className="text-rose-500 text-[11px] mt-1">{errors.targetPenerima.message}</p>}
             </div>
           </div>
 
@@ -336,6 +347,42 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          if (isDeleting) return;
+          setIsDeleteModalOpen(false);
+          setDeleteTarget(null);
+        }}
+        title="Hapus Program ZIS"
+        maxWidth="sm"
+      >
+        <div className="space-y-4 font-sans text-xs">
+          <p className="text-[#16211D] dark:text-slate-100">
+            Apakah Anda yakin ingin menghapus program "<strong>{deleteTarget?.nama}</strong>"?
+          </p>
+          <p className="text-[#7D938A]">
+            Program yang sudah punya transaksi penyaluran tidak dapat dihapus.
+          </p>
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setDeleteTarget(null);
+              }}
+              disabled={isDeleting}
+            >
+              Batal
+            </Button>
+            <Button type="button" variant="danger" onClick={confirmDelete} disabled={isDeleting}>
+              {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

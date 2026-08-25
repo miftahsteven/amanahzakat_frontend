@@ -13,7 +13,11 @@ const STEPS = [
   { id: 'laporan', title: 'Laporan Keuangan Disetujui', desc: 'Laporan sumber dan penggunaan dana PSAK 109 ditandatangani manajemen.' },
 ] as const;
 
-export const ClosingPage: React.FC = () => {
+export interface ClosingPageProps {
+  canExecute?: boolean;
+}
+
+export const ClosingPage: React.FC<ClosingPageProps> = ({ canExecute = false }) => {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,15 +91,17 @@ export const ClosingPage: React.FC = () => {
                 : 'Selesaikan empat langkah pra-tutup sebelum mengunci buku.'}
             </p>
           </div>
-          <Button
-            variant={isLocked ? 'outline' : 'primary'}
-            icon={isLocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-            onClick={toggleLock}
-            disabled={isLoading}
-            className={isLocked ? 'text-white border-white hover:bg-white/10' : ''}
-          >
-            {isLocked ? 'Buka Kunci Periode' : `Kunci Buku ${data?.label ?? ''}`}
-          </Button>
+          {canExecute && (
+            <Button
+              variant={isLocked ? 'outline' : 'primary'}
+              icon={isLocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+              onClick={toggleLock}
+              disabled={isLoading}
+              className={isLocked ? 'text-white border-white hover:bg-white/10' : ''}
+            >
+              {isLocked ? 'Buka Kunci Periode' : `Kunci Buku ${data?.label ?? ''}`}
+            </Button>
+          )}
         </div>
       </Card>
 
@@ -114,9 +120,11 @@ export const ClosingPage: React.FC = () => {
                   <p className="text-xs text-[#7D938A] mt-1">{step.desc}</p>
                 </div>
               </div>
-              <Button variant={done ? 'outline' : 'primary'} size="sm" onClick={() => toggleStep(step.id)} disabled={isLocked || isLoading}>
-                {done ? 'Selesai' : 'Tandai Selesai'}
-              </Button>
+              {canExecute && (
+                <Button variant={done ? 'outline' : 'primary'} size="sm" onClick={() => toggleStep(step.id)} disabled={isLocked || isLoading}>
+                  {done ? 'Selesai' : 'Tandai Selesai'}
+                </Button>
+              )}
             </Card>
           );
         })}

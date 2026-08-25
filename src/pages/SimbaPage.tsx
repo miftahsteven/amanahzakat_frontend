@@ -9,7 +9,11 @@ import { formatRP } from '../lib/utils';
 import { keuanganApi } from '../lib/api';
 import { toast } from 'sonner';
 
-export const SimbaPage: React.FC = () => {
+export interface SimbaPageProps {
+  canExport?: boolean;
+}
+
+export const SimbaPage: React.FC<SimbaPageProps> = ({ canExport = false }) => {
   const [dataList, setDataList] = useState<FormSimba[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,11 +51,12 @@ export const SimbaPage: React.FC = () => {
     {
       id: 'actions',
       header: 'Export',
-      cell: ({ row }) => (
-        <Button variant="outline" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => handleExport(row.original.kodeForm, row.original.namaForm)}>
-          Export
-        </Button>
-      ),
+      cell: ({ row }) =>
+        canExport ? (
+          <Button variant="outline" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={() => handleExport(row.original.kodeForm, row.original.namaForm)}>
+            Export
+          </Button>
+        ) : null,
     },
   ];
 
@@ -66,7 +71,9 @@ export const SimbaPage: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>Refresh</Button>
-          <Button variant="primary" icon={<Download className="w-4 h-4" />} onClick={() => toast.success('Paket SIMBA lengkap siap di-export!')}>Export Seluruh Paket</Button>
+          {canExport && (
+            <Button variant="primary" icon={<Download className="w-4 h-4" />} onClick={() => toast.success('Paket SIMBA lengkap siap di-export!')}>Export Seluruh Paket</Button>
+          )}
         </div>
       </div>
       <DataTable columns={columns} data={dataList} isLoading={isLoading} searchPlaceholder="Cari form SIMBA..." />

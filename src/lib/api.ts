@@ -514,6 +514,26 @@ export const penerimaanApi = {
       body: JSON.stringify(data),
     });
   },
+  async update(
+    id: string,
+    data: {
+      muzakkiId?: string;
+      jenisZis?: string;
+      nominal?: number;
+      kanal?: string;
+      rekeningTujuan?: string;
+      catatan?: string;
+      programNama?: string;
+    },
+  ) {
+    return apiFetch<any>(`/penerimaan/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+  async remove(id: string) {
+    return apiFetch<void>(`/penerimaan/${id}`, { method: 'DELETE' });
+  },
   async verify(id: string) {
     return apiFetch<any>(`/penerimaan/${id}/verify`, {
       method: 'PATCH',
@@ -540,6 +560,25 @@ export const muzakkiApi = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+  async update(
+    id: string,
+    data: {
+      nama: string;
+      tipe: string;
+      nikAtauNpwp: string;
+      hp: string;
+      email: string;
+      alamat: string;
+    },
+  ) {
+    return apiFetch<any>(`/muzakki/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+  async remove(id: string) {
+    return apiFetch<void>(`/muzakki/${id}`, { method: 'DELETE' });
   },
 };
 
@@ -569,6 +608,25 @@ export const penyaluranApi = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+  async update(
+    id: string,
+    data: {
+      mustahikId?: string;
+      programId?: string;
+      asnaf?: string;
+      nominal?: number;
+      metodePembayaran?: string;
+      keterangan?: string;
+    },
+  ) {
+    return apiFetch<any>(`/penyaluran/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+  async remove(id: string) {
+    return apiFetch<void>(`/penyaluran/${id}`, { method: 'DELETE' });
   },
   async disburse(id: string) {
     return apiFetch<PenyaluranDetail>(`/penyaluran/${id}/disburse`, {
@@ -606,6 +664,28 @@ export const mustahikApi = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+  async update(
+    id: string,
+    data: {
+      nama: string;
+      kategoriAsnaf: string;
+      hp: string;
+      alamat: string;
+      pekerjaan: string;
+      jumlahTanggungan: number;
+      penghasilanBulanan: number;
+      rekeningBank: string;
+      statusSurvei?: string;
+    },
+  ) {
+    return apiFetch<MustahikDetail>(`/mustahik/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+  async remove(id: string) {
+    return apiFetch<void>(`/mustahik/${id}`, { method: 'DELETE' });
   },
 };
 
