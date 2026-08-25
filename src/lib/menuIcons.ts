@@ -30,12 +30,14 @@ import {
   Quote,
   HelpCircle,
   Sparkles,
+  FileSpreadsheet,
   type LucideIcon,
 } from 'lucide-react';
 
 export const MENU_ICON_OPTIONS: { value: string; label: string; Icon: LucideIcon }[] = [
   { value: 'LayoutDashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { value: 'FileBarChart', label: 'Laporan', Icon: FileBarChart },
+  { value: 'FileSpreadsheet', label: 'Bukti Setor', Icon: FileSpreadsheet },
   { value: 'Map', label: 'Peta', Icon: Map },
   { value: 'HeartHandshake', label: 'Dampak', Icon: HeartHandshake },
   { value: 'Wallet', label: 'Penerimaan', Icon: Wallet },

@@ -101,7 +101,6 @@ export const GenericPage: React.FC<GenericPageProps> = ({ screenId, onNavigate }
     setting: { title: 'Tampilan, Branding & Logo Lembaga', desc: 'Kustomisasi warna tema, logo LAZNAS, dan skala antarmuka', icon: <Sliders className="w-6 h-6 text-[#0F9D6E]" /> },
     arsip: { title: 'Retensi Dokumen & E-Filing Arsip', desc: 'Penyimpanan bukti kwitansi, SBMZ, LPJ mitra, dan berkas audit', icon: <Archive className="w-6 h-6 text-[#0F9D6E]" /> },
     faktur: { title: 'Faktur Vendor & Tagihan Operasional', desc: 'Verifikasi faktur tagihan supplier & pengadaan fasilitas kantor', icon: <CreditCard className="w-6 h-6 text-[#0F9D6E]" /> },
-    bukti: { title: 'E-Filing Bukti Setor BSZ & SBMZ', desc: 'Arsip penomoran kwitansi BSZ sah dengan QR Code verifikasi', icon: <FileSpreadsheet className="w-6 h-6 text-[#0F9D6E]" /> },
     portalUpz: { title: 'Portal UPZ Self-Service Korporat', desc: 'Dashboard khusus mitra UPZ perusahaan untuk input payroll zakat karyawan', icon: <Building className="w-6 h-6 text-[#0F9D6E]" /> },
     approval: { title: 'Approval Berjenjang Penyaluran', desc: 'Verifikasi bertingkat Manajer Program -> Direktur untuk pencairan di atas Rp 25 juta', icon: <CheckCircle2 className="w-6 h-6 text-[#0F9D6E]" /> },
   };

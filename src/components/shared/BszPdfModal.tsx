@@ -1,133 +1,178 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { Printer, Download, QrCode, CheckCircle2 } from 'lucide-react';
-import { formatRP } from '../../lib/utils';
+import { Download } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  BszRecord,
+  buildSbmzNumber,
+  buildVerifyUrl,
+  formatBszDate,
+  formatBszNominal,
+  getAkunGlPenerimaan,
+  qrImageUrl,
+  toBszPrintFilename,
+} from '../../lib/bsz';
+import { printHtmlInIframe } from '../../lib/printReport';
 
 export interface BszPdfModalProps {
   isOpen: boolean;
   onClose: () => void;
-  data: {
-    noKwitansi: string;
-    tanggal: string;
-    muzakkiNama: string;
-    muzakkiTipe: string;
-    jenisZis: string;
-    nominal: number;
-    kanal: string;
-    catatan?: string;
-  } | null;
+  data: BszRecord | null;
+}
+
+function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex justify-between gap-4 text-[13px] py-0.5">
+      <span className="text-[#6b7a74] shrink-0">{label}</span>
+      <span className={`text-right text-[#16211D] ${mono ? "font-mono font-semibold" : "font-semibold"}`}>
+        {value}
+      </span>
+    </div>
+  );
 }
 
 export const BszPdfModal: React.FC<BszPdfModalProps> = ({ isOpen, onClose, data }) => {
+  const printRef = useRef<HTMLDivElement>(null);
+
   if (!data) return null;
 
-  const handleDownload = () => {
-    toast.success(`Dokumen BSZ ${data.noKwitansi} berhasil diunduh (PDF)`);
-    onClose();
-  };
+  const tgl = formatBszDate(data.tanggal);
+  const nomorSbmz = buildSbmzNumber(data);
+  const verifyUrl = buildVerifyUrl(data.noKwitansi);
+  const akun = getAkunGlPenerimaan(data.jenisZis);
+  const qrPayload = `${nomorSbmz}|${data.muzakkiNama}|${data.nominal}|${data.noKwitansi}`;
 
-  const handlePrint = () => {
-    toast.info(`Mencetak dokumen ${data.noKwitansi}...`);
-    window.print();
+  const handleDownloadPdf = () => {
+    const node = printRef.current;
+    if (!node) return;
+
+    const filename = toBszPrintFilename(data.noKwitansi);
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${filename}</title>
+  <style>
+    @page { size: A4; margin: 16mm; }
+    body { font-family: Inter, system-ui, sans-serif; color: #16211d; margin: 0; }
+    .sheet { max-width: 640px; margin: 0 auto; }
+    .header { background: #0d1714; color: #e7efe9; padding: 22px 26px; border-radius: 12px 12px 0 0; }
+    .eyebrow { font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: #7d938a; font-weight: 700; }
+    .org { font-size: 20px; font-weight: 800; margin-top: 6px; }
+    .sub { font-size: 11.5px; color: #8fa79c; margin-top: 3px; }
+    .body { padding: 22px 26px; border: 1px solid #e5eae6; border-top: 0; border-radius: 0 0 12px 12px; }
+    .row { display: flex; justify-content: space-between; gap: 14px; font-size: 13px; padding: 8px 0; border-bottom: 1px dashed #dde3df; }
+    .row:last-of-type { border-bottom: 0; }
+    .label { color: #6b7a74; }
+    .value { font-weight: 600; text-align: right; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .amount { background: #f4f8f6; border: 1px dashed #bfe4d4; border-radius: 12px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; margin: 14px 0; }
+    .amount-val { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 21px; font-weight: 700; color: #0b7c56; }
+    .qr-box { display: flex; gap: 18px; align-items: center; padding: 16px 18px; border: 1px solid #e5eae6; border-radius: 12px; }
+    .legal { margin: 14px 0 0; font-size: 11.5px; color: #8b9992; line-height: 1.6; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  </style>
+</head>
+<body>
+  <div class="sheet">${node.innerHTML}</div>
+</body>
+</html>`;
+
+    try {
+      printHtmlInIframe(html);
+      toast.success(`Dialog cetak terbuka — pilih "Simpan sebagai PDF" untuk ${filename}`);
+    } catch {
+      toast.error('Gagal membuka dialog cetak. Coba lagi.');
+    }
   };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Bukti Setor Zakat (BSZ) / SBMZ"
-      subtitle="Dokumen Resmi Pengurang Penghasilan Kena Pajak (SPT Tahunan)"
-      maxWidth="xl"
+      title="Bukti Setor Zakat"
+      subtitle="Dokumen resmi pengurang pajak sesuai PP No. 60 Tahun 2010"
+      maxWidth="lg"
       maximizable
+      footer={
+        <div className="flex items-center justify-end gap-2.5">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Tutup
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            icon={<Download className="w-4 h-4" />}
+            onClick={handleDownloadPdf}
+            className="bg-[#0F9D6E] hover:bg-[#0B7C56]"
+          >
+            Unduh PDF
+          </Button>
+        </div>
+      }
     >
-      <div className="space-y-6">
-        {/* Document Preview Box */}
-        <div className="p-6 bg-white border border-[#DDE3DF] rounded-2xl shadow-xs text-[#16211D] space-y-5 font-sans relative">
-          {/* Header Lembaga */}
-          <div className="flex items-center justify-between border-b pb-4 border-[#E3E8E4]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#0F9D6E] text-white flex items-center justify-center font-extrabold text-xl shadow-sm">
-                A
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-[#0D1714] tracking-wide uppercase">Amanah Zakat</h2>
-                <p className="text-[11px] text-[#7D938A] font-medium">Lembaga Amil Zakat Nasional (LAZNAS) Izin Kemenag RI</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-[#E6F6EF] text-[#0F9D6E] border border-[#A5E4CB]">
-                Resmi & Sah
-              </span>
-              <p className="text-xs font-mono font-bold text-[#16211D] mt-1">{data.noKwitansi}</p>
-            </div>
+      <div ref={printRef} className="overflow-hidden rounded-xl border border-[#E5EAE6] bg-white text-[#16211D]">
+        <div className="header bg-[#0D1714] text-[#E7EFE9] px-6 py-5">
+          <div className="eyebrow text-[10.5px] font-bold uppercase tracking-[1.2px] text-[#7D938A]">
+            Bukti Setor Zakat
           </div>
-
-          {/* Title */}
-          <div className="text-center py-2">
-            <h3 className="text-sm font-bold tracking-wider text-[#16211D] uppercase">TANDA TERIMA BUKTI SETOR ZAKAT (BSZ)</h3>
-            <p className="text-[11px] text-[#7D938A]">Dasar Pengurang Penghasilan Kena Pajak sesuai UU No. 23 Tahun 2011</p>
-          </div>
-
-          {/* Table Details */}
-          <div className="bg-[#F3F6F4] rounded-xl p-4 border border-[#DDE3DF] space-y-2.5 text-xs">
-            <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#7D938A] font-medium">Tanggal Transaksi</span>
-              <span className="col-span-2 font-bold text-[#16211D]">{data.tanggal}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#7D938A] font-medium">Nama Muzakki</span>
-              <span className="col-span-2 font-bold text-[#16211D]">{data.muzakkiNama} ({data.muzakkiTipe})</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#7D938A] font-medium">Jenis Akad ZIS</span>
-              <span className="col-span-2 font-bold text-[#0F9D6E]">{data.jenisZis}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#7D938A] font-medium">Jumlah Setoran</span>
-              <span className="col-span-2 font-extrabold text-base text-[#16211D]">{formatRP(data.nominal)}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <span className="text-[#7D938A] font-medium">Kanal Pembayaran</span>
-              <span className="col-span-2 font-medium text-[#16211D]">{data.kanal}</span>
-            </div>
-            {data.catatan && (
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-[#7D938A] font-medium">Keterangan</span>
-                <span className="col-span-2 italic text-[#16211D]">{data.catatan}</span>
-              </div>
-            )}
-          </div>
-
-          {/* QR Verification & Sign Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#E3E8E4] text-xs">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#F3F6F4] rounded-xl border border-[#DDE3DF]">
-                <QrCode className="w-10 h-10 text-[#0D1714]" />
-              </div>
-              <div className="space-y-0.5">
-                <p className="font-bold text-[11px] text-[#16211D] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#0F9D6E]" /> Tanda Tangan Digital Sah
-                </p>
-                <p className="text-[10px] text-[#7D938A]">Scan QR untuk verifikasi keaslian via Sistem SIMBA</p>
-              </div>
-            </div>
-            <div className="text-center font-medium">
-              <p className="text-[10px] text-[#7D938A]">Bandung, {data.tanggal}</p>
-              <p className="font-bold text-[#16211D] mt-6">Divisi Amil Kasir Utama</p>
-            </div>
+          <div className="org text-[19px] font-extrabold mt-1.5">AmanahZakat</div>
+          <div className="sub text-[11.5px] text-[#8FA79C] mt-1">
+            Lembaga Amil Zakat Nasional · SK Kemenag RI
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Button variant="outline" icon={<Printer className="w-4 h-4" />} onClick={handlePrint}>
-            Cetak BSZ
-          </Button>
-          <Button variant="primary" icon={<Download className="w-4 h-4" />} onClick={handleDownload}>
-            Unduh Sertifikat PDF
-          </Button>
+        <div className="body px-6 py-5 space-y-3">
+          <div className="space-y-0 divide-y divide-dashed divide-[#DDE3DF]">
+            <div className="py-2">
+              <DetailRow label="No. Bukti" value={data.noKwitansi} mono />
+            </div>
+            <div className="py-2">
+              <DetailRow label="Tanggal Setor" value={tgl} mono />
+            </div>
+            <div className="py-2">
+              <DetailRow label="Nama Muzakki" value={data.muzakkiNama} />
+            </div>
+            <div className="py-2">
+              <DetailRow label="Jenis Dana" value={data.jenisZis} />
+            </div>
+            <div className="py-2">
+              <DetailRow label="Kanal Pembayaran" value={data.kanal} />
+            </div>
+            {data.status ? (
+              <div className="py-2">
+                <DetailRow label="Status" value={data.status} />
+              </div>
+            ) : null}
+            <div className="py-2">
+              <DetailRow label="Akun G/L" value={akun} mono />
+            </div>
+          </div>
+          <div className="amount bg-[#F4F8F6] border border-dashed border-[#BFE4D4] rounded-xl px-[18px] py-4 flex justify-between items-center">
+            <span className="text-[12.5px] font-semibold text-[#4D5C56]">Jumlah Setoran</span>
+            <span className="amount-val font-mono text-[21px] font-semibold text-[#0B7C56]">
+              {formatBszNominal(data.nominal)}
+            </span>
+          </div>
+
+          <div className="qr-box flex gap-[18px] items-center p-4 border border-[#E5EAE6] rounded-xl">
+            <img
+              src={qrImageUrl(qrPayload, 120)}
+              alt={`QR ${nomorSbmz}`}
+              className="w-[120px] h-[120px] rounded-md border border-[#E5EAE6] bg-white shrink-0"
+            />
+            <div className="min-w-0 space-y-1.5">
+              <div className="text-[11px] font-bold uppercase tracking-[0.7px] text-[#8B9992]">Nomor SBMZ</div>
+              <div className="font-mono text-[12.5px] font-bold break-all">{nomorSbmz}</div>
+              <div className="font-mono text-[11px] text-[#7C8B84] break-all">{verifyUrl}</div>
+            </div>
+          </div>
+
+          <p className="legal m-0 text-[11.5px] text-[#8B9992] leading-relaxed">
+            Bukti setor ini sah tanpa tanda tangan basah dan dapat digunakan sebagai pengurang penghasilan kena pajak
+            sesuai PP No. 60 Tahun 2010. Keaslian dokumen dapat diverifikasi dengan memindai kode QR di atas.
+          </p>
         </div>
       </div>
     </Modal>

@@ -1,5 +1,57 @@
 import { formatRP } from './utils';
 
+/** Cetak HTML lewat iframe tersembunyi — tidak memicu pemblokir pop-up browser. */
+export function printHtmlInIframe(html: string): void {
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.cssText =
+    'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(iframe);
+
+  const win = iframe.contentWindow;
+  const doc = iframe.contentDocument ?? win?.document;
+  if (!doc || !win) {
+    iframe.remove();
+    throw new Error('Gagal menyiapkan dialog cetak.');
+  }
+
+  doc.open();
+  doc.write(html);
+  doc.close();
+
+  const cleanup = () => {
+    window.setTimeout(() => iframe.remove(), 1000);
+  };
+
+  const triggerPrint = () => {
+    win.focus();
+    win.print();
+    cleanup();
+  };
+
+  const images = Array.from(doc.images);
+  if (images.length === 0) {
+    window.setTimeout(triggerPrint, 120);
+    return;
+  }
+
+  let settled = 0;
+  const onImageReady = () => {
+    settled += 1;
+    if (settled >= images.length) {
+      window.setTimeout(triggerPrint, 150);
+    }
+  };
+
+  for (const img of images) {
+    if (img.complete) onImageReady();
+    else {
+      img.addEventListener('load', onImageReady, { once: true });
+      img.addEventListener('error', onImageReady, { once: true });
+    }
+  }
+}
+
 type DistribusiData = {
   summary: {
     totalNominal: number;

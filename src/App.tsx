@@ -45,6 +45,7 @@ import { ImpactManagementPage } from './pages/cms/ImpactManagementPage';
 import { AssistanceManagementPage } from './pages/cms/AssistanceManagementPage';
 import { WebSettingsPage } from './pages/cms/WebSettingsPage';
 import { ApprovalPage } from './pages/ApprovalPage';
+import { BuktiSetorPage } from './pages/BuktiSetorPage';
 import { Modal } from './components/ui/Modal';
 
 
@@ -388,6 +389,8 @@ export function App() {
             onOpenPenyaluran={(id) => setDetailRoute({ module: 'penyaluran', id })}
           />
         );
+      case 'bukti':
+        return <BuktiSetorPage />;
       case 'login':
         return <LoginPage onLoginSuccess={handleLoginSuccess} />;
       default:
