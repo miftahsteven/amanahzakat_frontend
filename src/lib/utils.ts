@@ -10,6 +10,20 @@ export function formatRP(val: number | undefined | null): string {
   return 'Rp ' + Math.round(val).toLocaleString('id-ID');
 }
 
+/** Format angka dengan pemisah ribuan id-ID (contoh: 50000000 → "50.000.000"). 0 → "". */
+export function formatIdNumber(val: number | undefined | null): string {
+  if (val === undefined || val === null || isNaN(val) || val === 0) return '';
+  return Math.round(val).toLocaleString('id-ID');
+}
+
+/** Parse input berdelimeter id-ID / bebas (hanya digit) menjadi number. */
+export function parseIdNumber(raw: string): number {
+  const digits = String(raw ?? '').replace(/\D/g, '');
+  if (!digits) return 0;
+  const n = Number(digits);
+  return Number.isFinite(n) ? n : 0;
+}
+
 export function formatJT(val: number | undefined | null): string {
   if (!val) return '0 Jt';
   if (val >= 1_000_000_000) {

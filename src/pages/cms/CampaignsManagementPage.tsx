@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   FolderKanban,
   Plus,
@@ -10,16 +10,17 @@ import {
   Clock,
   Sparkles,
   RefreshCw,
-  CheckCircle2,
   UploadCloud,
   X,
   FileImage,
+  PlusCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { cmsApi } from '../../lib/api';
 import { resolveMediaUrl, webPublicPageUrl } from '../../lib/media-url';
+import { formatIdNumber, parseIdNumber } from '../../lib/utils';
 
 export interface CampaignItem {
   id: number;
@@ -36,7 +37,22 @@ export interface CampaignItem {
   imageUrl: string;
   status: string;
   isFeatured: boolean;
+  rincian?: Array<{ item: string; nilai: number }>;
+  kabar?: Array<{ tgl: string; judul: string; isi: string }>;
+  donaturList?: Array<{ nama: string; nominal: number; waktu: string; doa?: string }>;
 }
+
+function slugifyClient(nama: string): string {
+  return nama
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+}
+
+const emptyRincian = (target: number) => [
+  { item: 'Penyaluran Program Langsung', nilai: Math.round(target * 0.9) },
+  { item: 'Operasional Lapangan & Amil', nilai: Math.round(target * 0.1) },
+];
 
 const MONTHS_ID = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -112,6 +128,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
   // Form State
   const [formData, setFormData] = useState({
     nama: '',
+    slug: '',
     program: 'Wakaf Sumur',
     lokasi: 'Indonesia',
     target: 500000000,
@@ -122,6 +139,9 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
     imageUrl: '',
     status: 'Berjalan',
     isFeatured: false,
+    rincian: emptyRincian(500000000),
+    kabar: [] as Array<{ tgl: string; judul: string; isi: string }>,
+    donaturList: [] as Array<{ nama: string; nominal: number; waktu: string; doa: string }>,
   });
 
   const loadCampaigns = async () => {
@@ -146,6 +166,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
     setPreviewUrl('');
     setFormData({
       nama: '',
+      slug: '',
       program: 'Wakaf Sumur',
       lokasi: 'Indonesia',
       target: 500000000,
@@ -156,6 +177,9 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
       imageUrl: '',
       status: 'Berjalan',
       isFeatured: false,
+      rincian: emptyRincian(500000000),
+      kabar: [],
+      donaturList: [],
     });
     setIsModalOpen(true);
   };
@@ -166,6 +190,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
     setPreviewUrl(campaign.imageUrl);
     setFormData({
       nama: campaign.nama,
+      slug: campaign.slug,
       program: campaign.program,
       lokasi: campaign.lokasi,
       target: campaign.target,
@@ -176,6 +201,21 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
       imageUrl: campaign.imageUrl,
       status: campaign.status,
       isFeatured: campaign.isFeatured,
+      rincian:
+        campaign.rincian && campaign.rincian.length > 0
+          ? campaign.rincian.map((r) => ({ item: r.item, nilai: Number(r.nilai) || 0 }))
+          : emptyRincian(campaign.target),
+      kabar: (campaign.kabar || []).map((k) => ({
+        tgl: dateStringToInputFormat(k.tgl),
+        judul: k.judul,
+        isi: k.isi,
+      })),
+      donaturList: (campaign.donaturList || []).map((d) => ({
+        nama: d.nama,
+        nominal: Number(d.nominal) || 0,
+        waktu: d.waktu || '',
+        doa: d.doa || '',
+      })),
     });
     setIsModalOpen(true);
   };
@@ -187,7 +227,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const applySelectedImage = (file: File) => {
+  const applySelectedImage = useCallback((file: File) => {
     const MAX_SIZE_MB = 50;
     if (!file.type.startsWith('image/')) {
       toast.error('Hanya file gambar (JPG, PNG, WEBP) yang diperbolehkan.');
@@ -205,7 +245,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
       if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);
       return URL.createObjectURL(file);
     });
-  };
+  }, []);
 
   const handleDropImage = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -213,6 +253,36 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
     const file = e.dataTransfer.files?.[0];
     if (file) applySelectedImage(file);
   };
+
+  /** Paste gambar dari clipboard (Ctrl+V) saat modal terbuka. */
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const onPaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items?.length) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item.type.startsWith('image/')) continue;
+
+        const blob = item.getAsFile();
+        if (!blob) continue;
+
+        e.preventDefault();
+        const ext = (item.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+        const file = new File([blob], `paste-kampanye-${Date.now()}.${ext}`, {
+          type: item.type,
+        });
+        applySelectedImage(file);
+        toast.success('Gambar dari clipboard berhasil ditempel.');
+        return;
+      }
+    };
+
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [isModalOpen, applySelectedImage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,10 +327,11 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
         setIsUploading(false);
       }
 
-      const formattedTenggat = inputFormatToIndoDate(formData.tenggatDateInput);
+      const formattedTenggat = formData.tenggatDateInput; // store ISO YYYY-MM-DD
 
       const payload = {
         nama,
+        slug: formData.slug.trim() || undefined,
         program,
         lokasi: formData.lokasi.trim() || 'Indonesia',
         target,
@@ -270,6 +341,24 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
         imageUrl: finalImageUrl,
         status: formData.status,
         isFeatured: formData.isFeatured,
+        rincian: formData.rincian
+          .filter((r) => r.item.trim())
+          .map((r) => ({ item: r.item.trim(), nilai: Number(r.nilai) || 0 })),
+        kabar: formData.kabar
+          .filter((k) => k.judul.trim() && k.tgl)
+          .map((k) => ({
+            tgl: k.tgl,
+            judul: k.judul.trim(),
+            isi: k.isi.trim(),
+          })),
+        donaturList: formData.donaturList
+          .filter((d) => d.nama.trim() && Number(d.nominal) > 0)
+          .map((d) => ({
+            nama: d.nama.trim(),
+            nominal: Number(d.nominal) || 0,
+            waktu: d.waktu.trim() || 'Baru saja',
+            ...(d.doa.trim() ? { doa: d.doa.trim() } : {}),
+          })),
       };
 
       if (selectedCampaign) {
@@ -509,7 +598,7 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3 text-[#7D938A]" />
-                        s.d. {camp.tenggat}
+                        s.d. {inputFormatToIndoDate(dateStringToInputFormat(camp.tenggat))}
                       </span>
                     </div>
                   </div>
@@ -567,7 +656,6 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
         subtitle="Form entri data program penggalangan dana ZIS publik"
         maxWidth="3xl"
         maximizable
-        defaultMaximized
         footer={
           <div className="flex items-center justify-end gap-2.5">
             <Button
@@ -603,16 +691,24 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
           {/* 1. Upload Langsung Gambar Banner (Max 50MB) */}
           <div className="space-y-2">
             <label className="block font-bold text-[#16211D]">
-              Foto / Gambar Utama Kampanye (Upload Langsung, Maksimal 50 MB) *
+              Foto / Gambar Utama Kampanye (Upload / Drag / Paste, Maksimal 50 MB) *
             </label>
 
             {previewUrl ? (
-              <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 shadow-xs group">
+              <div
+                className="relative rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 shadow-xs group"
+                tabIndex={0}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onDrop={handleDropImage}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={resolveMediaUrl(previewUrl)}
                   alt="Preview Kampanye"
-                  className="w-full h-36 object-cover"
+                  className="w-full max-h-72 object-contain bg-slate-100"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.dataset.triedFallback) {
@@ -669,10 +765,10 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
                 </div>
                 <div>
                   <p className="font-bold text-sm text-[#16211D]">
-                    Klik untuk Pilih Gambar Program atau Tarik File ke Sini
+                    Klik, tarik file, atau tempel (Ctrl+V) gambar di sini
                   </p>
                   <p className="text-[11px] text-[#7D938A] mt-0.5">
-                    Rasio 16:9 direkomendasikan · Format: JPG, PNG, WEBP · Ukuran Maksimal 50 MB
+                    Rasio 16:9 · JPG, PNG, WEBP · Maks 50 MB · Bisa paste dari browser / clipboard
                   </p>
                 </div>
               </div>
@@ -697,7 +793,17 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
                 type="text"
                 required
                 value={formData.nama}
-                onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+                onChange={(e) => {
+                  const nama = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    nama,
+                    slug:
+                      !selectedCampaign && !prev.slug
+                        ? slugifyClient(nama)
+                        : prev.slug,
+                  }));
+                }}
                 placeholder="Contoh: Sumur Kehidupan Sumba Timur"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDE3DF] bg-white text-[#16211D] font-bold text-sm focus:ring-2 focus:ring-[#0F9D6E] focus:outline-none placeholder-[#7D938A]"
               />
@@ -715,6 +821,36 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDE3DF] bg-white text-[#16211D] font-bold focus:ring-2 focus:ring-[#0F9D6E] focus:outline-none placeholder-[#7D938A]"
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block font-bold text-[#16211D]">Slug URL</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.slug}
+                onChange={(e) =>
+                  setFormData({ ...formData, slug: slugifyClient(e.target.value) || e.target.value })
+                }
+                placeholder="otomatis-dari-nama-kampanye"
+                className="flex-1 px-3.5 py-2 rounded-xl border border-[#DDE3DF] bg-white text-[#16211D] font-mono text-[11px] focus:ring-2 focus:ring-[#0F9D6E] focus:outline-none"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    slug: `${slugifyClient(prev.nama) || 'kampanye'}-${Math.floor(100 + Math.random() * 900)}`,
+                  }))
+                }
+              >
+                Generate
+              </Button>
+            </div>
+            <p className="text-[10px] text-[#7D938A]">
+              URL publik: /kampanye/{formData.slug || '…'}
+            </p>
           </div>
 
           {/* 3. Lokasi, Target Dana & Tenggat Waktu (Datepicker) */}
@@ -736,10 +872,12 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
                 Target Dana (Rp) *
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 required
-                value={formData.target}
-                onChange={(e) => setFormData({ ...formData, target: Number(e.target.value) })}
+                value={formatIdNumber(formData.target)}
+                onChange={(e) => setFormData({ ...formData, target: parseIdNumber(e.target.value) })}
+                placeholder="Contoh: 50.000.000"
                 className="w-full px-3.5 py-2 rounded-xl border border-[#DDE3DF] bg-white text-[#16211D] font-mono font-bold focus:ring-2 focus:ring-[#0F9D6E] focus:outline-none"
               />
             </div>
@@ -818,6 +956,245 @@ export const CampaignsManagementPage: React.FC<CampaignsManagementPageProps> = (
                   Tampilkan di Kampanye Pilihan Beranda
                 </span>
               </label>
+            </div>
+          </div>
+
+          {/* 7. Rincian alokasi dana */}
+          <div className="space-y-2 pt-2 border-t border-[#E3E8E4]">
+            <div className="flex items-center justify-between">
+              <label className="block font-bold text-[#16211D]">Rincian Rencana Penggunaan Dana</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={<PlusCircle className="w-3.5 h-3.5" />}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    rincian: [...prev.rincian, { item: '', nilai: 0 }],
+                  }))
+                }
+              >
+                Tambah Item
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {formData.rincian.map((row, idx) => (
+                <div key={idx} className="grid grid-cols-[1fr_160px_auto] gap-2">
+                  <input
+                    type="text"
+                    value={row.item}
+                    onChange={(e) => {
+                      const rincian = [...formData.rincian];
+                      rincian[idx] = { ...rincian[idx], item: e.target.value };
+                      setFormData({ ...formData, rincian });
+                    }}
+                    placeholder="Nama item alokasi"
+                    className="px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white text-[#16211D] focus:ring-2 focus:ring-[#0F9D6E] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formatIdNumber(row.nilai)}
+                    onChange={(e) => {
+                      const rincian = [...formData.rincian];
+                      rincian[idx] = { ...rincian[idx], nilai: parseIdNumber(e.target.value) };
+                      setFormData({ ...formData, rincian });
+                    }}
+                    placeholder="0"
+                    className="px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white text-[#16211D] font-mono focus:ring-2 focus:ring-[#0F9D6E] focus:outline-none"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-rose-600"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        rincian: prev.rincian.filter((_, i) => i !== idx),
+                      }))
+                    }
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 8. Kabar lapangan */}
+          <div className="space-y-2 pt-2 border-t border-[#E3E8E4]">
+            <div className="flex items-center justify-between">
+              <label className="block font-bold text-[#16211D]">Kabar & Perkembangan Lapangan</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={<PlusCircle className="w-3.5 h-3.5" />}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    kabar: [
+                      ...prev.kabar,
+                      { tgl: new Date().toISOString().slice(0, 10), judul: '', isi: '' },
+                    ],
+                  }))
+                }
+              >
+                Tambah Kabar
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {formData.kabar.length === 0 && (
+                <p className="text-[11px] text-[#7D938A]">Belum ada kabar. Tambahkan update lapangan bila ada.</p>
+              )}
+              {formData.kabar.map((row, idx) => (
+                <div key={idx} className="p-3 rounded-xl border border-[#E3E8E4] bg-[#F8FAF9] space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr_auto] gap-2">
+                    <input
+                      type="date"
+                      value={row.tgl}
+                      onChange={(e) => {
+                        const kabar = [...formData.kabar];
+                        kabar[idx] = { ...kabar[idx], tgl: e.target.value };
+                        setFormData({ ...formData, kabar });
+                      }}
+                      className="px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white font-mono text-[11px]"
+                    />
+                    <input
+                      type="text"
+                      value={row.judul}
+                      onChange={(e) => {
+                        const kabar = [...formData.kabar];
+                        kabar[idx] = { ...kabar[idx], judul: e.target.value };
+                        setFormData({ ...formData, kabar });
+                      }}
+                      placeholder="Judul kabar"
+                      className="px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white font-bold"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-rose-600"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          kabar: prev.kabar.filter((_, i) => i !== idx),
+                        }))
+                      }
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={row.isi}
+                    onChange={(e) => {
+                      const kabar = [...formData.kabar];
+                      kabar[idx] = { ...kabar[idx], isi: e.target.value };
+                      setFormData({ ...formData, kabar });
+                    }}
+                    placeholder="Isi singkat perkembangan lapangan..."
+                    className="w-full px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 9. Donatur highlight (opsional / showcase) */}
+          <div className="space-y-2 pt-2 border-t border-[#E3E8E4]">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block font-bold text-[#16211D]">Donatur Highlight (opsional)</label>
+                <p className="text-[10px] text-[#7D938A]">
+                  Tampil di halaman kampanye publik. Donasi real tetap dari transaksi web.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={<PlusCircle className="w-3.5 h-3.5" />}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    donaturList: [
+                      ...prev.donaturList,
+                      { nama: '', nominal: 0, waktu: 'Baru saja', doa: '' },
+                    ],
+                  }))
+                }
+              >
+                Tambah
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {formData.donaturList.map((row, idx) => (
+                <div key={idx} className="grid grid-cols-1 sm:grid-cols-[1fr_120px_120px_auto] gap-2">
+                  <input
+                    type="text"
+                    value={row.nama}
+                    onChange={(e) => {
+                      const donaturList = [...formData.donaturList];
+                      donaturList[idx] = { ...donaturList[idx], nama: e.target.value };
+                      setFormData({ ...formData, donaturList });
+                    }}
+                    placeholder="Nama donatur"
+                    className="px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white"
+                  />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formatIdNumber(row.nominal)}
+                    onChange={(e) => {
+                      const donaturList = [...formData.donaturList];
+                      donaturList[idx] = { ...donaturList[idx], nominal: parseIdNumber(e.target.value) };
+                      setFormData({ ...formData, donaturList });
+                    }}
+                    placeholder="Nominal"
+                    className="px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white font-mono"
+                  />
+                  <input
+                    type="text"
+                    value={row.waktu}
+                    onChange={(e) => {
+                      const donaturList = [...formData.donaturList];
+                      donaturList[idx] = { ...donaturList[idx], waktu: e.target.value };
+                      setFormData({ ...formData, donaturList });
+                    }}
+                    placeholder="Waktu"
+                    className="px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-rose-600"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        donaturList: prev.donaturList.filter((_, i) => i !== idx),
+                      }))
+                    }
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                  <input
+                    type="text"
+                    value={row.doa}
+                    onChange={(e) => {
+                      const donaturList = [...formData.donaturList];
+                      donaturList[idx] = { ...donaturList[idx], doa: e.target.value };
+                      setFormData({ ...formData, donaturList });
+                    }}
+                    placeholder="Doa (opsional)"
+                    className="sm:col-span-4 px-3 py-2 rounded-xl border border-[#DDE3DF] bg-white"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </form>
