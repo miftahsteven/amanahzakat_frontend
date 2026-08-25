@@ -5,7 +5,7 @@ import { DataTable } from '../components/shared/DataTable';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { FolderKanban, Plus, RefreshCw, Pencil, FileText } from 'lucide-react';
+import { FolderKanban, Plus, RefreshCw, Pencil, FileText, Trash2 } from 'lucide-react';
 import { formatRP } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,9 @@ import { programApi } from '../lib/api';
 export interface ProgramPageProps {
   onNavigate: (screen: string) => void;
   onOpenDetail: (id: string) => void;
+  /** Buat & ubah — backend memakai program.update untuk keduanya */
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
 const formSchema = z.object({
@@ -29,7 +32,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const ProgramPage: React.FC<ProgramPageProps> = ({ onOpenDetail }) => {
+export const ProgramPage: React.FC<ProgramPageProps> = ({
+  onOpenDetail,
+  canUpdate = false,
+  canDelete = false,
+}) => {
   const openDetail = (row: ProgramZis) => onOpenDetail(row.id);
   const [dataList, setDataList] = useState<ProgramZis[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -115,6 +122,23 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({ onOpenDetail }) => {
     }
   };
 
+  const onDelete = async (program: ProgramZis) => {
+    if (
+      !window.confirm(
+        `Hapus program "${program.nama}"?\n\nProgram yang sudah punya transaksi penyaluran tidak dapat dihapus.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await programApi.remove(program.id);
+      setDataList((prev) => prev.filter((p) => p.id !== program.id));
+      toast.success(`Program "${program.nama}" berhasil dihapus.`);
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus program ZIS');
+    }
+  };
+
   const columns: ColumnDef<ProgramZis, any>[] = [
     {
       accessorKey: 'nama',
@@ -175,9 +199,22 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({ onOpenDetail }) => {
           <Button variant="ghost" size="sm" onClick={() => openDetail(row.original)} title="Detail">
             <FileText className="w-3.5 h-3.5" />
           </Button>
-          <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
-            Ubah
-          </Button>
+          {canUpdate && (
+            <Button variant="outline" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={() => openEdit(row.original)}>
+              Ubah
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+              title="Hapus"
+              onClick={() => onDelete(row.original)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -199,9 +236,11 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({ onOpenDetail }) => {
           <Button variant="secondary" icon={<RefreshCw className="w-4 h-4" />} onClick={loadData} disabled={isLoading}>
             Refresh
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
-            Buat Program Baru
-          </Button>
+          {canUpdate && (
+            <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreate}>
+              Buat Program Baru
+            </Button>
+          )}
         </div>
       </div>
 

@@ -260,6 +260,14 @@ export function App() {
           <ProgramPage
             onNavigate={(screen) => setCurrentScreen(screen)}
             onOpenDetail={(id) => setDetailRoute({ module: 'program', id })}
+            canUpdate={
+              Boolean(currentUser?.permissions?.includes('program.update')) ||
+              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
+            }
+            canDelete={
+              Boolean(currentUser?.permissions?.includes('program.delete')) ||
+              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
+            }
           />
         );
       case 'mitra':
@@ -303,7 +311,22 @@ export function App() {
       case 'cms-hero':
         return <HeroSliderPage />;
       case 'cms-campaigns':
-        return <CampaignsManagementPage />;
+        return (
+          <CampaignsManagementPage
+            canCreate={
+              Boolean(currentUser?.permissions?.includes('cms-campaigns.create')) ||
+              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
+            }
+            canUpdate={
+              Boolean(currentUser?.permissions?.includes('cms-campaigns.update')) ||
+              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
+            }
+            canDelete={
+              Boolean(currentUser?.permissions?.includes('cms-campaigns.delete')) ||
+              Boolean(currentUser?.roles?.includes('SUPER_ADMIN'))
+            }
+          />
+        );
       case 'cms-distributions':
         return <DistributionsManagementPage />;
       case 'cms-testimonials':

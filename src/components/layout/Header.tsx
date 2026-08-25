@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Bell, Monitor, Moon, PanelLeftClose, PanelLeftOpen, Sun, Wallet } from 'lucide-react';
 import type { AuthUser, NavModul } from '../../types/acl';
 import { findMenuLabel } from '../../types/acl';
 import { useTheme } from '../../hooks/useTheme';
 import { GlobalSearch } from './GlobalSearch';
+import { inboxApi } from '../../lib/api';
 
 export interface HeaderProps {
   currentScreen: string;
@@ -48,6 +49,29 @@ export const Header: React.FC<HeaderProps> = ({
   const themeLabel =
     preference === 'system' ? 'Ikuti sistem' : preference === 'light' ? 'Mode terang' : 'Mode gelap';
   const ThemeIcon = preference === 'system' ? Monitor : preference === 'light' ? Sun : Moon;
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const loadUnreadCount = useCallback(async () => {
+    if (!canOpenInbox) return;
+    try {
+      const rows = await inboxApi.list();
+      setUnreadCount(rows.filter((r: any) => !r.dibaca).length);
+    } catch {
+      // Quiet: unread count is UI-only.
+    }
+  }, [canOpenInbox]);
+
+  useEffect(() => {
+    // Refresh unread count when user changes.
+    loadUnreadCount();
+  }, [currentUser?.id, loadUnreadCount]);
+
+  useEffect(() => {
+    // Refresh unread count after InboxPage is visited (items are usually marked as read there).
+    if (currentScreen !== 'inbox') return;
+    loadUnreadCount();
+  }, [currentScreen, loadUnreadCount]);
 
   return (
     <header className="min-h-[60px] h-[60px] bg-white/95 backdrop-blur-md border-b border-[#E3E8E4] px-7 flex items-center justify-between sticky top-0 z-30 font-sans">
@@ -114,7 +138,11 @@ export const Header: React.FC<HeaderProps> = ({
             className="relative p-1.5 rounded-lg hover:bg-[#F1F4F1] text-[#7D938A] transition-colors cursor-pointer border border-transparent hover:border-[#E3E8E4]"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute 0.5 top-0.5 right-0.5 w-2 h-2 rounded-full bg-rose-500"></span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </button>
         )}
 

@@ -19,6 +19,7 @@ export function getWebPublicOrigin(): string {
 
 /**
  * Resolve a stored media path to a full URL the ERP can load in <img>.
+ * - blob:/data: → local preview (unchanged)
  * - /uploads/* → backend static files
  * - /images/*  → webpublic Next.js public folder
  * - absolute URLs → unchanged
@@ -26,7 +27,12 @@ export function getWebPublicOrigin(): string {
 export function resolveMediaUrl(url?: string | null): string {
   if (!url) return '';
 
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('blob:') ||
+    url.startsWith('data:')
+  ) {
     return url;
   }
 

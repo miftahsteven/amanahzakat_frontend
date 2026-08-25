@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Maximize2, Minimize2, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface ModalProps {
@@ -8,8 +8,15 @@ export interface ModalProps {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  /** Sticky footer di bawah body (selalu terlihat, tidak ikut scroll form). */
+  footer?: React.ReactNode;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+  /** Mode peta/fullscreen gelap (existing). */
   fullscreen?: boolean;
+  /** Tampilkan tombol perbesar / kembalikan ukuran modal. */
+  maximizable?: boolean;
+  /** Mulai dalam keadaan diperbesar. */
+  defaultMaximized?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -18,9 +25,18 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   subtitle,
   children,
+  footer,
   maxWidth = 'lg',
   fullscreen = false,
+  maximizable = false,
+  defaultMaximized = false,
 }) => {
+  const [maximized, setMaximized] = useState(defaultMaximized);
+
+  useEffect(() => {
+    if (!isOpen) setMaximized(defaultMaximized);
+  }, [isOpen, defaultMaximized]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -43,6 +59,9 @@ export const Modal: React.FC<ModalProps> = ({
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
   };
 
   if (fullscreen) {
@@ -57,7 +76,7 @@ export const Modal: React.FC<ModalProps> = ({
             <button
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-              aria-label="Tutup peta"
+              aria-label="Tutup"
             >
               <X className="w-5 h-5" />
             </button>
@@ -69,29 +88,52 @@ export const Modal: React.FC<ModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         className={cn(
-          'w-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all',
-          maxWidths[maxWidth]
+          'flex flex-col w-full bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all',
+          maximized
+            ? 'max-w-[min(100vw-1.5rem,96rem)] h-[min(96vh,920px)] rounded-xl'
+            : cn(maxWidths[maxWidth], 'max-h-[90vh] rounded-2xl'),
         )}
       >
-        {/* Modal Header */}
-        <div className="flex items-start justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <div>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h3>
-            {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
+        <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">{title}</h3>
+            {subtitle && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{subtitle}</p>
+            )}
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-0.5 shrink-0">
+            {maximizable && (
+              <button
+                type="button"
+                onClick={() => setMaximized((v) => !v)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+                aria-label={maximized ? 'Kembalikan ukuran' : 'Perbesar modal'}
+                title={maximized ? 'Kembalikan ukuran' : 'Perbesar'}
+              >
+                {maximized ? <Minimize2 className="w-4.5 h-4.5 w-[18px] h-[18px]" /> : <Maximize2 className="w-[18px] h-[18px]" />}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+              aria-label="Tutup"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 max-h-[75vh] overflow-y-auto">{children}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6">{children}</div>
+
+        {footer && (
+          <div className="shrink-0 px-5 sm:px-6 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
