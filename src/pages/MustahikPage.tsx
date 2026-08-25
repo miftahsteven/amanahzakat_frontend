@@ -305,6 +305,7 @@ export const MustahikPage: React.FC<MustahikPageProps> = ({
         title={editTarget ? 'Ubah Data Mustahik' : 'Registrasi Mustahik Terverifikasi'}
         subtitle={editTarget ? `NIK: ${editTarget.nik}` : 'Input data calon penerima bantuan zakat & verifikasi ganda NIK'}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">

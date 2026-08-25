@@ -266,6 +266,7 @@ export const UpzPage: React.FC<UpzPageProps> = ({ onOpenDetail, canUpdate = fals
         title={editTarget ? 'Ubah Data UPZ Cabang' : 'Registrasi UPZ Cabang Baru'}
         subtitle={editTarget ? `Kode: ${editTarget.kodeUpz}` : 'Kode UPZ akan digenerate otomatis'}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
           <div>

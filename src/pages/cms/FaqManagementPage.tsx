@@ -302,6 +302,7 @@ export const FaqManagementPage: React.FC<FaqManagementPageProps> = ({
         title={selectedFaq ? 'Edit FAQ Fiqih ZIS' : 'Tambah FAQ Fiqih ZIS Baru'}
         subtitle="Form entri tanya jawab syariah dan basis pengetahuan AI"
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

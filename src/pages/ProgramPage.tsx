@@ -263,6 +263,7 @@ export const ProgramPage: React.FC<ProgramPageProps> = ({
           setEditTarget(null);
         }}
         title={editTarget ? 'Ubah Program & Pagu' : 'Buat Program ZIS Baru'}
+        maximizable
         subtitle="Kelola pagu anggaran dan target penerima manfaat per pilar"
         maxWidth="lg"
       >

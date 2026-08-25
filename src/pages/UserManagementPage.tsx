@@ -743,6 +743,7 @@ export const UserManagementPage: React.FC<UserManagementPageProps> = ({ canManag
         title="Tambah Pengguna System Baru"
         subtitle="Daftarkan akun petugas amil baru beserta NIP dan penetapan Role ACL"
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -861,6 +862,7 @@ export const UserManagementPage: React.FC<UserManagementPageProps> = ({ canManag
         title="Edit Pengguna System"
         subtitle={`Perbarui data akun dan otorisasi role untuk ${editingUser?.namaLengkap}`}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleUpdateUser} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

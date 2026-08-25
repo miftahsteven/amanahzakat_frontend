@@ -336,6 +336,7 @@ export const TestimonialsManagementPage: React.FC<TestimonialsManagementPageProp
         title={selectedTesti ? 'Edit Testimoni' : 'Tambah Testimoni Baru'}
         subtitle="Form publikasi testimoni muzakki dan kisah binaan mustahik"
         maxWidth="md"
+        maximizable
       >
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>

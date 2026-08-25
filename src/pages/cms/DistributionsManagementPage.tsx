@@ -363,6 +363,7 @@ export const DistributionsManagementPage: React.FC<DistributionsManagementPagePr
         title={selectedItem ? 'Edit Kabar Penyaluran' : 'Tulis Kabar Penyaluran Baru'}
         subtitle="Form publikasi laporan penyaluran dana zakat & infak ke publik"
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>

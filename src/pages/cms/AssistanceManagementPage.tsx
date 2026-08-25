@@ -299,6 +299,7 @@ export const AssistanceManagementPage: React.FC<AssistanceManagementPageProps> =
         title={`Detail Permohonan #${selectedSub?.submissionNumber}`}
         subtitle="Rincian lengkap berkas permohonan mustahik"
         maxWidth="lg"
+        maximizable
       >
         {selectedSub && (
           <div className="space-y-4 text-xs">
@@ -405,6 +406,7 @@ export const AssistanceManagementPage: React.FC<AssistanceManagementPageProps> =
         title="Update Status Permohonan & Catatan Survei"
         subtitle={`Pengajuan: #${selectedSub?.submissionNumber} a.n. ${selectedSub?.namaLengkap}`}
         maxWidth="md"
+        maximizable
       >
         <form onSubmit={handleUpdateStatus} className="space-y-4 text-xs">
           <div>

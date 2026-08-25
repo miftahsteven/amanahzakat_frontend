@@ -546,6 +546,7 @@ export const HeroSliderPage: React.FC<HeroSliderPageProps> = ({
         onClose={() => setIsModalOpen(false)}
         title={selectedSlider ? 'Edit Hero Slider' : 'Tambah Hero Slider Baru'}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs">
           {/* 1. Upload Langsung Gambar Banner (Max 50 MB) */}

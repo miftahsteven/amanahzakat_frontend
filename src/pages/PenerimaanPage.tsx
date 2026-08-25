@@ -305,6 +305,7 @@ export const PenerimaanPage: React.FC<PenerimaanPageProps> = ({
         title={editTarget ? 'Ubah Transaksi Penerimaan' : 'Catat Penerimaan ZIS Baru'}
         subtitle={editTarget ? `Status: Menunggu Verifikasi — ${editTarget.noKwitansi}` : 'Input transaksi setoran masuk ke rekening penampung Amanah Zakat'}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
           <div>

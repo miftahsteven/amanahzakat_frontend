@@ -393,6 +393,7 @@ export const ModuleManagementPage: React.FC<ModuleManagementPageProps> = ({ canM
         title={editingModul ? 'Edit Modul' : 'Tambah Modul Baru'}
         subtitle="Modul menjadi grup section di sidebar"
         maxWidth="md"
+        maximizable
       >
         <form onSubmit={handleSaveModul} className="space-y-4 text-xs">
           <div>
@@ -442,6 +443,7 @@ export const ModuleManagementPage: React.FC<ModuleManagementPageProps> = ({ canM
         title={editingMenu ? 'Edit Menu' : 'Tambah Menu Baru'}
         subtitle="Menu akan muncul di sidebar sesuai pengaturan tampilan"
         maxWidth="md"
+        maximizable
       >
         <form onSubmit={handleSaveMenu} className="space-y-4 text-xs">
           <div>

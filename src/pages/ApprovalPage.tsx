@@ -216,6 +216,7 @@ export const ApprovalPage: React.FC<ApprovalPageProps> = ({
         title="Tolak pengajuan"
         subtitle={rejectTarget ? rejectTarget.ref : ''}
         maxWidth="md"
+        maximizable
       >
         <div className="space-y-4 text-xs">
           <p className="text-[#7D938A]">Penyaluran terkait tidak dihapus — statusnya akan diubah menjadi Ditolak.</p>

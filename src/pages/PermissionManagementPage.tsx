@@ -388,6 +388,7 @@ export const PermissionManagementPage: React.FC<PermissionManagementPageProps> =
         title={editing ? 'Edit Permission' : 'Tambah Permission'}
         subtitle="Permission terikat ke satu menu dan satu aksi"
         maxWidth="md"
+        maximizable
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
@@ -475,6 +476,7 @@ export const PermissionManagementPage: React.FC<PermissionManagementPageProps> =
         title="Assign Permission ke Role"
         subtitle={assignTarget ? assignTarget.kodePermission : ''}
         maxWidth="md"
+        maximizable
       >
         <div className="space-y-4 text-xs">
           <p className="text-[#7D938A]">

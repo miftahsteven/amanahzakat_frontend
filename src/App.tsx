@@ -460,6 +460,7 @@ export function App() {
         title="Catat Penerimaan ZIS Kilat"
         subtitle="Entri cepat transaksi setoran zakat di konter atau via transfer bank"
         maxWidth="md"
+        maximizable
       >
         <form onSubmit={handleQuickZisSubmit} className="space-y-4 text-xs">
           <div>

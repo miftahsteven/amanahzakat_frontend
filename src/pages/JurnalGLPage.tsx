@@ -104,7 +104,7 @@ export const JurnalGLPage: React.FC<JurnalGLPageProps> = ({ canCreate = false })
 
       <DataTable columns={columns} data={dataList} isLoading={isLoading} searchPlaceholder="Cari no jurnal, akun, atau keterangan..." />
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Jurnal Manual" subtitle="Double-entry PSAK 109">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Jurnal Manual" subtitle="Double-entry PSAK 109" maximizable>
         <div className="space-y-3 text-sm">
           <input type="date" value={form.tanggal} onChange={(e) => setForm({ ...form, tanggal: e.target.value })} className="w-full p-2.5 border rounded-xl" />
           <input type="text" placeholder="Keterangan" value={form.keterangan} onChange={(e) => setForm({ ...form, keterangan: e.target.value })} className="w-full p-2.5 border rounded-xl" />

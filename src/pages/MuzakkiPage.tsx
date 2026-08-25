@@ -253,6 +253,7 @@ export const MuzakkiPage: React.FC<MuzakkiPageProps> = ({
         title={editTarget ? 'Ubah Data Muzakki' : 'Registrasi Muzakki / Donatur Baru'}
         subtitle={editTarget ? `Nomor: ${editTarget.nomor}` : 'Pendaftaran Muzakki perorangan atau korporat untuk penerbitan BSZ'}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">

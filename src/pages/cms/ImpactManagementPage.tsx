@@ -330,6 +330,7 @@ export const ImpactManagementPage: React.FC<ImpactManagementPageProps> = ({
         title="Tambah Berkas Laporan Tahunan"
         subtitle="Publikasikan ringkasan laporan keuangan audit WTP untuk diunduh publik"
         maxWidth="md"
+        maximizable
       >
         <div className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-4">

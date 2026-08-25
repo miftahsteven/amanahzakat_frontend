@@ -443,6 +443,7 @@ export const AclManagementPage: React.FC<AclManagementPageProps> = ({ canManage 
         title="Tambah Role / Peran ACL Baru"
         subtitle="Buat nama role baru. Hak akses menu diatur setelah role tersimpan."
         maxWidth="md"
+        maximizable
       >
         <form onSubmit={handleCreateRole} className="space-y-4 text-xs">
           <div>

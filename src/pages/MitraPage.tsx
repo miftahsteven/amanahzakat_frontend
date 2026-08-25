@@ -262,6 +262,7 @@ export const MitraPage: React.FC<MitraPageProps> = ({
         title={editTarget ? 'Ubah Data Mitra Penyalur' : 'Registrasi Mitra Penyalur Baru'}
         subtitle={editTarget ? `MoU: ${editTarget.noMou}` : 'MoU akan digenerate otomatis oleh sistem'}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
           <div>

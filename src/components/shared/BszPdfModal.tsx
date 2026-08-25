@@ -40,6 +40,7 @@ export const BszPdfModal: React.FC<BszPdfModalProps> = ({ isOpen, onClose, data 
       title="Bukti Setor Zakat (BSZ) / SBMZ"
       subtitle="Dokumen Resmi Pengurang Penghasilan Kena Pajak (SPT Tahunan)"
       maxWidth="xl"
+      maximizable
     >
       <div className="space-y-6">
         {/* Document Preview Box */}

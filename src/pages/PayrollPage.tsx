@@ -268,6 +268,7 @@ export const PayrollPage: React.FC<PayrollPageProps> = ({ canUpdate = false }) =
         title={editTarget ? 'Ubah Data Amil' : 'Tambah Amil / Staf Baru'}
         subtitle={editTarget ? `NIP: ${editTarget.nip}` : 'NIP akan digenerate otomatis · Potongan zakat 2,5% otomatis'}
         maxWidth="lg"
+        maximizable
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
           <div>
