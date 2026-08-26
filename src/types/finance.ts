@@ -59,9 +59,43 @@ export interface TutupBukuPeriode {
 
 export interface FormSimba {
   id: string;
-  kodeForm: 'FORM_1' | 'FORM_2' | 'FORM_3' | 'FORM_4' | 'FORM_5';
+  kodeForm: string;
+  no?: number;
   namaForm: string;
-  status: 'Siap Kirim' | 'Draft' | 'Terkirim';
+  sumber?: 'auto' | 'manual';
+  status: 'Siap Kirim' | 'Draft' | 'Terkirim' | string;
   itemCount: number;
   totalNilai: number;
+  koreksi?: number;
+  tanggalSimpan?: string | null;
+}
+
+export interface SimbaLapkinRow {
+  kode: string;
+  label: string;
+  current: number;
+  previous: number;
+  unit?: 'rp' | 'count' | 'ekor';
+  indent?: number;
+  isTotal?: boolean;
+}
+
+export interface SimbaLapkinDetail {
+  kodeForm: string;
+  no: number;
+  namaForm: string;
+  sumber: 'auto' | 'manual';
+  status: string;
+  periode: {
+    key: string;
+    label: string;
+    dari: string;
+    sampai: string;
+    previousLabel: string;
+    currentYear: string;
+    previousYear: string;
+    monthName: string;
+  };
+  lembaga: { nama: string; skala: string };
+  sections: Array<{ title: string; rows: SimbaLapkinRow[] }>;
 }

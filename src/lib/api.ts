@@ -913,11 +913,36 @@ export const keuanganApi = {
   }) {
     return apiFetch<any>('/keuangan/jurnal', { method: 'POST', body: JSON.stringify(data) });
   },
-  async listSimba() {
-    return apiFetch<any[]>('/keuangan/simba');
+  async listSimba(periode?: string) {
+    const q = periode ? `?periode=${encodeURIComponent(periode)}` : '';
+    return apiFetch<{
+      periode: {
+        key: string;
+        label: string;
+        dari: string;
+        sampai: string;
+        previousLabel: string;
+      };
+      pages: Array<{
+        id: string;
+        kodeForm: string;
+        no: number;
+        namaForm: string;
+        sumber: 'auto' | 'manual';
+        status: string;
+        itemCount: number;
+        totalNilai: number;
+        koreksi: number;
+        tanggalSimpan: string | null;
+      }>;
+    }>(`/keuangan/simba${q}`);
+  },
+  async detailSimba(kodeForm: string, periode?: string) {
+    const q = periode ? `?periode=${encodeURIComponent(periode)}` : '';
+    return apiFetch<any>(`/keuangan/simba/${encodeURIComponent(kodeForm)}/detail${q}`);
   },
   async exportSimba(kodeForm: string) {
-    return apiFetch<any>(`/keuangan/simba/${kodeForm}/export`, { method: 'PATCH' });
+    return apiFetch<any>(`/keuangan/simba/${encodeURIComponent(kodeForm)}/export`, { method: 'PATCH' });
   },
   async getClosing() {
     return apiFetch<any>('/keuangan/closing');

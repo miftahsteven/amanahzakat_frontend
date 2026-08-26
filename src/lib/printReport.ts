@@ -209,13 +209,81 @@ export function printReport(opts: { title: string; subtitle?: string; rows: Arra
 </body>
 </html>`;
 
-  const popup = window.open('', '_blank', 'width=800,height=600');
-  if (!popup) {
-    throw new Error('Popup diblokir. Izinkan jendela baru untuk mencetak PDF.');
-  }
-  popup.document.open();
-  popup.document.write(html);
-  popup.document.close();
-  popup.focus();
-  window.setTimeout(() => popup.print(), 350);
+  printHtmlInIframe(html);
+}
+
+function formatSimbaCell(value: number, unit?: 'rp' | 'count' | 'ekor') {
+  if (unit === 'rp') return formatRP(value);
+  return String(value);
+}
+
+export function printSimbaLapkin(detail: {
+  namaForm: string;
+  lembaga: { nama: string };
+  periode: { label: string; previousLabel: string; monthName: string; currentYear: string; previousYear: string };
+  sections: Array<{
+    title: string;
+    rows: Array<{
+      kode: string;
+      label: string;
+      current: number;
+      previous: number;
+      unit?: 'rp' | 'count' | 'ekor';
+      indent?: number;
+      isTotal?: boolean;
+    }>;
+  }>;
+}) {
+  const sectionsHtml = detail.sections
+    .map((section) => {
+      const rows = section.rows
+        .map((r) => {
+          const pad = '&nbsp;'.repeat((r.indent || 0) * 4);
+          const weight = r.isTotal ? 'font-weight:700' : 'font-weight:500';
+          return `<tr style="${weight}">
+            <td>${pad}${escapeHtml(r.kode)} ${escapeHtml(r.label)}</td>
+            <td class="num">${escapeHtml(formatSimbaCell(r.current, r.unit))}</td>
+            <td class="num">${escapeHtml(formatSimbaCell(r.previous, r.unit))}</td>
+          </tr>`;
+        })
+        .join('');
+      return `<h2>${escapeHtml(section.title)}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Uraian</th>
+              <th>${escapeHtml(detail.periode.currentYear)} ${escapeHtml(detail.periode.monthName)}</th>
+              <th>${escapeHtml(detail.periode.previousYear)} ${escapeHtml(detail.periode.monthName)}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    })
+    .join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(detail.namaForm)} — ${escapeHtml(detail.periode.label)}</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #16211D; padding: 24px; }
+    h1 { font-size: 16px; margin: 0 0 4px; }
+    .sub { font-size: 11px; color: #5b6b64; margin: 0 0 16px; }
+    h2 { font-size: 12px; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 8px; }
+    th, td { border: 1px solid #E3E8E4; padding: 6px 8px; text-align: left; }
+    th { background: #F4F6F4; }
+    .num { text-align: right; white-space: nowrap; font-family: ui-monospace, monospace; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(detail.lembaga.nama)}</h1>
+  <p class="sub">${escapeHtml(detail.namaForm)} · Periode ${escapeHtml(detail.periode.label)} (vs ${escapeHtml(detail.periode.previousLabel)})</p>
+  ${sectionsHtml}
+</body>
+</html>`;
+
+  printHtmlInIframe(html);
 }
