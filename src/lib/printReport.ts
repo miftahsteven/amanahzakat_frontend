@@ -212,7 +212,14 @@ export function printReport(opts: { title: string; subtitle?: string; rows: Arra
   printHtmlInIframe(html);
 }
 
-function formatSimbaCell(value: number, unit?: 'rp' | 'count' | 'ekor') {
+function formatSimbaCell(
+  value: number,
+  unit?: 'rp' | 'count' | 'ekor' | 'text',
+  text?: string,
+) {
+  if (unit === 'text' || text !== undefined) {
+    return text && text.length > 0 ? text : '—';
+  }
   if (unit === 'rp') return formatRP(value);
   return String(value);
 }
@@ -228,7 +235,9 @@ export function printSimbaLapkin(detail: {
       label: string;
       current: number;
       previous: number;
-      unit?: 'rp' | 'count' | 'ekor';
+      unit?: 'rp' | 'count' | 'ekor' | 'text';
+      textCurrent?: string;
+      textPrevious?: string;
       indent?: number;
       isTotal?: boolean;
     }>;
@@ -242,8 +251,8 @@ export function printSimbaLapkin(detail: {
           const weight = r.isTotal ? 'font-weight:700' : 'font-weight:500';
           return `<tr style="${weight}">
             <td>${pad}${escapeHtml(r.kode)} ${escapeHtml(r.label)}</td>
-            <td class="num">${escapeHtml(formatSimbaCell(r.current, r.unit))}</td>
-            <td class="num">${escapeHtml(formatSimbaCell(r.previous, r.unit))}</td>
+            <td class="num">${escapeHtml(formatSimbaCell(r.current, r.unit, r.textCurrent))}</td>
+            <td class="num">${escapeHtml(formatSimbaCell(r.previous, r.unit, r.textPrevious))}</td>
           </tr>`;
         })
         .join('');

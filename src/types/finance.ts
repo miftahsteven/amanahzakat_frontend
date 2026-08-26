@@ -75,7 +75,9 @@ export interface SimbaLapkinRow {
   label: string;
   current: number;
   previous: number;
-  unit?: 'rp' | 'count' | 'ekor';
+  unit?: 'rp' | 'count' | 'ekor' | 'text';
+  textCurrent?: string;
+  textPrevious?: string;
   indent?: number;
   isTotal?: boolean;
 }

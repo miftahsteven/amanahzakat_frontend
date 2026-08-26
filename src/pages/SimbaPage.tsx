@@ -20,7 +20,14 @@ function currentPeriodKey() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function formatCell(value: number, unit?: 'rp' | 'count' | 'ekor') {
+function formatCell(
+  value: number,
+  unit?: 'rp' | 'count' | 'ekor' | 'text',
+  text?: string,
+) {
+  if (unit === 'text' || text !== undefined) {
+    return text && text.length > 0 ? text : '—';
+  }
   if (unit === 'rp') return formatRP(value);
   return value.toLocaleString('id-ID');
 }
@@ -265,10 +272,12 @@ export const SimbaPage: React.FC<SimbaPageProps> = ({ canExport = false }) => {
                             <span className="text-[#8B9992] font-mono text-[11px] mr-1.5">{r.kode}</span>
                             {r.label}
                           </td>
-                          <td className={`px-4 py-2 text-right font-mono ${r.isTotal ? 'font-bold text-[#0B7C56]' : ''}`}>
-                            {formatCell(r.current, r.unit)}
+                          <td className={`px-4 py-2 text-right font-mono ${r.isTotal && r.unit !== 'text' ? 'font-bold text-[#0B7C56]' : ''} ${r.unit === 'text' ? 'text-left font-sans text-[12px]' : ''}`}>
+                            {formatCell(r.current, r.unit, r.textCurrent)}
                           </td>
-                          <td className="px-4 py-2 text-right font-mono text-[#6B7A74]">{formatCell(r.previous, r.unit)}</td>
+                          <td className={`px-4 py-2 text-right font-mono text-[#6B7A74] ${r.unit === 'text' ? 'text-left font-sans text-[12px]' : ''}`}>
+                            {formatCell(r.previous, r.unit, r.textPrevious)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
